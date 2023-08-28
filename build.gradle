@@ -1,0 +1,151 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '2.7.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+group = 'gov.me.irs'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+bootWar {
+    archiveBaseName='irs'
+    archiveFileName='irs.war'
+    archiveVersion='0.0.1-SNAPSHOT'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    
+	/*logback 의존성 제거*/
+	all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://maven.egovframe.go.kr/maven/'
+		metadataSources {
+			artifact()
+		}
+	} //전자정부 프레임워크
+	maven {
+		url 'https://mangosteen.tobesoft.co.kr/nexus/repository/maven-public'
+	} //Nexacro
+}
+
+dependencies {
+    // Springboot
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-taglibs'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // mybatis
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisVersion}"
+    testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${mybatisVersion}"
+
+    // JSP & JSTL
+    providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'javax.servlet:jstl'
+
+    // Apache 라이브러리
+    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation "org.apache.poi:poi:${poiVersion}"
+    implementation "org.apache.poi:poi-ooxml:${poiVersion}"
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-fileupload:commons-fileupload:1.4'
+    implementation 'org.apache.commons:commons-compress:1.23.0'
+    
+    //google gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // thymeleaf
+    // implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
+    // Nexacro
+	implementation 'org.apache.poi:ooxml-schemas:1.4'
+	implementation "com.nexacro:uiadapter-spring-core:${nexacroUiadapterVersion}"
+	implementation "com.nexacro:uiadapter-spring-dataaccess:${nexacroUiadapterVersion}"
+	implementation "com.nexacro:uiadapter-spring-excel:${nexacroUiadapterVersion}"
+    
+    // JXLS2
+	implementation 'org.jxls:jxls:2.11.0'
+	implementation 'org.jxls:jxls-poi:2.11.0'
+	implementation 'org.jxls:jxls-reader:2.1.0'
+	
+    // 설정 파일(yml, properties) 암호화
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+
+    // echache
+    implementation 'net.sf.ehcache:ehcache'
+    
+	/*log4j2 의존성 추가*/
+	implementation 'org.springframework.boot:spring-boot-starter-log4j2' // 의존성 주입
+	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+	
+	
+	implementation ('org.apache.logging.log4j:log4j-slf4j-impl:2.20.0') {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    }
+	implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+	implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+	
+	/* postgresql */
+	implementation 'org.postgresql:postgresql:42.5.0'
+	
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5' 
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5' 
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	
+	//전자정부프레임워크 - ref. [https://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte4.1:fdl:light]
+	implementation "org.egovframe.rte:org.egovframe.rte.ptl.mvc:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.fdl.cmmn:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.bat.core:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.fdl.idgnr:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.fdl.property:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.fdl.security:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.fdl.excel:${egovFwVersion}"
+	implementation "org.egovframe.rte:org.egovframe.rte.psl.dataaccess:${egovFwVersion}"
+	
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.7.21'
+
+    // external libraries 추가
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+}
+
+// 빌드 시 테스트 제외 추가
+test {
+    exclude '**/*'
+    useJUnitPlatform()
+}
+

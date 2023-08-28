@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.admin.mrm.mapper.MrmMapper">
+	
+	<!-- 역할별 메뉴 목록조회 -->
+	<select id="selectMenuRoleList" resultType="egovMap" parameterType="map">
+		/* MrmMapper.selectMenuRoleList */
+		<include refid="gov.me.irs.common.TreeMenuMapper.treeMenuSql" />
+		SELECT W.MENU_ID
+			 , W.UP_MENU_ID
+			 , W.MENU_CL_CD
+			 , W.MENU_NM
+			 , W.MENU_EXPLN
+			 , W.MENU_URL_ADDR
+			 , W.MENU_LVL
+			 , W.SORT_SEQO
+			 , W.SYS_CL_CD
+			 , W.PTH
+			 , #{roleId} AS ROLE_ID
+			 , CASE WHEN MR.INQ_AUTHRT_YN IS NULL THEN 'N' ELSE MR.INQ_AUTHRT_YN END AS INQ_AUTHRT_YN
+			 , CASE WHEN MR.REG_AUTHRT_YN IS NULL THEN 'N' ELSE MR.REG_AUTHRT_YN END AS REG_AUTHRT_YN
+			 , CASE WHEN MR.MDFCN_AUTHRT_YN IS NULL THEN 'N' ELSE MR.MDFCN_AUTHRT_YN END AS MDFCN_AUTHRT_YN
+			 , CASE WHEN MR.DEL_AUTHRT_YN IS NULL THEN 'N' ELSE MR.DEL_AUTHRT_YN END AS DEL_AUTHRT_YN
+			 , CASE WHEN MR.EXCN_AUTHRT_YN IS NULL THEN 'N' ELSE MR.EXCN_AUTHRT_YN END AS EXCN_AUTHRT_YN
+			 , CASE WHEN MR.ROLE_ID IS NULL THEN 'N'
+			 		ELSE 'Y'
+			   END AS ROLE_YN
+		  FROM WITH_MENU_LIST W
+		 LEFT OUTER JOIN irs_user.MENU_ROLE_DTL MR
+		    ON MR.MENU_ID = W.MENU_ID
+		   AND MR.ROLE_ID = #{roleId}
+		   AND MR.USE_YN = 'Y'
+		   AND MR.DEL_YN = 'N'
+		 WHERE W.MENU_LVL > 0
+		 ORDER BY W.PTH
+	</select>
+	
+	<!-- 역할별 메뉴 삭제 -->
+	<delete id="deleteMenuRole" parameterType="map">
+		/* MrmMapper.deleteMenuRole */
+		DELETE FROM irs_user.MENU_ROLE_DTL WHERE ROLE_ID = #{roleId}
+	</delete>
+	
+	<!-- 역할별 메뉴 등록 -->
+	<insert id="insertMenuRole" parameterType="map">
+		<selectKey keyProperty="roleMenuSn" resultType="int" order="BEFORE">
+			/* MrmMapper.insertMenuRole.selectKey */
+			SELECT COALESCE(MAX(ROLE_MENU_SN), 0) + 1 FROM irs_user.MENU_ROLE_DTL
+		</selectKey>
+		/* MrmMapper.insertMenuRole */
+		INSERT
+		  INTO irs_user.MENU_ROLE_DTL
+		     ( ROLE_ID
+		     , MENU_ID
+		     , ROLE_MENU_SN
+		     , USE_YN
+		     , DEL_YN
+		     , RGTR_ID
+		     )
+		VALUES
+		     ( #{roleId}
+		     , #{menuId}
+		     , #{roleMenuSn}
+		     , #{useYn}
+		     , #{delYn}
+		     , #{sessionUserId}
+		     )
+	</insert>
+	
+</mapper>

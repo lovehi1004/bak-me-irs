@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.core.client.mapper.ClientMapper">
+	
+	<!-- 사용자 접속정보 등록 -->
+	<insert id="insertClientDtl" parameterType="gov.me.irs.core.client.vo.ClientVo">
+		<selectKey keyProperty="sysCntnHstrySn" resultType="int" order="BEFORE">
+			/* ClientMapper.insertClientDtl.selectKey */
+			SELECT COALESCE(MAX(SYS_CNTN_HSTRY_SN), 0) + 1 FROM irs_user.SYS_CNTN_HSTRY
+		</selectKey>
+		/* ClientMapper.insertClientDtl */
+		INSERT
+		  INTO irs_user.SYS_CNTN_HSTRY
+			 ( SYS_CNTN_HSTRY_SN
+			 , USER_ID
+			 , USER_CL_CD
+			 , LGN_ID
+			 , LGN_SCS_YN
+			 , CNTN_IP_ADDR
+			 , BRWS_NM
+			 , OS_NM
+			 , CNTN_YMD
+			 , CNTN_YM
+			 )
+			 ( SELECT #{sysCntnHstrySn}
+				   , (SELECT USER_ID FROM irs_user.USER_BSC WHERE LGN_ID = #{username})
+				   , (SELECT USER_CL_CD FROM irs_user.USER_BSC WHERE LGN_ID = #{username})
+				   , #{username}
+				   , #{lgnScsYn}
+				   , #{ip}
+				   , #{browser}
+				   , #{os}
+				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMM')
+			 )
+	</insert>
+	
+</mapper>

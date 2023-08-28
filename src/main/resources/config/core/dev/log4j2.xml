@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+	<Properties>
+		<Property name="system">irs</Property><!-- 시스템구분 -->
+		<Property name="basePath">/data/log/jeus/irsserver</Property><!-- 서비스로그 기준 경로 -->
+		<Property name="standard">stdout</Property><!-- 서비스로그 -->
+		<Property name="error">stderr</Property><!-- 에러로그 -->
+		<Property name="fileMaxSize">500MB</Property><!-- 로그파일용량 -->
+		<!-- pattern : [https://logging.apache.org/log4j/2.x/manual/layouts.html] -->
+		<Property name="layoutPattern">[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%c] [%C{1.}.%M:%L] - %m%n</Property><!-- 출력형식 -->
+<!-- 		<Property name="layoutPattern">[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%C{1.}.%M:%L] - %m%n</Property>출력형식 -->
+	</Properties>
+	<Appenders>
+		<!-- 콘솔 -->
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="${layoutPattern}" />
+		</Console>
+		<!-- 서비스로그 -->
+		<RollingFile name="standardFile" fileName="${basePath}/${system}/${standard}.log" filePattern="${basePath}/${system}/logs/${standard}_%d{yyyy-MM-dd}_%i.log">
+			<PatternLayout pattern="${layoutPattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="${fileMaxSize}" /><!-- 용량초과시 순번부여 -->
+				<TimeBasedTriggeringPolicy module="true" interval="1" /><!-- 일별 로그파일 생성 -->
+				<DefaultRolloverStrategy max="9999" fileIndex="min" /><!-- 파일 500개 까지 생성 -->
+			</Policies>
+		</RollingFile>
+		<!-- 에러로그 -->
+		<RollingFile name="errorFile" fileName="${basePath}/${system}/${error}.log" filePattern="${basePath}/${system}/logs/${error}_%d{yyyy-MM-dd}_%i.log">
+			<PatternLayout pattern="${layoutPattern}" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="${fileMaxSize}" /><!-- 용량초과시 순번부여 -->
+				<TimeBasedTriggeringPolicy module="true" interval="1" /><!-- 일별 로그파일 생성 -->
+				<DefaultRolloverStrategy max="9999" fileIndex="min" /><!-- 파일 500개 까지 생성 -->
+			</Policies>
+		</RollingFile>
+
+	</Appenders>
+
+
+	<Loggers>
+		<Logger name="org.springframework" level="ERROR" />
+		<Logger name="org.apache.commons.digester" level="OFF" />
+		<Logger name="com.zaxxer.hikari" level="OFF" />
+		<Logger name="org.hibernate" level="OFF" />
+		<Logger name="jdbc" level="OFF" />
+<!-- 		<Logger name="jdbc.sqlonly" level="ERROR" /> -->
+		<Logger name="jdbc.sqlonly" level="INFO" />
+		<Logger name="jdbc.audit" level="OFF" />
+		<Logger name="jdbc.resultset" level="OFF" />
+<!-- 		<Logger name="jdbc.resultsettable" level="OFF" /> -->
+		<Logger name="jdbc.resultsettable" level="INFO" />
+		<Logger name="jdbc.connection" level="OFF" />
+
+		<Root level="DEBUG" additivity="false">
+<!-- 		<Root level="INFO" additivity="false"> -->
+			<AppenderRef ref="standardFile" />
+			<AppenderRef ref="errorFile" level="ERROR" />
+		</Root>
+	</Loggers>
+
+
+</Configuration>
+
+

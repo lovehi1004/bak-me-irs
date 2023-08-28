@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.admin.urm.mapper.UrmMapper">
+	
+	<!-- 사용자역할상세 역할별 사용자 목록조회 -->
+	<select id="selectUserRoleList" resultType="egovMap" parameterType="map">
+		/* UrmMapper.selectUserRoleList */
+		SELECT UR.ROLE_ID
+			 , UR.USER_ID
+			 , UR.USER_ROLE_SN
+			 , U.USER_CL_CD
+			 , U.USER_NM
+			 , U.LGN_ID
+		  FROM irs_user.USER_ROLE_DTL UR
+		 INNER JOIN irs_user.ROLE_BSC R
+		    ON R.ROLE_ID = UR.ROLE_ID
+		   AND R.SYS_CL_CD = #{sysClCd}
+		   AND R.ROLE_ID = #{roleId}
+		   AND R.USE_YN = 'Y'
+		   AND R.DEL_YN = 'N'
+		   AND UR.DEL_YN = 'N'
+		 INNER JOIN irs_user.USER_BSC U
+		    ON U.USER_ID = UR.USER_ID
+		   AND U.DEL_YN = 'N'
+		 WHERE 1 = 1
+		<if test="userClCd != null and !userClCd.equals('')"><!-- 사용자구분코드 -->
+		   AND U.USER_CL_CD = #{userClCd}
+		</if>
+		 ORDER BY UR.USER_ROLE_SN DESC
+	</select>
+	
+	<!-- 사용자역할상세 삭제 -->
+	<delete id="deleteUserRole" parameterType="map">
+		/* UrmMapper.deleteUserRole */
+		DELETE FROM irs_user.USER_ROLE_DTL WHERE ROLE_ID = #{roleId}
+	</delete>
+	
+	<!-- 사용자역할상세 등록 -->
+	<insert id="insertUserRole" parameterType="map">
+		<selectKey keyProperty="userRoleSn" resultType="int" order="BEFORE">
+			/* UrmMapper.insertUserRole.selectKey */
+			SELECT COALESCE(MAX(USER_ROLE_SN), 0) + 1 FROM irs_user.USER_ROLE_DTL
+		</selectKey>
+		/* UrmMapper.insertUserRole */
+		INSERT
+		  INTO irs_user.USER_ROLE_DTL
+		     ( USER_ID
+		     , ROLE_ID
+		     , USER_ROLE_SN
+		     , RGTR_ID
+		     )
+		VALUES
+		     ( #{userId}
+		     , #{roleId}
+		     , #{userRoleSn}
+		     , #{sessionUserId}
+		     )
+	</insert>
+	
+</mapper>

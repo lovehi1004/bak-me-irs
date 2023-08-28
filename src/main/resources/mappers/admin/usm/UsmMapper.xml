@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.admin.usm.mapper.UsmMapper">
+	
+	<!-- 사용자기본 목록 총건수 조회 -->
+	<select id="selectUserListCnt" resultType="int" parameterType="map">
+		/* UsmMapper.selectUserListCnt */
+		SELECT COUNT(*)
+		  FROM irs_user.USER_BSC U
+		 INNER JOIN irs_user.ROLE_BSC R
+		    ON R.USER_ID = U.USER_ID
+		   AND R.SYS_CL_CD = #{sysClCd}
+		 WHERE 1 = 1
+		   AND U.DEL_YN = 'N'
+		   AND R.DEL_YN = 'N'
+		<if test="userClCd != null and !userClCd.equals('')"><!-- 사용자구분코드 -->
+		   AND U.USER_CL_CD = #{userClCd}
+		</if>
+		<if test="lgnId != null and !lgnId.equals('')"><!-- 로그인ID -->
+		   AND U.LGN_ID LIKE CONCAT(#{lgnId}, '%')
+		</if>
+		<if test="userNm != null and !userNm.equals('')"><!-- 사용자명 -->
+		   AND U.USER_NM LIKE CONCAT('%', #{userNm}, '%')
+		</if>
+	</select>
+	
+	
+	<!-- 사용자기본 목록조회 -->
+	<select id="selectUserList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* UsmMapper.selectUserList */
+		SELECT U.USER_ID
+		     , U.USER_CL_CD
+		     , U.LGN_ID
+		     , U.USER_NM
+		     , U.DEL_YN
+		     , R.ROLE_ID
+		     , R.ROLE_NM
+		  FROM irs_user.USER_BSC U
+		 INNER JOIN irs_user.ROLE_BSC R
+		    ON R.USER_ID = U.USER_ID
+		   AND R.USER_CL_CD = U.USER_CL_CD
+		   AND R.SYS_CL_CD = #{sysClCd}
+		   AND R.DEL_YN = 'N'
+		 WHERE 1 = 1
+		<if test="userClCd != null and !userClCd.equals('')"><!-- 사용자구분코드 -->
+		   AND U.USER_CL_CD = #{userClCd}
+		</if>
+		<if test="lgnId != null and !lgnId.equals('')"><!-- 로그인ID -->
+		   AND U.LGN_ID LIKE CONCAT(#{lgnId}, '%')
+		</if>
+		<if test="userNm != null and !userNm.equals('')"><!-- 사용자명 -->
+		   AND U.USER_NM LIKE CONCAT('%', #{userNm}, '%')
+		</if>
+		 ORDER BY U.USER_ID DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- 사용자기본 상세조회 -->
+	<select id="selectUserDtl" resultType="egovMap" parameterType="map">
+		/* UsmMapper.selectUserDtl */
+		SELECT U.USER_ID
+		     , U.USER_CL_CD
+		     , U.LGN_ID
+		     , U.USER_NM
+		     , U.DEL_YN
+		     , R.ROLE_ID
+		     , R.ROLE_NM
+		  FROM irs_user.USER_BSC U
+		 INNER JOIN irs_user.ROLE_BSC R
+		    ON R.USER_ID = U.USER_ID
+		   AND R.USER_CL_CD = U.USER_CL_CD
+		   AND R.SYS_CL_CD = #{sysClCd}
+		   AND R.DEL_YN = 'N'
+		 WHERE U.USER_ID = #{userId}
+	</select>
+	
+	<!-- 사용자기본 등록 -->
+	<insert id="insertUser" parameterType="map">
+		<selectKey keyProperty="userId" resultType="string" order="BEFORE">
+			/* UsmMapper.insertUser.selectKey */
+			<!-- 총길이 12, 3번째부터 cutting --> 
+			SELECT CONCAT( 'URS'
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(USER_ID, (3 + 1), 12)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 12 - 3
+							   , '0'
+						   )
+				   )
+			FROM irs_user.USER_BSC
+		</selectKey>
+		/* UsmMapper.insertUser */
+		INSERT
+		  INTO irs_user.USER_BSC
+		     ( USER_ID
+		     , USER_CL_CD
+		     , LGN_ID
+		     , PSWD_ENCPT
+		     , USER_NM
+		     , RGTR_ID
+		     )
+		VALUES
+		     ( #{userId}
+		     , #{userClCd}
+		     , #{lgnId}
+		     , #{pswdEncpt}
+		     , #{userNm}
+		     , #{sessionUserId}
+		     )
+	</insert>
+	
+	<!-- 사용자기본 수정 -->
+	<update id="updateUser" parameterType="map">
+		/* UsmMapper.updateUser */
+		UPDATE irs_user.USER_BSC
+		   SET USER_NM = #{userNm}
+		     , LGN_ID = #{lgnId}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE USER_ID = #{userId}
+	</update>
+	
+	<!-- 사용자기본 삭제 -->
+	<update id="deleteUser" parameterType="map">
+		/* UsmMapper.deleteUser */
+		UPDATE irs_user.USER_BSC
+		   SET DEL_YN = 'Y'
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE USER_ID = #{userId}
+	</update>
+	
+</mapper>

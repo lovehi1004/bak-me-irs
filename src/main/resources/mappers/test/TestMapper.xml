@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.test.mapper.TestMapper">
+	
+	<!-- Test 조회 -->
+	<select id="selectTest" resultType="egovMap">
+		/* TestMapper.selectCdDtlList */
+		SELECT 
+			temp_seq
+			, temp_nm
+			, temp_desc
+		FROM
+			irs_user.TEMP_TABLE
+		LIMIT 1
+	</select>
+	
+	<!-- Test 조회 -->
+	<select id="selectTestList" resultType="egovMap">
+		/* TestMapper.selectTestList */
+		SELECT 
+			temp_seq
+			, temp_nm
+			, temp_desc
+		FROM
+			irs_user.TEMP_TABLE
+		LIMIT 10
+	</select>
+	
+</mapper>

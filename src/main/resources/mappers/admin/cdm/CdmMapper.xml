@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.admin.cdm.mapper.CdmMapper">
+	
+	<!-- 그룹코드기본 목록 총건수 조회 -->
+	<select id="selectGroupCdListCnt" resultType="int" parameterType="map">
+		/* CdmMapper.selectGroupCdListCnt */
+		SELECT COUNT(*)
+		  FROM irs_user.GROUP_CD_BSC
+		 WHERE 1 = 1
+		   AND DEL_YN = 'N'
+		<if test="groupCd != null and !groupCd.equals('')">
+		   AND GROUP_CD LIKE CONCAT('%', #{groupCd}, '%')
+		</if>
+		<if test="groupCdNm != null and !groupCdNm.equals('')">
+		   AND GROUP_CD_NM LIKE CONCAT('%', #{groupCdNm}, '%')
+		</if>
+		<if test="groupCdEngNm != null and !groupCdEngNm.equals('')">
+		   AND GROUP_CD_ENG_NM LIKE CONCAT('%', #{groupCdEngNm}, '%')
+		</if>
+		<if test="useYn != null and !useYn.equals('')">
+		   AND USE_YN = #{useYn}
+		</if>
+	</select>
+	
+	<!-- 그룹코드기본 목록 조회 -->
+	<select id="selectGroupCdList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* CdmMapper.selectGroupCdList */
+		SELECT GROUP_CD										/* 그룹코드 */
+			 , GROUP_CD_NM									/* 그룹코드명 */
+			 , GROUP_CD_ENG_NM								/* 그룹코드영문명 */
+			 , GROUP_CD_EXPLN									/* 그룹코드설명 */
+			 , USE_YN											/* 사용여부 */		
+		  FROM irs_user.GROUP_CD_BSC
+		 WHERE 1 = 1
+		   AND DEL_YN = 'N'
+		<if test="groupCd != null and !groupCd.equals('')">
+		   AND GROUP_CD LIKE CONCAT('%', #{groupCd}, '%')
+		</if>
+		<if test="groupCdNm != null and !groupCdNm.equals('')">
+		   AND GROUP_CD_NM LIKE CONCAT('%', #{groupCdNm}, '%')
+		</if>
+		<if test="groupCdEngNm != null and !groupCdEngNm.equals('')">
+		   AND GROUP_CD_ENG_NM LIKE CONCAT('%', #{groupCdEngNm}, '%')
+		</if>
+		<if test="useYn != null and !useYn.equals('')">
+		   AND USE_YN = #{useYn}
+		</if>
+		 ORDER BY GROUP_CD ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- 그룹코드기본 중복 조회 -->
+	<select id="selectGroupCd" resultType="int" parameterType="map">
+		/* CdmMapper.selectGroupCd */
+		SELECT COUNT(*) AS CNT FROM irs_user.GROUP_CD_BSC WHERE GROUP_CD = #{groupCd} AND DEL_YN = 'N'
+	</select>
+	
+	<!-- 코드 등록 가능여부 조회 -->
+	<select id="selectCdRegYn" resultType="string" parameterType="map">
+		/* CdmMapper.selectCdRegYn */
+		SELECT CASE WHEN U.CD_REG_LMT_CNT = 0 THEN 'Y'					<!-- 코드등록제한건수가 0 이면 무제한 등록가능하므로 0이면 예외없이 등록가능 -->
+			 		WHEN U.CD_REG_LMT_CNT <![CDATA[<=]]> U.CNT THEN 'N'	
+			 		ELSE 'Y'
+			   END
+		  FROM (SELECT G.GROUP_CD, G.CD_REG_LMT_CNT, COUNT(*) AS CNT
+				  FROM irs_user.CD_DTL C
+				 INNER JOIN irs_user.GROUP_CD_BSC G
+				    ON G.GROUP_CD = C.GROUP_CD
+				   AND G.GROUP_CD = #{groupCd}
+				 WHERE 1 = 1
+				   AND C.DEL_YN = 'N'
+				   AND G.DEL_YN = 'N'
+				 GROUP BY G.GROUP_CD, G.CD_REG_LMT_CNT
+		  ) U
+	</select>
+	
+	<insert id="insertGroupCd" parameterType="map">
+		/* CdmMapper.insertGroupCd */
+		INSERT
+		  INTO irs_user.GROUP_CD_BSC
+			 ( GROUP_CD
+			 , GROUP_CD_NM
+			 , GROUP_CD_ENG_NM
+			 , GROUP_CD_EXPLN
+			 , CD_REG_LMT_CNT
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{groupCd}
+			 , #{groupCdNm}
+			 , #{groupCdEngNm}
+			 , #{groupCdExpln}
+			 , #{cdRegLmtCnt}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+	
+	<!-- 그룹코드기본 수정 -->
+	<update id="updateGroupCd" parameterType="map">
+		/* CdmMapper.updateGroupCd */
+		UPDATE irs_user.GROUP_CD_BSC
+		   SET GROUP_CD_NM = #{groupCdNm}
+		     , GROUP_CD_ENG_NM = #{groupCdEngNm}
+		     , GROUP_CD_EXPLN = #{groupCdExpln}
+		     , CD_REG_LMT_CNT = #{cdRegLmtCnt}
+		     , USE_YN = #{useYn}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+	</update>
+	
+	<!-- 그룹코드기본 삭제 -->
+	<update id="deleteGroupCd" parameterType="map">
+		/* CdmMapper.deleteGroupCd */
+		UPDATE irs_user.GROUP_CD_BSC
+		   SET DEL_YN = 'Y'
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+	</update>
+	
+	<!-- 코드상세 목록 조회 -->
+	<select id="selectCdList" resultType="egovMap" parameterType="map">
+		/* CdmMapper.selectCdList */
+		SELECT GROUP_CD
+			 , CD
+			 , CD_NM
+			 , CD_ENG_NM
+			 , CD_EXPLN
+			 , SORT_SNO
+			 , USE_YN
+		  FROM irs_user.CD_DTL C
+		 INNER JOIN irs_user.GROUP_CD_BSC G
+		    ON G.GROUP_CD = C.GROUP_CD
+		   AND G.GROUP_CD = #{groupCd}
+		 WHERE 1 = 1
+		   AND C.DEL_YN = 'N'
+		   AND G.DEL_YN = 'N'
+		<if test="cd != null and !cd.equals('')">
+		   AND CD LIKE CONCAT('%', #{cd}, '%')
+		</if>
+		<if test="cdNm != null and !cdNm.equals('')">
+		   AND CD_NM LIKE CONCAT('%', #{cdNm}, '%')
+		</if>
+		<if test="cdEngNm != null and !cdEngNm.equals('')">
+		   AND CD_ENG_NM LIKE CONCAT('%', #{cdEngNm}, '%')
+		</if>
+		<if test="useYn != null and !useYn.equals('')">
+		   AND C.USE_YN = #{useYn}
+		</if>
+		 ORDER BY C.SORT_SNO ASC
+	</select>
+	
+	<!-- 코드상세 중복 조회 -->
+	<select id="selectCd" resultType="int" parameterType="map">
+		/* CdmMapper.selectCd */
+		SELECT COUNT(*) AS CNT
+		  FROM irs_user.CD_DTL
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+		   AND DEL_YN = 'N'
+	</select>
+	
+	<!-- 코드상세 등록 -->
+	<insert id="insertCd" parameterType="map">
+		/* CdmMapper.insertCd */
+		INSERT
+		  INTO irs_user.CD_DTL
+			 ( GROUP_CD
+			 , CD
+			 , CD_NM
+			 , CD_ENG_NM
+			 , CD_EXPLN
+			 , SORT_SNO
+			 , USE_YN
+			 , RGTR_ID
+			 )
+			 (SELECT #{groupCd}
+				   , #{cd}
+				   , #{cdNm}
+				   , #{cdEngNm}
+				   , #{cdExpln}
+				   , COALESCE(MAX(SORT_SNO), 0)+1
+				   , #{useYn}
+				   , #{sessionUserId}
+				FROM irs_user.CD_DTL
+			   WHERE GROUP_CD = #{groupCd}
+			 )
+	</insert>
+	
+	<!-- 코드상세 수정 -->
+	<update id="updateCd" parameterType="map">
+		/* CdmMapper.updateCd */
+		UPDATE irs_user.CD_DTL
+		   SET CD_NM = #{cdNm}
+		     , CD_ENG_NM = #{cdEngNm}
+		     , CD_EXPLN = #{cdExpln}
+		     , USE_YN = #{useYn}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+	</update>
+	
+	<!-- 코드상세 삭제 -->
+	<update id="deleteCd" parameterType="map">
+		/* CdmMapper.deleteCd */
+		UPDATE irs_user.CD_DTL
+		   SET DEL_YN = 'Y'
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+	</update>
+	
+</mapper>

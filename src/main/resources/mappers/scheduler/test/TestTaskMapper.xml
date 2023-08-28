@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.scheduler.test.mapper.TestTaskMapper">
+	
+	<!-- 스케줄러 테스트용 SQL -->
+	<select id="selectTestTaskList" resultType="egovMap">
+		/* UsmMapper.selectUserListCnt */
+		SELECT '가' AS COL_01, 1 AS COL_02, 'a' AS COL_03, 'A' AS COL_04
+		 UNION ALL
+		SELECT '나' AS COL_01, 2 AS COL_02, 'b' AS COL_03, 'B' AS COL_04
+		 UNION ALL
+		SELECT '다' AS COL_01, 3 AS COL_02, 'c' AS COL_03, 'C' AS COL_04
+		 UNION ALL
+		SELECT '라' AS COL_01, 4 AS COL_02, 'd' AS COL_03, 'D' AS COL_04
+	</select>
+	
+</mapper>

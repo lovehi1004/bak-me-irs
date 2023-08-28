@@ -1,0 +1,19 @@
+# upload root path
+upload:
+  root.path: /data/file
+  temporary.path: /temporary
+  real.path: /real
+  #1주일 주기 임시파일생성 경로 - 프로세스내에서 1회성 임시파일 생성 후 파일 생성일자가 1주일이 초과하면 반드시 삭제처리한다. - NexacroFileResult 에서 생성자 파라미터가 File이라 파일생성없이는 사용이 불가하므로 해당 경로를 활용 한다.
+  pending.delete.weekly.path: /pending/delete
+
+# synapsoft viewer solution
+sol.sn3hcv:
+  home: /opt/synap/sn3hcv/
+  sn3hcv: /opt/synap/sn3hcv/sn3hcv_exe
+  template: /opt/synap/sn3hcv/template
+  modules: /opt/synap/sn3hcv/modules
+# synapsoft viewer generation
+  web.root: /apps/app/irs-wlib/wlib/sn3hcv
+
+# examples
+web.example.prop: prop-local

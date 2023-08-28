@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gov.me.irs.common.TreeMenuMapper">
+	
+	<!-- 메뉴 트리목록 -->
+	<!--
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		■ 파라미터 정보
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		@param targetMenuId - 트리구조 시작 기준점의 메뉴ID 
+		@param sysClCd - 시스템구분코드 
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	 -->
+	<sql id="treeMenuSql">
+		/* MnmMapper.treeMenuSql */
+		WITH RECURSIVE WITH_MENU_LIST(MENU_ID
+									, UP_MENU_ID
+									, MENU_CL_CD
+									, MENU_NM
+									, MENU_EXPLN
+									, MENU_URL_ADDR
+									, MENU_LVL
+									, SORT_SEQO
+									, SYS_CL_CD
+									, PTH
+									, CYC
+		) AS (
+			/* 기준점 */
+			SELECT M.MENU_ID
+				 , M.UP_MENU_ID
+				 , M.MENU_CL_CD
+				 , M.MENU_NM
+				 , M.MENU_EXPLN
+				 , M.MENU_URL_ADDR
+				 , M.MENU_LVL
+				 , M.SORT_SEQO
+				 , M.SYS_CL_CD
+				 , ARRAY[M.MENU_ID::TEXT]  AS PTH
+				 , false
+			  FROM irs_user.MENU_BSC M
+			 WHERE 1 = 1
+			<choose>
+				<when test="targetMenuId != null and !targetMenuId.equals('')"><!-- 기준점 지정 -->
+			   AND M.MENU_ID = #{targetMenuId}
+				</when>
+				<otherwise>
+				<if test='sysClCd == "SCC0001"'><!-- IRS시스템 - Default -->
+			   AND M.MENU_ID = 'MNI000000000'
+				</if>
+				<if test='sysClCd == "SCC0002"'><!-- 대고객시스템 -->
+			   AND M.MENU_ID = 'MNE000000000'
+				</if>
+				</otherwise>
+			</choose>			
+			   AND M.SYS_CL_CD = #{sysClCd}
+			   AND M.DEL_YN = 'N'
+			 UNION ALL
+			SELECT M.MENU_ID
+				 , M.UP_MENU_ID
+				 , M.MENU_CL_CD
+				 , M.MENU_NM
+				 , M.MENU_EXPLN
+				 , M.MENU_URL_ADDR
+				 , M.MENU_LVL
+				 , M.SORT_SEQO
+				 , M.SYS_CL_CD
+				 , ARRAY_APPEND( W.PTH, M.MENU_ID::TEXT) AS PTH
+				 , M.MENU_ID = ANY(W.PTH)
+			  FROM irs_user.MENU_BSC M
+			 INNER JOIN WITH_MENU_LIST W
+				ON M.UP_MENU_ID = W.MENU_ID
+			   AND M.SYS_CL_CD = #{sysClCd}
+			   AND M.DEL_YN = 'N'
+			 WHERE NOT CYC
+		)
+	</sql>
+</mapper>
