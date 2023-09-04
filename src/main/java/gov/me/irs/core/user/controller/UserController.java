@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.client.service.ClientService;
 import gov.me.irs.core.config.util.CoreUtil;
+import gov.me.irs.core.crypt.util.RsaUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import gov.me.irs.core.token.JwtToken;
@@ -56,6 +58,8 @@ public class UserController {
 	
 	private final ClientService clientService;
 	
+	private final HttpSession session;
+	
 	// 로그인
 	@PostMapping("/login")
 	public NexacroResult login(@ParamDataSet(name = "inputLogin") List<Map<String, Object>> inputLogin
@@ -88,6 +92,28 @@ public class UserController {
 				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(email));
 			}
 			
+			/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			/* 2. 비밀번호 RSA 복호화 */
+			/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 START */
+			/**
+			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
+			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
+			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
+			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
+			 */
+			boolean isTest = true;
+			
+			if(!isTest) {
+				try {
+					password = RsaUtil.decryptRsa(session, password);
+				} catch (Exception e) {
+					throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
+				}
+			}
+			
+			/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 END */
+			/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			
 			log.debug("[xxx][{}]", user);
 			log.debug("[param][{}][db][{}]", password, user.getPassword());
 			// 비번 불일치
@@ -103,7 +129,7 @@ public class UserController {
 	        }
 			 */
 			
-			/* 2. JWT Token 생성 */
+			/* 3. JWT Token 생성 */
 			JwtToken jwtToken = JwtToken.builder()
 					.accessToken(jwtTokenProvider.createAccessToken(email, user.getRoles()))
 					.refreshToken(jwtTokenProvider.createRefreshToken(email, user.getRoles()))
@@ -116,20 +142,20 @@ public class UserController {
 			}
 			log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [END]");
 			
-			/* 3. JWT Token 헤더 설정 */
+			/* 4. JWT Token 헤더 설정 */
 			jwtTokenProvider.setHeaderIssueToken(response);
 			jwtTokenProvider.setHeaderAccessToken(response, jwtTokenProvider.createAccessToken(email, user.getRoles()));
 			jwtTokenProvider.setHeaderRefreshToken(response, jwtTokenProvider.createRefreshToken(email, user.getRoles()));
 			
 			log.info("getroleeeee = {}", user.getRoles());
 			
-			/* 4. JWT Token - 인증정보 저장처리 */
+			/* 5. JWT Token - 인증정보 저장처리 */
 			jwtService.login(jwtToken, userAgent);
 			
-			/* 5. 사용자 접속정보 저장 */
+			/* 6. 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.Y);
 			
-			/* 6. 응답정보 설정 */
+			/* 7. 응답정보 설정 */
 			NexacroResult nexacroResult = new NexacroResult();
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.LOGIN));
 			return nexacroResult;
@@ -159,7 +185,7 @@ public class UserController {
 			log.error("[SignException][Login Fail][e.getCode()]["+e.getCode()+"][][]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]", e.getCause());
 			
 			NexacroResult nexacroResult = new NexacroResult();
-			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, e));
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, cause));
 			return nexacroResult;
 		}
 		

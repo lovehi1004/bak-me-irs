@@ -46,6 +46,9 @@
 </head>
 <body>
 	<hr/>
+		[암호화 테스트 - Get방식 호출 할 것][/test/cryptMain.irs]
+	<hr/>
+	<hr/>
 	index jsp page - test / 수정테스트
 	<hr/>
 	<a href="javascript:;" id="btnTest">미리보기 버튼 {그룹 2, 상세 1}</a>

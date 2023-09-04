@@ -2,11 +2,15 @@
 package gov.me.irs.test.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TestNexacroNController {
 	
+	private final MessageSource messageSource;
+	
 	private final FileService fileService;
 	
 	private final StatisticsService statisticsService;
@@ -50,6 +56,11 @@ public class TestNexacroNController {
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ 조회 테스트용 - 시스템접속통계 일별통계조회 ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
+		/* US 테스트 */
+		LocaleContextHolder.setLocale(Locale.US);
+    	log.debug("i18n 테스트 : {}", messageSource.getMessage("i18n.message.test1", null, LocaleContextHolder.getLocale()));
+    	log.debug("i18n 파라미터 테스트 : {}", messageSource.getMessage("i18n.message.test2", Arrays.asList("테스트1", "테스트2").toArray(), LocaleContextHolder.getLocale()));
+
 		List<Map<String, Object>> list = statisticsService.selectConnectDailyStatisticsList(requestMap);
 		nexacroResult.addDataSet("list", list);
 		

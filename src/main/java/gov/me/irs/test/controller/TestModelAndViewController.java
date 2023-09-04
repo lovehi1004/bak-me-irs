@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class TestModelAndViewController {
-
+	
 	@GetMapping("/test/jspPage")
 	public String test1(@RequestParam(required=true, value="aaaa", defaultValue="값이없음" ) String aaaa){
 		
 		log.debug("▶▶▶▶▶▶▶▶ [jspPage] 로그테스트 DEBUG LEVEL");
 		
-		return "jspPage";
+		return "WEB-INF/views/jspPage";
 	}
 	
 	@GetMapping("/test/mavJspPage")
@@ -35,7 +35,7 @@ public class TestModelAndViewController {
 		map.put("cccc", "다다다다");
 		
 		ModelAndView mv = new ModelAndView();
-		mv.setViewName("mavJspPage");
+		mv.setViewName("WEB-INF/views/mavJspPage");
 		mv.addAllObjects(map);
 		
 		return mv;

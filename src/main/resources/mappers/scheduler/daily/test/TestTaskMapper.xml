@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="gov.me.irs.scheduler.test.mapper.TestTaskMapper">
+<mapper namespace="gov.me.irs.scheduler.daily.test.mapper.TestTaskMapper">
 	
 	<!-- 스케줄러 테스트용 SQL -->
 	<select id="selectTestTaskList" resultType="egovMap">

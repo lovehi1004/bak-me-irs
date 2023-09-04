@@ -1,4 +1,4 @@
-package gov.me.irs.scheduler.test.mapper;
+package gov.me.irs.scheduler.daily.test.mapper;
 
 import java.util.List;
 import java.util.Map;

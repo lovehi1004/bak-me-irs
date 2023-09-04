@@ -45,7 +45,7 @@ spring:
       use-new-id-generator-mappings: true
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true  # 실행되는 SQL 출력 여부
+    show-sql: true  # 실행되는 SQL 출력 여부 - JPA전용
     generate-ddl: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 

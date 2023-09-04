@@ -26,7 +26,6 @@ public final class JwtConst {
 	 */
 	public final static class AUTH_CODE {
 		
-		public final static int AUTHENTICATION_REISSUE_TOKEN_OK = 8200;
 		public final static int AUTHENTICATION_ACCESS_UNKNOWN_ERROR = 8001;
 		public final static int AUTHENTICATION_REFRESH_UNKNOWN_ERROR = 8002;
 		public final static int AUTHENTICATION_EXPIRED_TOKEN = 8003;
@@ -49,7 +48,6 @@ public final class JwtConst {
 		public final static int OK = 9200;
 		
 		public final static int BAD_REQUEST = 9400;
-		public final static int FORBIDDEN = 9403;
 		public final static int NOT_FOUND = 9404;
 		public final static int METHOD_NOT_ALLOWED = 9405;
 		public final static int NOT_ACCEPTABLE = 9406;
@@ -65,7 +63,6 @@ public final class JwtConst {
 	
 	public final static class AUTH_MESSAGE {
 		
-		public final static String AUTHENTICATION_REISSUE_TOKEN_OK = "Token이 재발급 되었습니다.";
 		public final static String AUTHENTICATION_ACCESS_UNKNOWN_ERROR = "Access Token이 존재하지 않습니다.";
 		public final static String AUTHENTICATION_REFRESH_UNKNOWN_ERROR = "Refresh Token이 존재하지 않습니다.";
 		public final static String AUTHENTICATION_EXPIRED_TOKEN = "만료된 Token입니다.";
@@ -83,12 +80,11 @@ public final class JwtConst {
 		public final static String LOGIN = "로그인 성공!";
 		public final static String LOGOUT = "로그아웃 성공!";
 		public final static String LOGOUT_UNKNOWN_STATE = "이미 로그아웃되었거나 만료된 Token입니다.";
-		public final static String LOGOUT_MISSING_PARAMETERS = "파라미터가 누락되었습니다. 다시 확인해 주세요.";
+		public final static String LOGOUT_MISSING_PARAMETERS = "로그아웃시 파라미터가 누락되었습니다. 다시 확인해 주세요.";
 		
 		public final static String OK = "응답 성공";
 		
 		public final static String BAD_REQUEST = "잘못된 요청입니다.";
-		public final static String FORBIDDEN = "접근이 거부되었습니다.";
 		public final static String NOT_FOUND = "요청자원이 존재하지 않습니다.";
 		public final static String METHOD_NOT_ALLOWED = "허용되지 않는 HTTP Method입니다.";
 		public final static String NOT_ACCEPTABLE = "허용되지 않는 요청입니다.";

@@ -14,10 +14,13 @@
 			 , W.MENU_NM
 			 , W.MENU_EXPLN
 			 , W.MENU_URL_ADDR
+			 , W.EXPSR_YN
+			 , W.POPUP_YN
 			 , W.MENU_LVL
 			 , W.SORT_SEQO
 			 , W.SYS_CL_CD
 			 , W.PTH
+			 , 'TODO - 메뉴경로' AS MENU_PATH <!-- TODO - 메뉴정보 생성되면 메뉴경로 정보 : "가나 > 다라 > 마바사아 관리" 형태의 정보가 추가적으로 필요함 -->
 		  FROM WITH_MENU_LIST W
 		 WHERE W.MENU_LVL > 0
 		 ORDER BY W.PTH
@@ -32,6 +35,8 @@
 			 , MENU_NM
 			 , MENU_EXPLN
 			 , MENU_URL_ADDR
+			 , EXPSR_YN
+			 , POPUP_YN
 			 , MENU_LVL
 			 , SORT_SEQO
 			 , USE_YN
@@ -49,6 +54,8 @@
 		/* MnmMapper.updateUpMenuSeCd */
 		UPDATE irs_user.MENU_BSC
 		   SET MENU_CL_CD = #{menuClCd}
+			 , EXPSR_YN     = #{expsrYn}
+			 , POPUP_YN     = #{popupYn}
 			 , MDFR_ID     = #{sessionUserId}
 			 , MDFCN_DT     = CURRENT_TIMESTAMP
 		 WHERE MENU_ID = #{upMenuId}
@@ -78,6 +85,8 @@
 			 , MENU_NM
 			 , MENU_EXPLN
 			 , MENU_URL_ADDR
+			 , EXPSR_YN
+			 , POPUP_YN
 			 , MENU_LVL
 			 , SORT_SEQO
 			 , SYS_CL_CD
@@ -90,6 +99,8 @@
 				   , #{menuNm}
 				   , #{menuExpln}
 				   , #{menuUrlAddr}
+				   , #{expsrYn}
+				   , #{popupYn}
 				   , #{menuLvl}+1
 				   , COALESCE(MAX(SORT_SEQO), 0)+1
 				   , #{sysClCd}
@@ -107,6 +118,8 @@
 		   SET MENU_NM   = #{menuNm}
 			 , MENU_EXPLN = #{menuExpln}
 			 , MENU_URL_ADDR  = #{menuUrlAddr}
+			 , EXPSR_YN = #{expsrYn}
+			 , POPUP_YN = #{popupYn}
 			 , USE_YN    = #{useYn}
 			 , MDFR_ID    = #{sessionUserId}
 			 , MDFCN_DT    = CURRENT_TIMESTAMP

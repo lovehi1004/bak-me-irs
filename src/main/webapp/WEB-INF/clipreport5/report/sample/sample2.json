@@ -1,0 +1,334 @@
+{
+	"list1": [
+		{
+			"bbsSn": "39",
+			"bbscttTtl": "공지사항 감리 테스트"
+		},
+		{
+			"bbsSn": "38",
+			"bbscttTtl": "rrrrrrrrrrrr"
+		}
+	],
+	"list2": [
+		{
+			"msgCd": "C0001",
+			"msgCn": "{0}(을/를) 삭제처리 불가합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0002",
+			"msgCn": "{0}(을/를) 선택하기 바랍니다. ",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0003",
+			"msgCn": "{0}(을/를) 수정 불가합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0004",
+			"msgCn": "{0}(을/를) 입력하기 바랍니다. ",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0005",
+			"msgCn": "{0}(을/를) 정확하게 입력하기 바랍니다. ",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0006",
+			"msgCn": "{0}(이/가) 중복되어 입력할 수 없습니다. ",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0007",
+			"msgCn": "{0}{은/는) 삭제가 불가합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0008",
+			"msgCn": "{0}할 {1}(을/를) 선택하기 바랍니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0009",
+			"msgCn": "시작일은 종료일보다 이전 시점이어야 합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0010",
+			"msgCn": "종료일은 시작일보다 이후 시점이어야 합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0011",
+			"msgCn": "잘못된 인증 정보 입니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0012",
+			"msgCn": "선택된 데이터가 없습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0013",
+			"msgCn": "체크된 데이터가 없습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0014",
+			"msgCn": "이미 등록된 {0}입니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0015",
+			"msgCn": "처리중 오류가 발생하였습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0016",
+			"msgCn": "조회되는 데이터가 존재하지 않습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0017",
+			"msgCn": "해당 데이터가 저장되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0018",
+			"msgCn": "해당 데이터가 삭제되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0019",
+			"msgCn": "해당 데이터가 수정되었습니다. ",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0020",
+			"msgCn": "해당 데이터가 등록 되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0021",
+			"msgCn": "{0}(이/가) 조회되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0022",
+			"msgCn": "{0} 작업이 완료되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0023",
+			"msgCn": "{0}(이/가) 생성되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0024",
+			"msgCn": "{0}(이/가) 생성되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0025",
+			"msgCn": "{0}(을/를) 실행하겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0026",
+			"msgCn": "일괄다운로드 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0027",
+			"msgCn": "엑셀을 다운로드 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0028",
+			"msgCn": "엑셀을 저장 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0029",
+			"msgCn": "해당 데이터를 삭제하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0030",
+			"msgCn": "저장 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0031",
+			"msgCn": "{0}(을/를) 다운로드 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0032",
+			"msgCn": "임시비밀번호를 생성하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0033",
+			"msgCn": "로그아웃하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0034",
+			"msgCn": "일괄등록 하시겠습니까?",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0035",
+			"msgCn": "조회되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0036",
+			"msgCn": "저장되었습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0037",
+			"msgCn": "텍스트(txt) 파일 등록만 가능합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0038",
+			"msgCn": "요청한 페이지를 찾을 수 없습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0039",
+			"msgCn": "사용 가능한 {0}입니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0040",
+			"msgCn": "중복체크 하시기 바랍니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0041",
+			"msgCn": "시간은 0 ~ 24까지 입력이 가능합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0042",
+			"msgCn": "분은 0 ~ 59까지 입력이 가능합니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0043",
+			"msgCn": "시작시간은 종료시간 이전이어야 합니다.\u003cbr/\u003e시간을 확인해 주세요.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0044",
+			"msgCn": "동일시간의 경우 시작 분은 종료 분 이전이어야 합니다.\u003cbr/\u003e분을 확인해 주세요.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0045",
+			"msgCn": "시간은 24시간 이상 입력할 수 없습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0047",
+			"msgCn": "저장할 데이터가 없습니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "C0048",
+			"msgCn": "조회하려는 일자가 현재보다 앞선 일자입니다.",
+			"sysSeCd": "SYE030"
+		},
+		{
+			"msgCd": "E0001",
+			"msgCn": "조사년도와 입력날짜 년도가 달라 입력할 수 없습니다. \u003cbr/\u003e조사년도를 확인해 주세요.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0002",
+			"msgCn": "가동시간 정보 오류입니다.\u003cbr/\u003e시작시간, 종료시간, 가동중지 시간을 확인해 주세요.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0003",
+			"msgCn": "입력하려는 일자가 현재보다 앞선 일자입니다.\u003cbr/\u003e 입력 일자를 확인해 주세요.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0004",
+			"msgCn": "가동일자를 변경하여 저장할 수 없습니다.\u003cbr/\u003e{0} 일자로 거래해 주세요.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0005",
+			"msgCn": "기본부과금 제출 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0006",
+			"msgCn": "기본부과금 수정 요청 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0007",
+			"msgCn": "기본부과금 수정 반려 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0008",
+			"msgCn": "보고 제출의 제출 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0009",
+			"msgCn": "보고 제출의 검증완료 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0010",
+			"msgCn": "보고 제출의 검증미완료 상태이므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0013",
+			"msgCn": "시설 운영기간이 아닙니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0014",
+			"msgCn": "시설 임대기간으로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0015",
+			"msgCn": "시설 임차기간이 아니므로 {0} 할 수 없습니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0016",
+			"msgCn": "시설정보를 선택 후 거래하시기 바랍니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0017",
+			"msgCn": "해당 배출구에 같은 달 입력된 TMS 데이터가 있습니다. \\n자료를 확인 바랍니다.",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0018",
+			"msgCn": "입력된 기온 값이 \u00270\u0027이 맞습니까?",
+			"sysSeCd": "SYE010"
+		},
+		{
+			"msgCd": "E0019",
+			"msgCn": "측정농도값이 배출허용기준보다 큽니다. 저장하시겠습니까?",
+			"sysSeCd": "SYE010"
+		}
+	]
+}

@@ -25,7 +25,7 @@ public class TestPageController {
 	public String testPage(){
 		log.info("[/page/testPage] 성공!");
 		
-		return "testPage";
+		return "WEB-INF/views/testPage";
 	}
 	
 	@GetMapping("/test/page/testJson")

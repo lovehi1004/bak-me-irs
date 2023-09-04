@@ -20,6 +20,8 @@
 									, MENU_NM
 									, MENU_EXPLN
 									, MENU_URL_ADDR
+									, EXPSR_YN
+									, POPUP_YN
 									, MENU_LVL
 									, SORT_SEQO
 									, SYS_CL_CD
@@ -33,6 +35,8 @@
 				 , M.MENU_NM
 				 , M.MENU_EXPLN
 				 , M.MENU_URL_ADDR
+				 , M.EXPSR_YN
+				 , M.POPUP_YN
 				 , M.MENU_LVL
 				 , M.SORT_SEQO
 				 , M.SYS_CL_CD
@@ -62,6 +66,8 @@
 				 , M.MENU_NM
 				 , M.MENU_EXPLN
 				 , M.MENU_URL_ADDR
+				 , M.EXPSR_YN
+				 , M.POPUP_YN
 				 , M.MENU_LVL
 				 , M.SORT_SEQO
 				 , M.SYS_CL_CD

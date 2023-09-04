@@ -104,6 +104,7 @@ public class SecurityConfig {
                 .antMatchers(IGNORING_MATCH_LIST).permitAll()
                 .antMatchers("/exception/**").permitAll()							/* URL고정 - 인증 예외처리 전용 */
                 .antMatchers("/login").permitAll()									/* URL고정 - 인증체크 없음 */
+                .antMatchers("/common/report.irs").permitAll()					/* URL고정 - 리포트, 인증체크 없음 */
                 
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */

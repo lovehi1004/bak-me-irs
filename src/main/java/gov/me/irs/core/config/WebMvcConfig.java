@@ -66,7 +66,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	public ViewResolver internalResourceViewResolver() {
 	    InternalResourceViewResolver bean = new InternalResourceViewResolver();
 	    bean.setViewClass(JstlView.class);
-	    bean.setPrefix("/WEB-INF/views/");
+	    bean.setPrefix("/");			/* 클립리포트 솔루션 설치파일(jsp) 경로로 인한 설정 변경, bean.setPrefix("/WEB-INF/views/"); */
 	    bean.setSuffix(".jsp");
 	    bean.setOrder(0);
 	    return bean;

@@ -1,4 +1,4 @@
-package gov.me.irs.scheduler.test.task;
+package gov.me.irs.scheduler.daily.test.task;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import gov.me.irs.scheduler.test.service.TestTaskService;
+import gov.me.irs.scheduler.daily.test.service.TestTaskService;
 
 /**
  * 스케줄러 테스트용 Task

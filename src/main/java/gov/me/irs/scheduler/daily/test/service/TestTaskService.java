@@ -1,4 +1,4 @@
-package gov.me.irs.scheduler.test.service;
+package gov.me.irs.scheduler.daily.test.service;
 
 import java.util.List;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import gov.me.irs.scheduler.test.mapper.TestTaskMapper;
+import gov.me.irs.scheduler.daily.test.mapper.TestTaskMapper;
 import lombok.RequiredArgsConstructor;
 
 /**

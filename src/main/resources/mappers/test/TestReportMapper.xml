@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.test.mapper.TestReportMapper">
+	
+	<!-- TestReportMapper 예제 -->
+	<select id="selectTestReportList" resultType="egovMap" parameterType="map">
+		/* TestReportMapper.selectTestReportList */
+		SELECT 1001 AS BBS_SN, '게시판제목1001'||#{crfPath} AS BBSCTT_TTL UNION ALL
+		SELECT 2002 AS BBS_SN, '게시판제목2002'||#{service} AS BBSCTT_TTL UNION ALL
+		SELECT 3003 AS BBS_SN, '게시판제목3003' AS BBSCTT_TTL UNION ALL
+		SELECT 4004 AS BBS_SN, '게시판제목4004' AS BBSCTT_TTL UNION ALL
+		SELECT 5005 AS BBS_SN, '게시판제목5005' AS BBSCTT_TTL
+	</select>
+	
+</mapper>
