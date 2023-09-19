@@ -91,17 +91,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						if (validateRefreshToken && isRefreshToken) {
 							log.debug("▶▶▶▶ 3. invalid accessToken and valid refreshToken");
 							// Refresh Token으로 사용자인증 식별자 조회
-							String email = jwtTokenProvider.getUserIdByRefreshToken(refreshToken);
+							String identifier = jwtTokenProvider.getUserIdByRefreshToken(refreshToken);
 							// 사용자인증 식별자로 역할정보 조회
-							List<String> roles = jwtTokenProvider.getRoles(email);
+							List<String> roles = jwtTokenProvider.getRoles(identifier);
 							
 							// Token 재발급
-							String newAccessToken = jwtTokenProvider.createAccessToken(email, roles);
-							String newRefreshToken = jwtTokenProvider.createRefreshToken(email, roles);
+							String newAccessToken = jwtTokenProvider.createAccessToken(identifier, roles);
+							String newRefreshToken = jwtTokenProvider.createRefreshToken(identifier, roles);
 							
 							// 재발급 된 Refresh Token 저장소에 갱신
 							String userAgent = request.getHeader("User-Agent");
-							jwtTokenProvider.updateRefreshToken(email, userAgent, newRefreshToken);
+							jwtTokenProvider.updateRefreshToken(identifier, userAgent, newRefreshToken);
 							
 							// 헤더에 재발급 된 Token정보 설정
 							jwtTokenProvider.setHeaderReissueToken(response);

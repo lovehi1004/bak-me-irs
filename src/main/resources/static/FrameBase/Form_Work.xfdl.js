@@ -100,18 +100,18 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"id\"/><Cell col=\"1\" text=\"name\"/><Cell col=\"2\" text=\"description\"/><Cell col=\"3\" text=\"uesYn\"/><Cell col=\"4\" text=\"regUser\"/></Band><Band id=\"body\"><Cell text=\"bind:id\"/><Cell col=\"1\" text=\"bind:name\"/><Cell col=\"2\" text=\"bind:description\"/><Cell col=\"3\" text=\"bind:uesYn\"/><Cell col=\"4\" text=\"bind:regUser\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button00_00","540","27","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button00_00","534","27","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("4");
             obj.set_text("로그인-나중에");
             obj.set_background("yellow");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button404","536","79","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button404","534","Button00_00:20","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("5");
             obj.set_text("404");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonAuth","535","135","111","31",null,null,null,null,null,null,this);
+            obj = new Button("ButtonAuth","534","Button404:20","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("6");
             obj.set_text("엑세스토큰누락");
             this.addChild(obj.name, obj);
@@ -126,7 +126,7 @@
             obj.set_inputtype("digit");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button_Statistics","79","343","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button_Statistics","51","343","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("9");
             obj.set_text("테스트 통계조회");
             this.addChild(obj.name, obj);
@@ -137,13 +137,13 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"totDt\"/><Cell col=\"1\" text=\"visitor\"/><Cell col=\"2\" text=\"edge\"/><Cell col=\"3\" text=\"chrome\"/><Cell col=\"4\" text=\"safari\"/><Cell col=\"5\" text=\"opera\"/><Cell col=\"6\" text=\"whale\"/><Cell col=\"7\" text=\"ie\"/><Cell col=\"8\" text=\"unknown\"/><Cell col=\"9\" text=\"utc1\"/><Cell col=\"10\" text=\"utc2\"/><Cell col=\"11\" text=\"utc3\"/><Cell col=\"12\" text=\"utc4\"/><Cell col=\"13\" text=\"utc5\"/><Cell col=\"14\" text=\"utc6\"/><Cell col=\"15\" text=\"utc0\"/></Band><Band id=\"body\"><Cell text=\"bind:totDt\"/><Cell col=\"1\" text=\"bind:visitor\"/><Cell col=\"2\" text=\"bind:edge\"/><Cell col=\"3\" text=\"bind:chrome\"/><Cell col=\"4\" text=\"bind:safari\"/><Cell col=\"5\" text=\"bind:opera\"/><Cell col=\"6\" text=\"bind:whale\"/><Cell col=\"7\" text=\"bind:ie\"/><Cell col=\"8\" text=\"bind:unknown\"/><Cell col=\"9\" text=\"bind:utc1\"/><Cell col=\"10\" text=\"bind:utc2\"/><Cell col=\"11\" text=\"bind:utc3\"/><Cell col=\"12\" text=\"bind:utc4\"/><Cell col=\"13\" text=\"bind:utc5\"/><Cell col=\"14\" text=\"bind:utc6\"/><Cell col=\"15\" text=\"bind:utc0\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonViewer00","720","333","170","31",null,null,null,null,null,null,this);
+            obj = new Button("ButtonViewer00","680","340","170","31",null,null,null,null,null,null,this);
             obj.set_taborder("11");
             obj.set_text("문서뷰어-개발only(1-1,2-1)");
             obj.set_background("cyan");
             this.addChild(obj.name, obj);
 
-            obj = new Edit("EditViewer_fileGroupSn","495","330","99","38",null,null,null,null,null,null,this);
+            obj = new Edit("EditViewer_fileGroupSn","534","336","60","38",null,null,null,null,null,null,this);
             obj.set_taborder("12");
             obj.set_inputtype("digit");
             obj.set_value("2");
@@ -151,7 +151,7 @@
             obj.set_text("2");
             this.addChild(obj.name, obj);
 
-            obj = new Edit("EditViewer_fileDtlSn","615","330","85","38",null,null,null,null,null,null,this);
+            obj = new Edit("EditViewer_fileDtlSn","607","336","60","38",null,null,null,null,null,null,this);
             obj.set_taborder("13");
             obj.set_inputtype("digit");
             obj.set_value("1");
@@ -243,10 +243,25 @@
             obj.set_text("parma1값");
             this.Div00_Report.addChild(obj.name, obj);
 
-            obj = new Button("ButtonCrypt","670","185","170","31",null,null,null,null,null,null,this);
+            obj = new Button("ButtonCrypt","610","185","170","31",null,null,null,null,null,null,this);
             obj.set_taborder("15");
             obj.set_text("비밀번호암호화테스트");
             obj.set_background("lime");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("Button_Xeni","715","292","111","31",null,null,null,null,null,null,this);
+            obj.set_taborder("16");
+            obj.set_text("Xeni서버");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonFileDownPage","745","55","111","31",null,null,null,null,null,null,this);
+            obj.set_taborder("17");
+            obj.set_text("파일다운로드");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonFileUpPage","744","108","111","31",null,null,null,null,null,null,this);
+            obj.set_taborder("18");
+            obj.set_text("파일업로드");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
@@ -704,8 +719,8 @@
 
 
 
-
-        		var url = "http://dev.gov.irs/sol/viewer/skin/doc.html?fn=" + fn + "&rs=/sn3hcv" + rs;
+        		//var url = "http://localhost:28080/irs/sol/viewer/skin/doc.html?fn=" + fn + "&rs=/sn3hcv" + rs;
+        		var url = "http://192.168.0.140:28080/irs/sol/viewer/skin/doc.html?fn=" + fn + "&rs=" + rs;
         		system.execBrowser(url);
 
 
@@ -723,8 +738,8 @@
         		var param1 = this.Div00_Report.form.Edit13.text;
         		var param2 = this.Div00_Report.form.Edit14.text;
 
-        		//var url = "http://localhost/common/report.irs"
-        		var url = "http://dev.gov.irs/common/report.irs"
+        		//var url = "http://localhost:28080/irs/common/report.irs"
+        		var url = "http://192.168.0.140:28080/irs/common/report.irs"
         		+ "?crfPath=" + crfPath
         		+ "&service=" + service
         		+ "&param1=" + param1
@@ -746,10 +761,32 @@
         this.ButtonCrypt_onclick = function(obj,e)
         {
 
-        		//var url = "http://localhost/test/cryptMain.irs";
-        		var url = "http://dev.gov.irs/test/cryptMain.irs";
+        		//var url = "http://localhost:28080/irs/test/cryptMain.irs";
+        		var url = "http://192.168.0.140:28080/irs/test/cryptMain.irs";
 
         		system.execBrowser(url);
+        };
+
+        /*
+        * Xeni 서버
+        */
+        this.Button_Xeni_onclick = function(obj,e)
+        {
+        	nexacro.setHTTPHeaderVariable("Access-Control-Allow-Origin", "http://192.168.0.140:28080/irs");
+        	this.exportObj = new ExcelExportObject();
+            var ret = this.exportObj.addExportItem(nexacro.ExportItemTypes.GRID, this.Grid01, "Sheet1!A1");
+            this.exportObj.set_exporturl("http://192.168.0.140:28080/nexacro-xeni-java/XExportImport");
+            this.exportObj.exportData();
+        };
+
+        this.ButtonFileDownPage_onclick = function(obj,e)
+        {
+        	this.go( "FrameBase::FileDownTransfer.xfdl" );
+        };
+
+        this.ButtonFileUpPage_onclick = function(obj,e)
+        {
+        	this.go( "FrameBase::FileUpTransfer.xfdl" );
         };
 
         });
@@ -768,6 +805,9 @@
             this.Div00_Report.form.Edit11.addEventHandler("onchanged",this.Div00_Report_Edit11_onchanged,this);
             this.Div00_Report.form.Edit12.addEventHandler("onchanged",this.Div00_Report_Edit12_onchanged,this);
             this.ButtonCrypt.addEventHandler("onclick",this.ButtonCrypt_onclick,this);
+            this.Button_Xeni.addEventHandler("onclick",this.Button_Xeni_onclick,this);
+            this.ButtonFileDownPage.addEventHandler("onclick",this.ButtonFileDownPage_onclick,this);
+            this.ButtonFileUpPage.addEventHandler("onclick",this.ButtonFileUpPage_onclick,this);
             this.FileUpTransfer00.addEventHandler("onerror",this.FileUpTransfer00_onerror,this);
             this.FileUpTransfer00.addEventHandler("onprogress",this.FileUpTransfer00_onprogress,this);
             this.FileUpTransfer00.addEventHandler("onsuccess",this.FileUpTransfer00_onsuccess,this);

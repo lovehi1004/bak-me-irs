@@ -6,9 +6,9 @@ spring.profiles.active: local
 ##########################################################################################
 --- # common
 server:
-  port: 80
+  port: 28080
   servlet:
-    context-path: /
+    context-path: /irs
     encoding:
       charset: UTF-8
       enabled: true

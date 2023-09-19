@@ -2,7 +2,6 @@ package gov.me.irs.core.user.controller;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,34 +61,32 @@ public class UserController {
 	
 	// 로그인
 	@PostMapping("/login")
-	public NexacroResult login(@ParamDataSet(name = "inputLogin") List<Map<String, Object>> inputLogin
+	public NexacroResult login(@ParamDataSet(name = "inputLogin") Map<String, Object> requestMap
 			, @RequestHeader("User-Agent") String userAgent
 			, HttpServletRequest request
 			, HttpServletResponse response) throws SignException {
 		
 		try {
-			Map<String, Object> requestMap = inputLogin.get(0);
-			
 			log.info("user infomation = {}", requestMap);
 			log.info("userAgent infomation = {}", userAgent);
 			
-			String email = (String) requestMap.get(Const.CORE.KEY_USER_IDENTIFIER);
+			String identifier = (String) requestMap.get(Const.CORE.KEY_USER_IDENTIFIER);
 			String password = (String) requestMap.get(Const.CORE.KEY_USER_PASSWORD);
 			
 			/* 0. 사용자 식별정보 저장 */
-			request.setAttribute(Const.CORE.KEY_USER_IDENTIFIER, email);
+			request.setAttribute(Const.CORE.KEY_USER_IDENTIFIER, identifier);
 			
-			TableUser user = userRepository.findByLgnId(email);
+			TableUser user = userRepository.findByLgnId(identifier);
 			
 			/* 1. 인증 예외처리 */
 			// 유저 없는경우 
 			if (user == null ) {
-				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_ID.getCode(), new UsernameNotFoundException(email));
+				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_ID.getCode(), new UsernameNotFoundException(identifier));
 			}
 			
 			// 비밀번호가 없는경우 
 			if (password == null ) {
-				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(email));
+				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(identifier));
 			}
 			
 			/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
@@ -118,7 +115,7 @@ public class UserController {
 			log.debug("[param][{}][db][{}]", password, user.getPassword());
 			// 비번 불일치
 			if (!passwordEncoder.matches(password, user.getPassword())) {
-				throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(email));
+				throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(identifier));
 			}
 			
 			/**
@@ -131,9 +128,9 @@ public class UserController {
 			
 			/* 3. JWT Token 생성 */
 			JwtToken jwtToken = JwtToken.builder()
-					.accessToken(jwtTokenProvider.createAccessToken(email, user.getRoles()))
-					.refreshToken(jwtTokenProvider.createRefreshToken(email, user.getRoles()))
-					.key(email)
+					.accessToken(jwtTokenProvider.createAccessToken(identifier, user.getRoles()))
+					.refreshToken(jwtTokenProvider.createRefreshToken(identifier, user.getRoles()))
+					.key(identifier)
 					.build();
 			
 			log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [START]");
@@ -144,8 +141,8 @@ public class UserController {
 			
 			/* 4. JWT Token 헤더 설정 */
 			jwtTokenProvider.setHeaderIssueToken(response);
-			jwtTokenProvider.setHeaderAccessToken(response, jwtTokenProvider.createAccessToken(email, user.getRoles()));
-			jwtTokenProvider.setHeaderRefreshToken(response, jwtTokenProvider.createRefreshToken(email, user.getRoles()));
+			jwtTokenProvider.setHeaderAccessToken(response, jwtTokenProvider.createAccessToken(identifier, user.getRoles()));
+			jwtTokenProvider.setHeaderRefreshToken(response, jwtTokenProvider.createRefreshToken(identifier, user.getRoles()));
 			
 			log.info("getroleeeee = {}", user.getRoles());
 			

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import gov.me.irs.common.constants.Const;
@@ -28,6 +29,9 @@ public class ViewerService {
 	private final SynapConverter synapConverter;
 	
 	private final FileMapper fileMapper;
+	
+	@Value("${sol.sn3hcv.rs.root}")
+	private String rsRoot;
 	
 	/**
 	 * 문서미리보기 - 파일변환 처리
@@ -62,6 +66,17 @@ public class ViewerService {
 			
 			resultMap.put("fileGroupSn", fileVo.getFileGroupSn());
 			resultMap.put("fileDtlSn", fileVo.getFileDtlSn());
+			
+			outputPath = rsRoot + outputPath;
+			
+			/* Context Path 가 존재하면 rs에 추가조립 - 문서뷰어 솔루션에서 파라미터로만 판단 Context Path는 조립해서 보내야 됨 */
+			String contextPath = request.getContextPath();
+			if(!Const.SYMBOL.SLASH.equals(contextPath)) {
+				outputPath = contextPath + outputPath;
+			}
+			
+			log.debug("[outputPath to doc.html]["+outputPath+"]");
+			
 			resultMap.put("rs", outputPath);
 			resultMap.put("fn", resultName);
 		}

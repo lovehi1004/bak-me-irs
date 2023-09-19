@@ -26,7 +26,7 @@
         ],
         "screen" :
         [    
-        {"id":"Desktop_screen","type":"desktop","themeid":"theme::blue"}
+        {"id":"Desktop_screen","type":"desktop","networksecurelevel":"all","themeid":"theme::blue"}
         ],
         "xadl" :
         [

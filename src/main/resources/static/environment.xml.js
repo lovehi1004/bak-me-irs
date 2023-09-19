@@ -23,7 +23,7 @@ if (nexacro.Environment)
         nexacro._addService("extlib", "file", "./_extlib_/", "session", null, "", "0", "");
         nexacro._addService("Base", "form", "./Base/", "session", null, "", "0", "0");
         nexacro._addService("FrameBase", "form", "./FrameBase/", "session", null, "", "0", "0");
-        nexacro._addService("svc", "JSP", "http://localhost/", "none", null, "", "0", "0");
+        nexacro._addService("svc", "JSP", "http://192.168.0.140:28080/irs/", "none", null, "", "0", "0");
         nexacro._addService("nexacrolib", "js", "./nexacrolib/", "session", null, "", "0", "0");
     	nexacro._component_uri = (nexacro._arg_compurl ? nexacro._arg_compurl : "./nexacrolib/component/");
     	nexacro._theme_uri = "./_resource_/_theme_/";

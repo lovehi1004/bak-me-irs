@@ -148,6 +148,7 @@ public final class Const {
 	 */
 	public final static class SYMBOL {
 		public final static String COMMA = ",";
+		public final static String SLASH = "/";
 	}
 	
 

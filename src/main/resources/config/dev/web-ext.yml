@@ -13,7 +13,8 @@ sol.sn3hcv:
   template: /opt/synap/sn3hcv/template
   modules: /opt/synap/sn3hcv/modules
 # synapsoft viewer generation
-  web.root: /apps/app/irs-wlib/wlib/sn3hcv
+  web.root: /opt/tomcat/apache-tomcat-9.0.80/webapps/irs/WEB-INF/classes/static/sn3hcv
+  rs.root: /sn3hcv
 
 # examples
 web.example.prop: prop-dev

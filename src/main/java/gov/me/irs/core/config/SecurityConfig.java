@@ -71,11 +71,12 @@ public class SecurityConfig {
     }
 	
 	private final static String[] IGNORING_MATCH_LIST = {
-			"/",				/* root path */
+//			"/",				/* root path */
 			/* ■■■■■■■■■■■■■■■■■■■■ local 전용설정 START ■■■■■■■■■■■■■■■■■■■■ */
 			/* web, was 분리 구성시 (개발서버 같은 경우) web서버에서 request를 가로채므로 기능이 동작하지 않으므로 영향없음 */
-			"/nexacrolib/**", "/FrameBase/**", "/Base/**", "/_resource_/**",
-			"/favicon.ico"
+//			"/nexacrolib/**", "/FrameBase/**", "/Base/**", "/_resource_/**",
+//			"/css/**", "/fonts/**", "/images/**", "/js/**", "/sol/**",
+//			"/favicon.ico"
 			/* ■■■■■■■■■■■■■■■■■■■■ local 전용설정 END ■■■■■■■■■■■■■■■■■■■■ */
 			};
 	

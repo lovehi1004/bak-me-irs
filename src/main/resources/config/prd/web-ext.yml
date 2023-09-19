@@ -14,6 +14,7 @@ sol.sn3hcv:
   modules: /opt/synap/sn3hcv/modules
 # synapsoft viewer generation
   web.root: /apps/app/irs-wlib/wlib/sn3hcv
+  rs.root: /sn3hcv
 
 # examples
 web.example.prop: prop-prd

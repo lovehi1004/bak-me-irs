@@ -86,7 +86,7 @@
         this.FileDownTransfer_onload = function(obj,e)
         {
         	//파일다운로드시 파일다운 폴더경로 PostData 셋팅
-        	this.FileDownTransfer00.setPostData("downloadArchiveFileNm","압축파일");
+        	this.FileDownTransfer00.setPostData("downloadArchiveFileNm","압축파일.zip");
         	//파일업로드 전송 URL 셋팅
         	//this.FileDownTransfer00.set_url(this.sFileUrl);
         };

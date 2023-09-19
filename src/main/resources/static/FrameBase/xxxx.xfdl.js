@@ -34,6 +34,11 @@
             obj.set_taborder("2");
             obj.set_text("Button00");
             this.addChild(obj.name, obj);
+
+            obj = new Button("Button01","67","168","120","50",null,null,null,null,null,null,this);
+            obj.set_taborder("3");
+            obj.set_text("Button01");
+            this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this
             obj = new Layout("default","",1280,720,this,function(p){});

@@ -22,7 +22,7 @@
             // properties
             this.set_id("Application_Desktop");
             this.set_screenid("Desktop_screen");
-            this.set_licenseurl("http://dev.gov.irs/NexacroN_client_license.xml");
+            this.set_licenseurl("http://192.168.0.140:28080/irs/NexacroN_client_license.xml");
 
             if (this._is_attach_childframe)
             	return;
@@ -60,7 +60,7 @@
         
         // script Compiler
 
-        this.checkLicense("http://dev.gov.irs/NexacroN_client_license.xml");
+        this.checkLicense("http://192.168.0.140:28080/irs/NexacroN_client_license.xml");
         
         this.loadPreloadList();
 

@@ -28,13 +28,13 @@ String resultKey =  ReportUtil.createReport(request, oof, "false", "false", requ
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=800, user-scalable=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<link rel="stylesheet" type="text/css" href="/sol/ClipReport5/css/clipreport5.css">
-<link rel="stylesheet" type="text/css" href="/sol/ClipReport5/css/UserConfig5.css">
-<link rel="stylesheet" type="text/css" href="/sol/ClipReport5/css/font.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/clipreport5.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/UserConfig5.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/font.css">
 
-<script type='text/javascript' src='/sol/ClipReport5/js/jquery-1.11.1.js'></script>
-<script type='text/javascript' src='/sol/ClipReport5/js/clipreport5.js'></script>
-<script type='text/javascript' src='/sol/ClipReport5/js/UserConfig5.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/jquery-1.11.1.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/clipreport5.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/UserConfig5.js'></script>
 <script type='text/javascript'>
 	
 function html2xml(divPath){	
