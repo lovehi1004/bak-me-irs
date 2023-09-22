@@ -62,7 +62,7 @@ public class MnmService {
 		
 		/* 시스템구분코드 누락시 Default IRS시스템 구분값 설정 */
 		if(ObjectUtils.isEmpty(requestMap.get("sysClCd"))) {
-			requestMap.put("sysClCd", Const.SYSTEM.SYS_CL_CD_SCC0001);
+			requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
 		}
 
 		// 하위메뉴 생성 - 하위메뉴 생성시 상위메뉴의 메뉴구분정보를 변경 후 메뉴를 추가한다.

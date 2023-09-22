@@ -73,7 +73,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(new GlobalInteceptor());
+		registry.addInterceptor(new GlobalInteceptor()).addPathPatterns("/**/*.irs");
 	}
 	
 	@Bean

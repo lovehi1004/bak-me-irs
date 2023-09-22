@@ -9,16 +9,35 @@ package gov.me.irs.common.constants;
 public final class Const {
 	
 	/**
-	 * 시스템구분
+	 * 서비스
 	 * 
 	 * @author Justin
 	 *
 	 */
-	public final static class SYSTEM {
+	public final static class SERVICE {
+		public final static String EXT = "irs";			// IRS시스템 - 서비스 URL 확장자
+	}
+	
+	/**
+	 * 코드
+	 * 
+	 * @author Justin
+	 *
+	 */
+	public final static class CODE {
 		public final static String SYS_CL_CD_SCC0001 = "SCC0001";			// IRS시스템 - Default
 		public final static String SYS_CL_CD_SCC0002 = "SCC0002";			// 대고객시스템
 	}
 	
+	/**
+	 * MDC 키
+	 * 
+	 * @author Justin
+	 *
+	 */
+	public final static class MDC {
+		public final static String IP = "MDC_IP";			// request ip
+	}
 	
 	/**
 	 * 파일 업로드 SINGLE/MULTI 상수

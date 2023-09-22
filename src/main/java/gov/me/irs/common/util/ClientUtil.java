@@ -24,43 +24,43 @@ public final class ClientUtil {
 	public final static String getIp(HttpServletRequest request) {
 		/* 접속자 IP 조회 */
         String ip = request.getHeader("X-Forwarded-For");
-    	log.debug("[CLIENT IP][X-Forwarded-For]["+ip+"]");
+//    	log.debug("[CLIENT IP][X-Forwarded-For]["+ip+"]");
     	
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("Proxy-Client-IP");
-            log.debug("[CLIENT IP][Proxy-Client-IP]["+ip+"]");
+//            log.debug("[CLIENT IP][Proxy-Client-IP]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("WL-Proxy-Client-IP");
-            log.debug("[CLIENT IP][WL-Proxy-Client-IP]["+ip+"]");
+//            log.debug("[CLIENT IP][WL-Proxy-Client-IP]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("HTTP_CLIENT_IP");
-            log.debug("[CLIENT IP][HTTP_CLIENT_IP]["+ip+"]");
+//            log.debug("[CLIENT IP][HTTP_CLIENT_IP]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-            log.debug("[CLIENT IP][HTTP_X_FORWARDED_FOR]["+ip+"]");
+//            log.debug("[CLIENT IP][HTTP_X_FORWARDED_FOR]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("X-Real-IP");
-            log.debug("[CLIENT IP][X-Real-IP]["+ip+"]");
+//            log.debug("[CLIENT IP][X-Real-IP]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("X-RealIP");
-            log.debug("[CLIENT IP][X-RealIP]["+ip+"]");
+//            log.debug("[CLIENT IP][X-RealIP]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getHeader("REMOTE_ADDR");
-            log.debug("[CLIENT IP][REMOTE_ADDR]["+ip+"]");
+//            log.debug("[CLIENT IP][REMOTE_ADDR]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
             ip = request.getRemoteAddr();
-            log.debug("[CLIENT IP][request.getRemoteAddr()]["+ip+"]");
+//            log.debug("[CLIENT IP][request.getRemoteAddr()]["+ip+"]");
         }
         if (ObjectUtils.isEmpty(ip)) { 
         	ip = "Unknown";
-        	log.debug("[CLIENT IP][NOT FOUND]["+ip+"]");
+//        	log.debug("[CLIENT IP][NOT FOUND]["+ip+"]");
         }
         
         return ip;

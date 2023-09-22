@@ -195,7 +195,10 @@ ddd|||444|||라라라|||ccc|||400
 				
 				console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ SQL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
 				
-				let allSqlClause = "";
+				let allInsertSqlClause = "";
+				let allUpdateSqlClause = "";
+				let allDeleteSqlClause = "";
+				
 				$(rowDataList).each(function(idx, item){
 					
 					let valuesClauseList = [];
@@ -206,16 +209,37 @@ ddd|||444|||라라라|||ccc|||400
 					
 					let tableName = $("#tableName").val();
 					
-					let itemSqlClause = "INSERT INTO "+tableName+"("+headerList.join(', ')+") VALUES("+valuesClauseList.join(', ')+");";
+					let itemInsertSqlClause = "INSERT INTO "+tableName+"("+headerList.join(', ')+") VALUES("+valuesClauseList.join(', ')+");";
 					
-					console.log("[itemSqlClause]["+itemSqlClause+"]");
+					let itemSetterUpdateSqlClause = "";
+					for(let idx = 0; idx < headerList.length; idx++) {
+						if(idx != 0) { itemSetterUpdateSqlClause += ", "; }
+						itemSetterUpdateSqlClause += headerList[idx] + " = " + valuesClauseList[idx];
+					}
 					
+					let itemUpdateSqlClause = "UPDATE "+tableName+" SET "+itemSetterUpdateSqlClause+" WHERE 1 <> 1;";
 					
-					allSqlClause += itemSqlClause + "\n";
+					let itemConditionDeleteSqlClause = "";
+					for(let idx = 0; idx < headerList.length; idx++) {
+						if(idx != 0) { itemConditionDeleteSqlClause += "AND "; }
+						itemConditionDeleteSqlClause += headerList[idx] + " = " + valuesClauseList[idx];
+					}
+					
+					let itemDeleteSqlClause = "DELETE FROM "+tableName+" WHERE "+itemConditionDeleteSqlClause+";";
+					
+					console.log("[itemInsertSqlClause]["+itemInsertSqlClause+"]");
+					console.log("[itemUpdateSqlClause]["+itemUpdateSqlClause+"]");
+					console.log("[itemDeleteSqlClause]["+itemDeleteSqlClause+"]");
+					
+					allInsertSqlClause += itemInsertSqlClause + "\n";
+					allUpdateSqlClause += itemUpdateSqlClause + "\n";
+					allDeleteSqlClause += itemDeleteSqlClause + "\n";
 				});
 				console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ SQL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
 
-				$("#txaOutput").val(allSqlClause);
+				$("#txaOutputInsert").val(allInsertSqlClause);
+				$("#txaOutputUpdate").val(allUpdateSqlClause);
+				$("#txaOutputDelete").val(allDeleteSqlClause);
 			});
 			
 		});
@@ -272,6 +296,8 @@ ddd|||444|||라라라|||ccc|||400</textarea>
 	<hr/>
 	<button data-link="generateSql" style="padding: 3px 5px; cursor: pointer;">SQL 만들기</button>
 	<hr/>
-	<textarea id="txaOutput" style="width: 100%; height:200px; background: Chartreuse;"></textarea>
+	<textarea id="txaOutputInsert" style="width: 100%; height:200px; background: Chartreuse;"></textarea>
+	<textarea id="txaOutputUpdate" style="width: 100%; height:200px; background: Chartreuse;"></textarea>
+	<textarea id="txaOutputDelete" style="width: 100%; height:200px; background: Chartreuse;"></textarea>
 </body>
 </html>

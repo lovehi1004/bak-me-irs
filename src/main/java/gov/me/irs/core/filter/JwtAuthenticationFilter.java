@@ -8,10 +8,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import gov.me.irs.common.constants.Const;
+import gov.me.irs.common.util.ClientUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -31,6 +34,24 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	private final JwtTokenProvider jwtTokenProvider;
+	
+	/**
+	 * Filter 제외 범위설정
+	 */
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		
+		String ip = ClientUtil.getIp(request);
+		MDC.put(Const.MDC.IP, ip);
+		
+		String uri = request.getRequestURI().substring(request.getContextPath().length());
+		
+		/* uri 확장자 */
+		int lastIndex = uri.lastIndexOf(".");
+		String ext = lastIndex >= 0 ? uri.substring(lastIndex+1) : "";
+		log.debug("[URL][{}][ext][{}]", request.getRequestURL(), ext);
+		return !Const.SERVICE.EXT.equals(ext);
+	}
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -163,5 +184,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 인증정보 갱신
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-	
+
 }

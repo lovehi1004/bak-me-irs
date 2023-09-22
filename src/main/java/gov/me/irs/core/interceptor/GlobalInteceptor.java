@@ -28,6 +28,8 @@ public class GlobalInteceptor implements HandlerInterceptor {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		
+		log.debug("[preHandle] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ START");
+		
 		String uri = request.getRequestURI().substring(request.getContextPath().length());
 		
 		/* uri 확장자 */
@@ -41,27 +43,10 @@ public class GlobalInteceptor implements HandlerInterceptor {
 			String headerName = headers.nextElement();
 			headerMap.put(headerName, request.getHeader(headerName));
 		}
+		
 		log.debug("[헤더][{}]", headerMap);
-		
-//		Map<String, String[]> requestMap = request.getParameterMap();
-		log.debug("[preHandle] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ START");
-		log.debug("[Request URL]["+request.getRequestURL()+"]");
-		log.debug("[Request URI]["+request.getRequestURI()+"]");
-		log.debug("[uri] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ ["+uri+"]");
-		log.debug("[ext]["+ext+"]");
-//		log.debug("[parameters size]["+requestMap.size()+"]");
-//		for (Entry<String, String[]> e : requestMap.entrySet()) {
-//			String key = e.getKey();
-//			
-//			String value[] = e.getValue();
-//			List<String> valueList = null;
-//			if(value!=null&&value.length>0) {
-//				valueList = Arrays.asList(value);
-//			}
-//			
-//			log.debug("[parameters-item]["+key+"]["+String.join(",", valueList)+"]");
-//		}
-		
+		log.debug("[Request URL][{}][URI]][{}][ext][{}]", request.getRequestURL(), request.getRequestURI(), ext);
+		log.debug("[preHandle] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ END");
 		return true;
 	}
 
@@ -91,8 +76,5 @@ public class GlobalInteceptor implements HandlerInterceptor {
 		}
 		
 	}
-	
-	
-	
 	
 }

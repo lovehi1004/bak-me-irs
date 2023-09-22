@@ -8,7 +8,7 @@
 		<Property name="error">stderr</Property><!-- 에러로그 -->
 		<Property name="fileMaxSize">500MB</Property><!-- 로그파일용량 -->
 		<!-- pattern : [https://logging.apache.org/log4j/2.x/manual/layouts.html] -->
-		<Property name="layoutPattern">[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%C{1.}.%M:%L] - %m%n</Property><!-- 출력형식 -->
+		<Property name="layoutPattern">[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%X{MDC_IP}] [%t] [%C{1.}.%M:%L] - %m%n</Property><!-- 출력형식 -->
 <!-- 		<Property name="layoutPattern">[%-5p] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%C{1.}.%M:%L] - %m%n</Property>출력형식 -->
 	</Properties>
 	<Appenders>
