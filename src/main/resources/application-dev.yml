@@ -21,7 +21,11 @@ spring:
       - classpath:config/${spring.profiles.active}/web-ext.yml
       - classpath:config/${spring.profiles.active}/jwt.yml
       - classpath:config/error/errorcode.properties
-    
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      
 ##########################################################################################
 --- # yml - properties
 spring:

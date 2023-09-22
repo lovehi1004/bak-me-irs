@@ -9,7 +9,7 @@
 		/* FirstMapper.selectFirstList */
 		SELECT 
 			COLUMN_ONE
-			, COLUMN_TO
+			, COLUMN_TWO
 			, COLUMN_THREE
 		FROM
 			TEST_TABLE
