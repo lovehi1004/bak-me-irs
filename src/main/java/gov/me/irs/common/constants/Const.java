@@ -81,6 +81,7 @@ public final class Const {
 		/* 사용자 로그인 식별자 - 로그인ID or 이메일주소 */
 		public final static String KEY_USER_IDENTIFIER = "id";
 		public final static String KEY_USER_PASSWORD = "password";
+		public final static String KEY_USER_ROLE = "role";
 	}
 	
 	/**

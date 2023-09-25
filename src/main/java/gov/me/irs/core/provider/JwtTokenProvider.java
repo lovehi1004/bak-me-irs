@@ -18,7 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import gov.me.irs.core.token.entity.TableRefreshToken;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.jwt.util.JwtUtil;
 import gov.me.irs.core.token.constants.JwtConst;
@@ -130,56 +129,6 @@ public class JwtTokenProvider {
 		return this.createToken(lgnId, roles, refreshTokenKey, refreshTokenValidTime);
 	}
     
-	/**
-	 * Refresh Token 유효성 검증
-	 * 
-	 * @param tableRefreshToken
-	 * @return
-	 */
-	public String validateRefreshToken(TableRefreshToken tableRefreshToken){
-        // Refresh Token 추출
-        String refreshToken = tableRefreshToken.getRefreshTknCn();
-
-        try {
-            // 검증
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(refreshToken);
-
-            // Refresh Token 만료전 재발급
-            if (!claims.getBody().getExpiration().before(new Date())) {
-                return recreationAccessToken(claims.getBody().get("sub").toString(), claims.getBody().get("roles"));
-            }
-        }catch (Exception e) {
-        	// Refresh Token 만료시, 이후 프로세스에서 재인증 유도
-            return null;
-        }
-        return null;
-    }
-	
-	/**
-	 * Access Token 발급
-	 * 
-	 * @param lgnId
-	 * @param roles
-	 * @return
-	 */
-	public String recreationAccessToken(String lgnId, Object roles){
-		
-		Claims payloads = Jwts.claims().setSubject(lgnId);
-		payloads.put("roles", roles);
-		Date now = new Date();
-		
-		//Access Token
-		String accessToken = Jwts.builder()
-				.setHeader(headers) // Headers 설정
-				.setClaims(payloads) // 정보 저장
-				.setIssuedAt(now) // 토큰 발행 시간 정보
-				.setExpiration(new Date(now.getTime() + accessTokenValidTime)) // 토큰 만료 시간 설정
-				.signWith(accessTokenKey, SignatureAlgorithm.HS256)				// 사용할 암호화 알고리즘과 signature 에 들어갈 secret값 세팅
-				.compact();
-		
-		return accessToken;
-	}
-	
 	/**
 	 * Token정보로 부터 인증정보 취득
 	 * 

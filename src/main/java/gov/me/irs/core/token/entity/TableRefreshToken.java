@@ -34,4 +34,10 @@ public class TableRefreshToken {
     @Column(name ="USER_CLNT_CN", nullable = false, length = 500)
     private String userClntCn;
 	
+    /**
+     * 실제 업무관련 권한, 복수의 권한중에 실제 선택된 권한, 이 권한정보로 권한을 부여한다.
+     */
+    @Column(name = "JWT_ROLE_NM", nullable = false, length = 50)
+    private String role;
+    
 }
