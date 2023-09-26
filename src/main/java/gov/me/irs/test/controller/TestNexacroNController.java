@@ -50,7 +50,7 @@ public class TestNexacroNController {
 	 * @param requestMap
 	 * @return
 	 */
-	@PreAuthorize("hasRole('" + RoleConst.ROLE_SUPER + "')")
+	@PreAuthorize("hasRole('" + RoleConst.ROLE_BIZ + "')")
 	@PostMapping("/test/selectConnectDailyStatisticsList.irs")
 	public NexacroResult selectConnectDailyStatisticsList(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
