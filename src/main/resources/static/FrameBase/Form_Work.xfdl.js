@@ -33,7 +33,7 @@
 
 
             obj = new Dataset("ds_login", this);
-            obj._setContents("<ColumnInfo><Column id=\"id\" type=\"STRING\" size=\"256\"/><Column id=\"password\" type=\"STRING\" size=\"256\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"id\" type=\"STRING\" size=\"256\"/><Column id=\"password\" type=\"STRING\" size=\"256\"/><Column id=\"role\" type=\"STRING\" size=\"256\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
@@ -100,7 +100,7 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"id\"/><Cell col=\"1\" text=\"name\"/><Cell col=\"2\" text=\"description\"/><Cell col=\"3\" text=\"uesYn\"/><Cell col=\"4\" text=\"regUser\"/></Band><Band id=\"body\"><Cell text=\"bind:id\"/><Cell col=\"1\" text=\"bind:name\"/><Cell col=\"2\" text=\"bind:description\"/><Cell col=\"3\" text=\"bind:uesYn\"/><Cell col=\"4\" text=\"bind:regUser\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button00_00","534","27","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button00_00","919","20","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("4");
             obj.set_text("로그인-나중에");
             obj.set_background("yellow");
@@ -126,12 +126,12 @@
             obj.set_inputtype("digit");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button_Statistics","51","343","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button_Statistics","826","435","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("9");
             obj.set_text("테스트 통계조회");
             this.addChild(obj.name, obj);
 
-            obj = new Grid("Grid01","50","384","890","216",null,null,null,null,null,null,this);
+            obj = new Grid("Grid01","50","472","890","216",null,null,null,null,null,null,this);
             obj.set_taborder("10");
             obj.set_binddataset("Dataset_Statistics");
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"totDt\"/><Cell col=\"1\" text=\"visitor\"/><Cell col=\"2\" text=\"edge\"/><Cell col=\"3\" text=\"chrome\"/><Cell col=\"4\" text=\"safari\"/><Cell col=\"5\" text=\"opera\"/><Cell col=\"6\" text=\"whale\"/><Cell col=\"7\" text=\"ie\"/><Cell col=\"8\" text=\"unknown\"/><Cell col=\"9\" text=\"utc1\"/><Cell col=\"10\" text=\"utc2\"/><Cell col=\"11\" text=\"utc3\"/><Cell col=\"12\" text=\"utc4\"/><Cell col=\"13\" text=\"utc5\"/><Cell col=\"14\" text=\"utc6\"/><Cell col=\"15\" text=\"utc0\"/></Band><Band id=\"body\"><Cell text=\"bind:totDt\"/><Cell col=\"1\" text=\"bind:visitor\"/><Cell col=\"2\" text=\"bind:edge\"/><Cell col=\"3\" text=\"bind:chrome\"/><Cell col=\"4\" text=\"bind:safari\"/><Cell col=\"5\" text=\"bind:opera\"/><Cell col=\"6\" text=\"bind:whale\"/><Cell col=\"7\" text=\"bind:ie\"/><Cell col=\"8\" text=\"bind:unknown\"/><Cell col=\"9\" text=\"bind:utc1\"/><Cell col=\"10\" text=\"bind:utc2\"/><Cell col=\"11\" text=\"bind:utc3\"/><Cell col=\"12\" text=\"bind:utc4\"/><Cell col=\"13\" text=\"bind:utc5\"/><Cell col=\"14\" text=\"bind:utc6\"/><Cell col=\"15\" text=\"bind:utc0\"/></Band></Format></Formats>");
@@ -159,7 +159,7 @@
             obj.set_text("1");
             this.addChild(obj.name, obj);
 
-            obj = new Div("Div00_Report","68","636","842","132",null,null,null,null,null,null,this);
+            obj = new Div("Div00_Report","70","700","842","132",null,null,null,null,null,null,this);
             obj.set_taborder("14");
             obj.set_text("Div00");
             obj.set_border("3px double coral");
@@ -263,6 +263,28 @@
             obj.set_taborder("18");
             obj.set_text("파일업로드");
             this.addChild(obj.name, obj);
+
+            obj = new Edit("Edit_AccessToken","50","382","766","38",null,null,null,null,null,null,this);
+            obj.set_taborder("19");
+            obj.set_background("#aaaaff");
+            obj.set_displaynulltext("Access Token");
+            obj.set_color("black");
+            this.addChild(obj.name, obj);
+
+            obj = new Edit("Edit_RefreshToken","50","430","766","38",null,null,null,null,null,null,this);
+            obj.set_taborder("20");
+            obj.set_background("#aaffaa");
+            obj.set_displaynulltext("Refresh Token");
+            obj.set_color("black");
+            this.addChild(obj.name, obj);
+
+            obj = new Edit("Edit_Role","900","76","340","38",null,null,null,null,null,null,this);
+            obj.set_taborder("21");
+            obj.set_background("#ffaaaa");
+            obj.set_value("ROLE_SUPER");
+            obj.set_displaynulltext("권한지정");
+            obj.set_text("ROLE_SUPER");
+            this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
             obj = new Layout("default","",0,0,this.Div00_Report.form,function(p){});
@@ -361,6 +383,8 @@
         	this.ds_login.addRow();
           this.ds_login.setColumn(0, "id", "ddeeff@gmail.com");
           this.ds_login.setColumn(0, "password"  , "1234");
+          this.ds_login.setColumn(0, "role"  , this.Edit_Role.value);
+
           var strSvcId    = "login";
           var strSvcUrl   = "svc::login";
           var inData      = "inputLogin=ds_login";
@@ -622,6 +646,8 @@
         this.Button_Statistics_onclick = function(obj,e)
         {
 
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
 
 
         console.log("[this.transaction]["+this.transaction+"]");

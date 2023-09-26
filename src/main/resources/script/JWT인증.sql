@@ -26,7 +26,7 @@ COMMENT ON COLUMN irs_user.JWT_USER.USER_CL_CD IS '사용자구분코드';
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 CREATE TABLE irs_user.JWT_USER_ROLE (
 	LGN_ID VARCHAR(20)        NOT NULL ,
-	JWT_ROLE_NM VARCHAR(50)        NOT NULL ,
+	JWT_ROLE_NM VARCHAR(255)        NOT NULL ,
 	CONSTRAINT FK_JWT_USER_ROLE_01 foreign key (LGN_ID) references irs_user.JWT_USER(LGN_ID) ON UPDATE RESTRICT ON DELETE restrict
 );
 
@@ -42,8 +42,7 @@ COMMENT ON COLUMN irs_user.JWT_USER_ROLE.JWT_ROLE_NM IS 'JWT역할명';
 CREATE TABLE irs_user.JWT_USER_REFRESH_TKN (
 	LGN_ID VARCHAR(20)        NOT NULL ,
 	REFRESH_TKN_CN VARCHAR(500)        NOT NULL ,
-	USER_CLNT_CN VARCHAR(500)        NOT NULL,
-	JWT_ROLE_NM VARCHAR(50)        NOT NULL 		/*  복수의 ROLE중에서 선택된 ROLE 1건을 지정해서 저장 */
+	USER_CLNT_CN VARCHAR(500)        NOT NULL
 );
 
 ALTER TABLE irs_user.JWT_USER_REFRESH_TKN ADD CONSTRAINT PK_JWT_USER_REFRESH_TKN PRIMARY KEY (LGN_ID);
@@ -52,7 +51,6 @@ COMMENT ON TABLE irs_user.JWT_USER_REFRESH_TKN IS 'JWT사용자리프레시토�
 COMMENT ON COLUMN irs_user.JWT_USER_REFRESH_TKN.LGN_ID IS '로그인ID';
 COMMENT ON COLUMN irs_user.JWT_USER_REFRESH_TKN.REFRESH_TKN_CN IS '리프레시토큰내용';
 COMMENT ON COLUMN irs_user.JWT_USER_REFRESH_TKN.USER_CLNT_CN IS '사용자클라이언트내용';
-COMMENT ON COLUMN irs_user.JWT_USER_REFRESH_TKN.JWT_ROLE_NM IS 'JWT역할명';
 
 
 

@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.JoinColumn;
 
+import org.hibernate.annotations.Comment;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,6 +37,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name = "IRS_USER.JWT_USER")
+@org.hibernate.annotations.Table(comment = "JWT사용자", appliesTo = "IRS_USER.JWT_USER")
 @NoArgsConstructor
 @AllArgsConstructor
 public class TableUser implements UserDetails {
@@ -46,18 +48,23 @@ public class TableUser implements UserDetails {
 	private static final long serialVersionUID = -3055432343506191045L;
 
     @Id
+    @Comment("로그인ID")
     @Column(name = "LGN_ID", nullable = false, length = 20, unique = true)
     private String lgnId;
     
+    @Comment("사용자ID")
     @Column(name = "USER_ID", nullable = false, length = 20)
     private String userId;
     
+    @Comment("암호화비밀번호")
     @Column(name = "ENCPT_PSWD", nullable = false, length = 100)
     private String encptPswd;
-
-    @Column(name = "USER_CL_CD", nullable = false, length = 5)
+    
+    @Comment("사용자구분코드")
+    @Column(name = "USER_CL_CD", nullable = false, length = 7)
     private UserClCdEnum userClCd;
-
+    
+    @Comment("JWT역할명")
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "IRS_USER.JWT_USER_ROLE", joinColumns = @JoinColumn(name = "LGN_ID"))
     @Column(name = "JWT_ROLE_NM")

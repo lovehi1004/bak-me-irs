@@ -88,9 +88,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						log.debug("▶▶▶▶ 1. valid accessToken");
 						
 						if (validateRefreshToken && isRefreshToken) {
+							
+							/* 유효한 RefreshToken정보로 부터 role 권한정보 취득 */
+							String role = jwtTokenProvider.getRoleByRefreshToken(refreshToken);
+							
 							log.debug("▶▶▶▶ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공");
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
-							this.setAuthentication(accessToken);
+							this.setAuthentication(accessToken, role);
 							
 						} else if (validateRefreshToken && !isRefreshToken) {
 							log.debug("▶▶▶▶ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
@@ -116,9 +120,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							// 사용자인증 식별자로 역할정보 조회
 							List<String> roles = jwtTokenProvider.getRoles(identifier);
 							
+							/* 유효한 RefreshToken정보로 부터 role 권한정보 취득 */
+							String role = jwtTokenProvider.getRoleByRefreshToken(refreshToken);
+							
 							// Token 재발급
-							String newAccessToken = jwtTokenProvider.createAccessToken(identifier, roles);
-							String newRefreshToken = jwtTokenProvider.createRefreshToken(identifier, roles);
+							String newAccessToken = jwtTokenProvider.createAccessToken(identifier, roles, role);
+							String newRefreshToken = jwtTokenProvider.createRefreshToken(identifier, roles, role);
 							
 							// 재발급 된 Refresh Token 저장소에 갱신
 							String userAgent = request.getHeader("User-Agent");
@@ -130,7 +137,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							jwtTokenProvider.setHeaderRefreshToken(response, newRefreshToken);
 							
 							// 재발급 된 Token정보로 인증정보 생성
-							this.setAuthentication(newAccessToken);
+							this.setAuthentication(newAccessToken, role);
 							
 						} else {
 							log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");
@@ -174,13 +181,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	/**
 	 * Token정보로 인증정보 생성
 	 * 
-	 * @param token
+	 * @param accessToken
 	 */
-    public void setAuthentication(String token) {
+    public void setAuthentication(String accessToken, String role) {
     	log.debug("▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ [setAuthentication] ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶");
     	
     	// Token정보로 부터 인증정보 취득
-        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        Authentication authentication = jwtTokenProvider.getAuthentication(accessToken, role);
         // 인증정보 갱신
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

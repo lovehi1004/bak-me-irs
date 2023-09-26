@@ -11,7 +11,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -75,7 +74,8 @@ public class UserController {
 			
 			String identifier = (String) requestMap.get(Const.CORE.KEY_USER_IDENTIFIER);
 			String password = (String) requestMap.get(Const.CORE.KEY_USER_PASSWORD);
-			String role = StringUtils.EMPTY;		/* 선택된 권한 */
+			String role = StringUtils.EMPTY;			/* 기본권한 또는 선택된 권한정보 */
+
 			
 			/* 0. 사용자 식별정보 저장 */
 			request.setAttribute(Const.CORE.KEY_USER_IDENTIFIER, identifier);
@@ -129,40 +129,20 @@ public class UserController {
 	            throw new AccountExpiredException("인증 요청이 거부되었습니다. 관리자에게 문의하세요.");
 	        }
 			 */
-			log.info("[roles][{}]", user.getRoles());
 			
-			/* ######################################## 권한에러 테스트 START ######################################## */
-			/* ######################################## 권한에러 테스트 START ######################################## */
-			/* ######################################## 권한에러 테스트 START ######################################## */
-			/* ######################################## 권한에러 테스트 START ######################################## */
-			/* ######################################## 권한에러 테스트 START ######################################## */
-			//requestMap.put(Const.CORE.KEY_USER_ROLE, "ssss");
-			/* ######################################## 권한에러 테스트 END ######################################## */
-			/* ######################################## 권한에러 테스트 END ######################################## */
-			/* ######################################## 권한에러 테스트 END ######################################## */
-			/* ######################################## 권한에러 테스트 END ######################################## */
-			/* ######################################## 권한에러 테스트 END ######################################## */
-			
-			/* 3-1. 복수권한인 경우 - 사용자가 권한을 직접 선택한 경우 */
+			/* 선택된 권한정보 설정 */
 			if(!ObjectUtils.isEmpty(requestMap.get(Const.CORE.KEY_USER_ROLE))) {
 				role = (String) requestMap.get(Const.CORE.KEY_USER_ROLE);
-				log.debug("[사용자권한][▶ {}][전체권한][{}][▶ 선택지정][{}]", (user.getRoles().size() == 1) ? "단일권한" : "복수권한", user.getRoles(), role);
 				
-			/* 3-2. 단일권한인 경우 - 사용자가 권한종류 선택이 불필요한 경우 */
+			/* 선택된게 없으면 기본권한 설정 - 0번째꺼 */
 			} else {
-				role = user.getUserClCd().getValue();
-				log.debug("[사용자권한][▶ {}][전체권한][{}][▶ 기본지정][{}]", (user.getRoles().size() == 1) ? "단일권한" : "복수권한", user.getRoles(), role);
+				role = user.getRoles().get(Const.NUMERIC.ZERO);
 			}
 			
-			/* 권한부여 대상정보가 존재하지 않거나 선택지정한 권한정보가 올바르지 않으면 */
-			if(user.getRoles().size() == 0 || !user.getRoles().contains(role)) {
-				throw new SignException(JwtAuthEnum.AUTHENTICATION_ACCESS_DENIED.getCode(), new AccessDeniedException(identifier));
-			}
-			
-			/* 4. JWT Token 생성 */
+			/* 3. JWT Token 생성 */
 			JwtToken jwtToken = JwtToken.builder()
-					.accessToken(jwtTokenProvider.createAccessToken(identifier, user.getRoles()))
-					.refreshToken(jwtTokenProvider.createRefreshToken(identifier, user.getRoles()))
+					.accessToken(jwtTokenProvider.createAccessToken(identifier, user.getRoles(), role))
+					.refreshToken(jwtTokenProvider.createRefreshToken(identifier, user.getRoles(), role))
 					.key(identifier)
 					.build();
 			
@@ -172,18 +152,22 @@ public class UserController {
 			}
 			log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [END]");
 			
-			/* 5. JWT Token 헤더 설정 */
-			jwtTokenProvider.setHeaderIssueToken(response);
-			jwtTokenProvider.setHeaderAccessToken(response, jwtTokenProvider.createAccessToken(identifier, user.getRoles()));
-			jwtTokenProvider.setHeaderRefreshToken(response, jwtTokenProvider.createRefreshToken(identifier, user.getRoles()));
-
-			/* 6. JWT Token - 인증정보 저장처리 */
-			jwtService.login(jwtToken, user.getUserClCd(), role);
 			
-			/* 7. 사용자 접속정보 저장 */
+			
+			/* 4. JWT Token 헤더 설정 */
+			jwtTokenProvider.setHeaderIssueToken(response);
+			jwtTokenProvider.setHeaderAccessToken(response, jwtToken.getAccessToken());
+			jwtTokenProvider.setHeaderRefreshToken(response, jwtToken.getRefreshToken());
+			
+			log.info("getroleeeee = {}", user.getRoles());
+			
+			/* 5. JWT Token - 인증정보 저장처리 */
+			jwtService.login(jwtToken, userAgent);
+			
+			/* 6. 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.Y);
 			
-			/* 8. 응답정보 설정 */
+			/* 7. 응답정보 설정 */
 			NexacroResult nexacroResult = new NexacroResult();
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.LOGIN));
 			return nexacroResult;

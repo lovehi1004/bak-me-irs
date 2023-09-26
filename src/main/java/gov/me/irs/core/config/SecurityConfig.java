@@ -110,6 +110,7 @@ public class SecurityConfig {
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZ, RoleConst.SUPER, RoleConst.SUPERVISORY, RoleConst.DELEGATED)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZ)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
                 
                 

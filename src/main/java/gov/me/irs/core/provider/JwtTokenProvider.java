@@ -1,6 +1,7 @@
 package gov.me.irs.core.provider;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -82,6 +85,18 @@ public class JwtTokenProvider {
 	}
 	
 	/**
+	 * RefreshToken정보로 부터 role 권한정보 취득
+	 * 
+	 * @param token
+	 * @return
+	 */
+	public String getRoleByRefreshToken(String token) {
+		Claims payloads = Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(token).getBody();
+		String role = (String) payloads.get("role");
+		return role;
+	}
+	
+	/**
 	 * Token 발급
 	 * 
 	 * @param lgnId
@@ -90,10 +105,11 @@ public class JwtTokenProvider {
 	 * @param tokenValidTime
 	 * @return
 	 */
-    public String createToken(String lgnId, List<String> roles, SecretKey tokenKey, long tokenValidTime) {
+    public String createToken(String lgnId, List<String> roles, SecretKey tokenKey, long tokenValidTime, String role) {
     	
 		Claims payloads = Jwts.claims().setSubject(lgnId);		// 사용자인증 식별자 설정
-		payloads.put("roles", roles);									// payloads 설정
+		payloads.put("roles", roles);							// payloads 설정 - 전체권한
+		payloads.put("role", role);								// payloads 설정 - 기본권한 또는 선택된 권한
         Date now = new Date();
         
         return Jwts.builder()
@@ -112,9 +128,10 @@ public class JwtTokenProvider {
      * @param roles
      * @return
      */
-	public String createAccessToken(String lgnId, List<String> roles){
-		log.debug("accessToken 생성완료");
-		return this.createToken(lgnId, roles, accessTokenKey, accessTokenValidTime);
+	public String createAccessToken(String lgnId, List<String> roles, String role){
+		log.debug("■■■■■■■■■■[AccessToken 생성완료]");
+		log.debug("■■■■■■■■■■[AccessToken 생성시 role 권한정보][{}]", role);
+		return this.createToken(lgnId, roles, accessTokenKey, accessTokenValidTime, role);
 	}
 	
 	/**
@@ -124,9 +141,10 @@ public class JwtTokenProvider {
 	 * @param roles
 	 * @return
 	 */
-	public String createRefreshToken(String lgnId, List<String> roles) {
-		log.debug("refreshToken 생성완료");
-		return this.createToken(lgnId, roles, refreshTokenKey, refreshTokenValidTime);
+	public String createRefreshToken(String lgnId, List<String> roles, String role) {
+		log.debug("■■■■■■■■■■[RefreshToken 생성완료]");
+		log.debug("■■■■■■■■■■[RefreshToken 생성시 role 권한정보][{}]", role);
+		return this.createToken(lgnId, roles, refreshTokenKey, refreshTokenValidTime, role);
 	}
     
 	/**
@@ -135,16 +153,20 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	public Authentication getAuthentication(String token) {
+	public Authentication getAuthentication(String token, String role) {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessTokenKey, token));
 		
-//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [START-service]");
-//		for (GrantedAuthority a : userDetails.getAuthorities()) {
-//			log.debug("[roleName]["+a.getAuthority()+"]");
-//		}
-//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [END-service]");
+		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
+		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		authorities.add(new SimpleGrantedAuthority(role));
+		
+		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
+		for (GrantedAuthority a : authorities) {
+			log.debug("[roleName]["+a.getAuthority()+"]");
+		}
+		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [END-service]");
 
-		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 	}
 	
 	/**
