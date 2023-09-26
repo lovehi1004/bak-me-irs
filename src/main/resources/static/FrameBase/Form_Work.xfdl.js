@@ -281,9 +281,9 @@
             obj = new Edit("Edit_Role","900","76","340","38",null,null,null,null,null,null,this);
             obj.set_taborder("21");
             obj.set_background("#ffaaaa");
-            obj.set_value("ROLE_SUPER");
+            obj.set_value("ROLE_BIZ");
             obj.set_displaynulltext("권한지정");
-            obj.set_text("ROLE_SUPER");
+            obj.set_text("ROLE_BIZ");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
