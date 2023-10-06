@@ -1,9 +1,8 @@
 package gov.me.irs.common.util;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Calendar;
 
 /**
@@ -16,20 +15,20 @@ public class DateUtil {
 	/**
 	 * FullFormat 현재날짜 - Full format - ExcelUtil.java 전용
 	 * 
-	 * @param pattern
+	 * @param pattern - full pattern example. yyyyMMddHHmmss
 	 * @return
 	 */
 	public final static String getFullDate() {
-		return LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL));
+		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 	}
 	
 	/**
 	 * 현재날짜
-	 * @param pattern
+	 * @param pattern - full pattern example. yyyyMMddHHmmss
 	 * @return
 	 */
 	public final static String getDate(String pattern) {
-		return LocalDate.now().format(DateTimeFormatter.ofPattern(pattern));
+		return LocalDateTime.now().format(DateTimeFormatter.ofPattern(pattern));
 	}
 	
 	/**

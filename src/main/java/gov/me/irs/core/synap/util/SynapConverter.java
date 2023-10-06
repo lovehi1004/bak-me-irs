@@ -12,9 +12,10 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import gov.me.irs.core.config.property.Sn3hcvProperties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,24 +24,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author Justin
  *
  */
+@RequiredArgsConstructor
 @Component
 @Slf4j
 public class SynapConverter {
 	
-	@Value("${sol.sn3hcv.home}")
-	private String sn3hcvHome;
-
-	@Value("${sol.sn3hcv.sn3hcv}")
-	private String sn3hcv;
-
-	@Value("${sol.sn3hcv.template}")
-	private String template;
-
-	@Value("${sol.sn3hcv.modules}")
-	private String modules;
-
-	@Value("${sol.sn3hcv.web.root}")
-	private String webRoot;
+	private final Sn3hcvProperties props;
 
 	/*
 	 * 변환 호출
@@ -60,7 +49,7 @@ public class SynapConverter {
 
 		log.debug("[" + this.getClass().getName() + "][convertToHtml] START");
 
-		outputPath = webRoot + outputPath; /* WEB ROOT 를 지정한다. */
+		outputPath = props.web.root + outputPath; /* WEB ROOT 를 지정한다. */
 		
 		log.debug("[SynapConverter.java] inputFile >>> " + inputFile);
 		log.debug("[SynapConverter.java] outputPath >>> " + outputPath);
@@ -80,7 +69,7 @@ public class SynapConverter {
 		// 기존 변환 결과가 존재하지 않을 경우 변환 실행
 		if(!htmlFile.exists() || !htmlDir.isDirectory()) {
 			// 문서미리보기 프로세스 실행을 위한 인자 준비
-			String[] cmd = { sn3hcv, "-t", template, "-mod_path", modules, inputFile, outputPath, resultName };
+			String[] cmd = { props.sn3hcv, "-t", props.template, "-mod_path", props.modules, inputFile, outputPath, resultName };
 			log.debug("[cmd][" + Arrays.asList(cmd) + "]");
 			
 			try {

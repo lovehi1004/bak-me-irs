@@ -5,12 +5,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.mapper.FileMapper;
 import gov.me.irs.common.file.vo.FileVo;
+import gov.me.irs.core.config.property.Sn3hcvProperties;
 import gov.me.irs.core.synap.util.SynapConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +30,7 @@ public class ViewerService {
 	
 	private final FileMapper fileMapper;
 	
-	@Value("${sol.sn3hcv.rs.root}")
-	private String rsRoot;
+	private final Sn3hcvProperties props;
 	
 	/**
 	 * 문서미리보기 - 파일변환 처리
@@ -67,7 +66,7 @@ public class ViewerService {
 			resultMap.put("fileGroupSn", fileVo.getFileGroupSn());
 			resultMap.put("fileDtlSn", fileVo.getFileDtlSn());
 			
-			outputPath = rsRoot + outputPath;
+			outputPath = props.rs.root + outputPath;
 			
 			/* Context Path 가 존재하면 rs에 추가조립 - 문서뷰어 솔루션에서 파라미터로만 판단 Context Path는 조립해서 보내야 됨 */
 			String contextPath = request.getContextPath();

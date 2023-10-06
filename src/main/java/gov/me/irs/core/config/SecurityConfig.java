@@ -128,7 +128,12 @@ public class SecurityConfig {
                 .and()
         			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         
-        http.headers().xssProtection().block(true).xssProtectionEnabled(true);
+        http.headers()
+        		.xssProtection()																//X-XSS-Protection 헤더 설정
+        			.block(true)																//XSS 공격 차단
+        			.xssProtectionEnabled(true);												//X-XSS-Protection 헤더 활성화
+        
+        http.headers().frameOptions().sameOrigin();												//X-Frame-Options - html기반 환경 iframe 허용
         
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);		//세션정책 설정
 		

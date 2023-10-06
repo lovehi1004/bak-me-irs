@@ -22,6 +22,9 @@ import gov.me.irs.admin.statistics.service.StatisticsService;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.service.FileService;
 import gov.me.irs.common.file.vo.FileVo;
+import gov.me.irs.core.config.property.JasyptProperties;
+import gov.me.irs.core.config.property.JwtProperties;
+import gov.me.irs.core.config.property.Sn3hcvProperties;
 import gov.me.irs.core.config.util.SessionUtil;
 import gov.me.irs.core.constants.RoleConst;
 import gov.me.irs.core.user.entity.TableUser;
@@ -38,6 +41,10 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 public class TestNexacroNController {
+	
+	private final Sn3hcvProperties sn3hcvProperties;
+	private final JasyptProperties jasyptProperties;
+	private final JwtProperties jwtProperties;
 	
 	private final MessageSource messageSource;
 	
@@ -56,6 +63,22 @@ public class TestNexacroNController {
 		NexacroResult nexacroResult = new NexacroResult();
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ 조회 테스트용 - 시스템접속통계 일별통계조회 ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
+		
+		log.debug("[############################################################]");
+		log.debug("[home][{}]", sn3hcvProperties.home);
+		log.debug("[sn3hcv][{}]", sn3hcvProperties.sn3hcv);
+		log.debug("[template][{}]", sn3hcvProperties.template);
+		log.debug("[modules][{}]", sn3hcvProperties.modules);
+		log.debug("[webRoot][{}]", sn3hcvProperties.web.root);
+		log.debug("[rsRoot][{}]", sn3hcvProperties.rs.root);
+		log.debug("[############################################################]");
+		log.debug("[jasyptProperties.password][{}]", jasyptProperties.password);
+		log.debug("[############################################################]");
+		log.debug("[JwtProperties.accessToken.secretKey][{}]", jwtProperties.accessToken.secretKey);
+		log.debug("[JwtProperties.accessToken.validTime][{}]", jwtProperties.accessToken.validTime);
+		log.debug("[JwtProperties.refreshToken.secretKey][{}]", jwtProperties.refreshToken.secretKey);
+		log.debug("[JwtProperties.refreshToken.validTime][{}]", jwtProperties.refreshToken.validTime);
+		log.debug("[############################################################]");
 		
 		/* US 테스트 */
 		LocaleContextHolder.setLocale(Locale.US);

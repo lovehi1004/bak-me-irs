@@ -12,7 +12,6 @@ import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import gov.me.irs.common.constants.Const;
+import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.jwt.util.JwtUtil;
 import gov.me.irs.core.token.constants.JwtConst;
 import gov.me.irs.core.token.service.JwtService;
@@ -52,18 +52,8 @@ public class JwtTokenProvider {
     	headers.put("typ", "JWT");
     	headers.put("alg", "HS256");			//HMAC with SHA-256
     }
-	
-	@Value("${jwt.access-token.secret-key}")
-	private String accessTokenSecretKey;
-	
-	@Value("${jwt.access-token.valid-time}")
-	private long accessTokenValidTime;
-	
-	@Value("${jwt.refresh-token.secret-key}")
-	private String refreshTokenSecretKey;
-	
-	@Value("${jwt.refresh-token.valid-time}")
-	private long refreshTokenValidTime;
+    
+    private final JwtProperties props;
 	
 	/* Token 정보 (Signature) */
     private SecretKey accessTokenKey;
@@ -80,8 +70,8 @@ public class JwtTokenProvider {
 	 */
 	@PostConstruct
 	protected void init() {
-		this.accessTokenKey = Keys.hmacShaKeyFor(accessTokenSecretKey.getBytes(StandardCharsets.UTF_8));
-		this.refreshTokenKey = Keys.hmacShaKeyFor(refreshTokenSecretKey.getBytes(StandardCharsets.UTF_8));
+		this.accessTokenKey = Keys.hmacShaKeyFor(props.accessToken.secretKey.getBytes(StandardCharsets.UTF_8));
+		this.refreshTokenKey = Keys.hmacShaKeyFor(props.refreshToken.secretKey.getBytes(StandardCharsets.UTF_8));
 	}
 	
 	/**
@@ -131,7 +121,7 @@ public class JwtTokenProvider {
 	public String createAccessToken(String lgnId, List<String> roles, String role){
 		log.debug("■■■■■■■■■■[AccessToken 생성완료]");
 		log.debug("■■■■■■■■■■[AccessToken 생성시 role 권한정보][{}]", role);
-		return this.createToken(lgnId, roles, accessTokenKey, accessTokenValidTime, role);
+		return this.createToken(lgnId, roles, accessTokenKey, props.accessToken.validTime, role);
 	}
 	
 	/**
@@ -144,7 +134,7 @@ public class JwtTokenProvider {
 	public String createRefreshToken(String lgnId, List<String> roles, String role) {
 		log.debug("■■■■■■■■■■[RefreshToken 생성완료]");
 		log.debug("■■■■■■■■■■[RefreshToken 생성시 role 권한정보][{}]", role);
-		return this.createToken(lgnId, roles, refreshTokenKey, refreshTokenValidTime, role);
+		return this.createToken(lgnId, roles, refreshTokenKey, props.refreshToken.validTime, role);
 	}
     
 	/**
