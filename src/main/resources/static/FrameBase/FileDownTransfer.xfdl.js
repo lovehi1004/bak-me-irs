@@ -76,8 +76,8 @@
         
         // User Script
         this.registerScript("FileDownTransfer.xfdl", function() {
-        this.sFileUrl1 = nexacro.getEnvironment().services["svc"].url + "test/file/single/download.irs"; //파일다운로드 URL
-        this.sFileUrl2 = nexacro.getEnvironment().services["svc"].url + "test/file/multi/download.irs"; //파일다운로드 URL
+        this.sFileUrl1 = nexacro.getEnvironment().services["svc"].url + "common/file/single/download.irs"; //파일다운로드 URL
+        this.sFileUrl2 = nexacro.getEnvironment().services["svc"].url + "common/file/multi/download.irs"; //파일다운로드 URL
         this.sFileUrl3 = nexacro.getEnvironment().services["svc"].url + "test/excel/download.irs"; //엑셀파일다운로드 URL
         this.sFileUrl4 = nexacro.getEnvironment().services["svc"].url + "test/csv/download.irs"; //csv파일다운로드 URL
 

@@ -11,6 +11,7 @@
         {
             this.set_name("FileUpTransfer");
             this.set_titletext("New Form");
+            this.set_color("RGB(255,255,255)");
             if (Form == this.constructor)
             {
                 this._setFormPosition(1280,720);
@@ -44,12 +45,14 @@
             obj = new Button("Button00","602","22","120","40",null,null,null,null,null,null,this);
             obj.set_taborder("1");
             obj.set_text("파일추가");
+            obj.set_background("blue");
             this.addChild(obj.name, obj);
 
             obj = new Button("Button02","602","145","120","40",null,null,null,null,null,null,this);
             obj.set_taborder("2");
             obj.set_text("single 저장");
             obj.set_background("");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
 
             obj = new TextArea("TextArea00","19","143","575","428",null,null,null,null,null,null,this);
@@ -60,27 +63,32 @@
             obj = new Button("Button01","602","65","120","40",null,null,null,null,null,null,this);
             obj.set_taborder("4");
             obj.set_text("초기화");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
 
             obj = new Button("Button_singleSave","630","250","84","41",null,null,null,null,null,null,this);
             obj.set_taborder("5");
             obj.set_text("single 최종저장");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
 
             obj = new Button("Button_multiSave","632","310","84","41",null,null,null,null,null,null,this);
             obj.set_taborder("6");
             obj.set_text("multi 최종저장");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
 
             obj = new Button("Button02_00","604","195","120","40",null,null,null,null,null,null,this);
             obj.set_taborder("7");
             obj.set_text("multi 저장");
             obj.set_background("");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
 
             obj = new Button("Button_excel","599","375","150","50",null,null,null,null,null,null,this);
             obj.set_taborder("8");
             obj.set_text(" 엑셀 업로드");
+            obj.set_color("black");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this
@@ -101,9 +109,9 @@
         
         // User Script
         this.registerScript("FileUpTransfer.xfdl", function() {
-        this.sFileUrl_1 = nexacro.getEnvironment().services["svc"].url + "test/file/single/upload.irs"; //파일전송 URL
-        this.sFileUrl_2 = nexacro.getEnvironment().services["svc"].url + "test/file/multi/upload.irs"; //파일전송 URL
-        this.sFileUrl_3 = nexacro.getEnvironment().services["svc"].url + "test/excel/upload.irs"; //엑셀 파일전송 URL
+        this.sFileUrl_1 = nexacro.getEnvironment().services["svc"].url + "common/file/single/upload.irs"; //파일전송 URL
+        this.sFileUrl_2 = nexacro.getEnvironment().services["svc"].url + "common/file/multi/upload.irs"; //파일전송 URL
+        this.sFileUrl_3 = nexacro.getEnvironment().services["svc"].url + "common/excel/upload.irs"; //엑셀 파일전송 URL
         this.nMaxFileSize = 2000000;	//각 파일 최대사이즈 (2 Mbyte)
 
         //폼 로딩 후 이벤트

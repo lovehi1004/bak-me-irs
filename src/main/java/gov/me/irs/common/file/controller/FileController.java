@@ -51,19 +51,19 @@ public class FileController {
 	
 	private final FileService fileService;
 	
-	private static final String __TEST__ = "/test";
+	private static final String URL_PREFIX = "/common";
 	
-	private static final String URL_FILE_UPLOAD   = __TEST__ + "/file/{uploadType}/upload.irs";					//SINGLE/MULTI 업로드
-	private static final String URL_FILE_DOWNLOAD = __TEST__ + "/file/{uploadType}/download.irs";				//SINGLE/MULTI 파일 다운로드 - MULTI는 압축파일
-	private static final String URL_FILE_CHECK_DOWNLOAD = __TEST__ + "/file/{uploadType}/checkDownload.irs";		//SINGLE/MULTI 파일 다운로드 체크 - MULTI는 압축파일
+	private static final String URL_FILE_UPLOAD   = URL_PREFIX + "/file/{uploadType}/upload.irs";					//SINGLE/MULTI 업로드
+	private static final String URL_FILE_DOWNLOAD = URL_PREFIX + "/file/{uploadType}/download.irs";				//SINGLE/MULTI 파일 다운로드 - MULTI는 압축파일
+	private static final String URL_FILE_CHECK_DOWNLOAD = URL_PREFIX + "/file/{uploadType}/checkDownload.irs";		//SINGLE/MULTI 파일 다운로드 체크 - MULTI는 압축파일
 	
 	/* single upload url list */
-	private static final String URL_FILE_SINGLE_DELETE   = __TEST__ + "/file/single/delete.irs";					//SINGLE 업로드 파일 삭제, MULTI 파일은 최종저장처리 시점에 상태을 반영한다.
-	private static final String URL_FILE_SINGLE_DETAIL   = __TEST__ + "/file/single/detail.irs";					//SINGLE 파일정보 불러오기
-	private static final String URL_FILE_SINGLE_BASE64  = __TEST__ + "/file/single/selectBase64Image.irs";		//SINGLE 이미지파일 Base64 Data 불러오기 - 성능에 영향을 줄 수 있으므로 SINGLE기능만, MULTI기능은 제외
+	private static final String URL_FILE_SINGLE_DELETE   = URL_PREFIX + "/file/single/delete.irs";					//SINGLE 업로드 파일 삭제, MULTI 파일은 최종저장처리 시점에 상태을 반영한다.
+	private static final String URL_FILE_SINGLE_DETAIL   = URL_PREFIX + "/file/single/detail.irs";					//SINGLE 파일정보 불러오기
+	private static final String URL_FILE_SINGLE_BASE64  = URL_PREFIX + "/file/single/selectBase64Image.irs";		//SINGLE 이미지파일 Base64 Data 불러오기 - 성능에 영향을 줄 수 있으므로 SINGLE기능만, MULTI기능은 제외
 	
 	/* multi upload url list */
-	private static final String URL_FILE_MULTI_LIST      = __TEST__ + "/file/multi/list.irs";					//MULTI 파일목록 불러오기
+	private static final String URL_FILE_MULTI_LIST      = URL_PREFIX + "/file/multi/list.irs";					//MULTI 파일목록 불러오기
 	
 	
 	private static final String DEFAULT_ARCHIVE_FILE_NAME = "archive.zip";			/* MULTI 다운로드 - Default 압축파일명 */

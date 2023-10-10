@@ -10,32 +10,32 @@ public final class RoleConst {
 	
 	private final static String ROLE_PREFIX = "ROLE_";
 	
-	/* 역할 : GIR - 전체관리자 */
+	/* 역할 : 슈퍼관리자 */
 	public final static String SUPER = "SUPER";
 	public final static String ROLE_SUPER = ROLE_PREFIX + SUPER;
 	public final static String CODE_SUPER = "UCC0001";
 	
-	/* 역할 : 민간사업자 */
-	public final static String BIZ = "BIZ";
-	public final static String ROLE_BIZ = ROLE_PREFIX + BIZ;
-	public final static String CODE_BIZ = "UCC0002";
+	/* 역할 : 시스템관리자 */
+	public final static String SYSTEM = "SYSTEM";
+	public final static String ROLE_SYSTEM = ROLE_PREFIX + SYSTEM;
+	public final static String CODE_SYSTEM = "UCC0002";
 	
 	/* 역할 : 관장기관 */
-	public final static String SUPERVISORY = "SUPERVISORY";
-	public final static String ROLE_SUPERVISORY = ROLE_PREFIX + SUPERVISORY;
-	public final static String CODE_SUPERVISORY = "UCC0003";
+	public final static String DIRECTOR = "DIRECTOR";
+	public final static String ROLE_DIRECTOR = ROLE_PREFIX + DIRECTOR;
+	public final static String CODE_DIRECTOR = "UCC0003";
 	
 	/* 역할 : 위탁기관 */
-	public final static String DELEGATED = "DELEGATED";
-	public final static String ROLE_DELEGATED = ROLE_PREFIX + DELEGATED;
-	public final static String CODE_DELEGATED = "UCC0004";
+	public final static String OUTSOURCING = "OUTSOURCING";
+	public final static String ROLE_OUTSOURCING = ROLE_PREFIX + OUTSOURCING;
+	public final static String CODE_OUTSOURCING = "UCC0004";
 	
-	/* 역할 : 환경부 */
-	public final static String ME = "ME";
-	public final static String ROLE_ME = ROLE_PREFIX + ME;
-	public final static String CODE_ME = "UCC0005";
+	/* 역할 : 사업수행자 */
+	public final static String BIZ = "BIZ";
+	public final static String ROLE_BIZ = ROLE_PREFIX + BIZ;
+	public final static String CODE_BIZ = "UCC0005";
 	
-	/* 역할 : 국제감축협의체 */
+	/* 역할 : 기타부처 */
 	public final static String ORGAN = "ORGAN";
 	public final static String ROLE_ORGAN = ROLE_PREFIX + ORGAN;
 	public final static String CODE_ORGAN = "UCC0006";

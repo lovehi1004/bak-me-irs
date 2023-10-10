@@ -19,27 +19,27 @@ public enum UserClCdEnum implements EnumType {
 	SUPER(
 			RoleConst.CODE_SUPER,
 			RoleConst.ROLE_SUPER
-	),											//역할 : GIR - 전체관리자
+	),											//역할 : 슈퍼관리자
+	SYSTEM(
+			RoleConst.CODE_SYSTEM,
+			RoleConst.ROLE_SYSTEM
+	),											//역할 : 시스템관리자
+	DIRECTOR(
+			RoleConst.CODE_DIRECTOR,
+			RoleConst.ROLE_DIRECTOR
+	),											//역할 : 관장기관
+	OUTSOURCING(
+			RoleConst.CODE_OUTSOURCING,
+			RoleConst.ROLE_OUTSOURCING
+	),											//역할 : 위탁기관
 	BIZ(
 			RoleConst.CODE_BIZ,
 			RoleConst.ROLE_BIZ
-	),											//역할 : 민간사업자
-	SUPERVISORY(
-			RoleConst.CODE_SUPERVISORY,
-			RoleConst.ROLE_SUPERVISORY
-	),											//역할 : 관장기관
-	DELEGATED(
-			RoleConst.CODE_DELEGATED,
-			RoleConst.ROLE_DELEGATED
-	),											//역할 : 위탁기관
-	ME(
-			RoleConst.CODE_ME,
-			RoleConst.ROLE_ME
-	),											//역할 : 환경부
+	),											//역할 : 사업수행자
 	ORGAN(
 			RoleConst.CODE_ORGAN,
 			RoleConst.ROLE_ORGAN
-	),											//역할 : 국제감축협의체
+	),											//역할 : 기타부처
 	MOFA(
 			RoleConst.CODE_MOFA,
 			RoleConst.ROLE_MOFA

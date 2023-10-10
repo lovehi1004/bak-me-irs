@@ -105,20 +105,26 @@ public class SecurityConfig {
                 .antMatchers(IGNORING_MATCH_LIST).permitAll()
                 .antMatchers("/exception/**").permitAll()							/* URL고정 - 인증 예외처리 전용 */
                 .antMatchers("/login").permitAll()									/* URL고정 - 인증체크 없음 */
-                .antMatchers("/common/report.irs").permitAll()					/* URL고정 - 리포트, 인증체크 없음 */
+                .antMatchers("/common/report.irs").permitAll()						/* URL고정 - 리포트, 인증체크 없음 */
+                .antMatchers("/common/rsa.irs").permitAll()							/* URL고정 - RSA 공개키, 개인키 생성 */
+                .antMatchers("/common/file/**").permitAll()							/* URL고정 - 파일업로드 and 파일다운로드 */
+                
+                
+                
+                
+                
                 
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZ, RoleConst.SUPER, RoleConst.SUPERVISORY, RoleConst.DELEGATED)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZ, RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZ)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
                 
                 
-                .antMatchers("/file/upload/**").authenticated()						/* 권한설정  - 인증상태만 접근가능 : 업로드 전용 */
-                .antMatchers("/admin/**").hasAnyRole(RoleConst.SUPER, RoleConst.SUPERVISORY, RoleConst.DELEGATED)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
-                .antMatchers("/user/**").authenticated()										/* 권한설정 예시2 - 인증상태만 접근가능 */
-                .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZ)								/* 권한설정 예시3 - 인증상태만 접근가능 */
-                .antMatchers("/**").permitAll()													/* 권한설정 예시4 - 인증체크 없음 */
+                .antMatchers("/admin/**").hasAnyRole(RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
+                .antMatchers("/user/**").authenticated()																	/* 권한설정 예시2 - 인증상태만 접근가능 */
+                .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZ)															/* 권한설정 예시3 - 인증상태만 접근가능 */
+                .antMatchers("/**").permitAll()																				/* 권한설정 예시4 - 인증체크 없음 */
                 .and()
                 	.logout().logoutUrl("/logout")
                 	.logoutSuccessHandler(coreLogoutSuccessHandler).permitAll()

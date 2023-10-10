@@ -240,7 +240,7 @@ public class UserController {
 	
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■ TEST-1 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성1 - 역할 : GIR - 전체관리자
+	 * 새로운 사용자 생성1 - 역할 : 슈퍼관리자
 	 * 
 	 * @return
 	 */
@@ -261,7 +261,7 @@ public class UserController {
 	
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■ TEST-2 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성2 - 역할 : 민간사업자
+	 * 새로운 사용자 생성2 - 역할 : 시스템관리자
 	 * 
 	 * @return
 	 */
@@ -269,7 +269,7 @@ public class UserController {
 		final String USER_LOGIN_ID = "ddeeff@gmail.com";
 		final String USER_SEQ_ID = "URS000000002";
 		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.BIZ;
+		final UserClCdEnum userClCd = UserClCdEnum.SYSTEM;
 		
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
@@ -290,7 +290,7 @@ public class UserController {
 		final String USER_LOGIN_ID = "gghhii@gmail.com";
 		final String USER_SEQ_ID = "URS000000003";
 		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.SUPERVISORY;
+		final UserClCdEnum userClCd = UserClCdEnum.DIRECTOR;
 		
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
@@ -311,7 +311,7 @@ public class UserController {
 		final String USER_LOGIN_ID = "jjkkll@gmail.com";
 		final String USER_SEQ_ID = "URS000000004";
 		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.DELEGATED;
+		final UserClCdEnum userClCd = UserClCdEnum.OUTSOURCING;
 		
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
@@ -324,7 +324,7 @@ public class UserController {
 	
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■ TEST-5 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성5 - 역할 : 환경부
+	 * 새로운 사용자 생성5 - 역할 : 사업수행자
 	 * 
 	 * @return
 	 */
@@ -332,7 +332,7 @@ public class UserController {
 		final String USER_LOGIN_ID = "mmnnoo@gmail.com";
 		final String USER_SEQ_ID = "URS000000005";
 		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.ME;
+		final UserClCdEnum userClCd = UserClCdEnum.BIZ;
 		
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
@@ -345,7 +345,7 @@ public class UserController {
 	
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■ TEST-6 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성6 - 역할 : 국제감축협의체
+	 * 새로운 사용자 생성6 - 역할 : 기타부처
 	 * 
 	 * @return
 	 */
