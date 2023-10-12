@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -147,6 +148,8 @@ public class JwtTokenProvider {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessTokenKey, token));
 		
 		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
+		/**
+START #########################
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 		authorities.add(new SimpleGrantedAuthority(role));
 		
@@ -156,6 +159,11 @@ public class JwtTokenProvider {
 		}
 		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [END-service]");
 
+		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+END #########################
+		*/
+		List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(role);
+		
 		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 	}
 	
