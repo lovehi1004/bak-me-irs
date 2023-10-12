@@ -148,6 +148,7 @@ public class JwtTokenProvider {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessTokenKey, token));
 		
 		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
+		
 		/**
 START #########################
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
@@ -162,6 +163,7 @@ START #########################
 		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 END #########################
 		*/
+		
 		List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(role);
 		
 		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
