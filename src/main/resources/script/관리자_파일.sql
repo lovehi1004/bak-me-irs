@@ -1,13 +1,13 @@
 
-DROP TABLE irs_user.FILE_DTL;
-DROP TABLE irs_user.FILE_GROUP_BSC;
+DROP TABLE irsuser.FILE_DTL;
+DROP TABLE irsuser.FILE_GROUP_BSC;
 
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 /* 파일그룹기본*/
 /* ▶ 파일 관리 */
 /* 파일그룹기본 */
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-CREATE TABLE irs_user.FILE_GROUP_BSC (
+CREATE TABLE irsuser.FILE_GROUP_BSC (
 	FILE_GROUP_SN INTEGER NOT NULL,
 	FILE_TYPE_CL_CD VARCHAR(7) NOT NULL,
 	MENU_ID VARCHAR(20) NOT NULL,
@@ -20,15 +20,15 @@ CREATE TABLE irs_user.FILE_GROUP_BSC (
 	CONSTRAINT PK_FILE_GROUP_BSC PRIMARY KEY (FILE_GROUP_SN)
 );
 
-COMMENT ON TABLE irs_user.FILE_GROUP_BSC IS '파일그룹기본';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.FILE_GROUP_SN IS '파일그룹일련번호';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.FILE_TYPE_CL_CD IS '파일유형구분코드';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.MENU_ID IS '메뉴ID';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.DEL_YN IS '삭제여부';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.RGTR_ID IS '등록ID';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.REG_DT IS '등록일시';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.MDFR_ID IS '수정ID';
-COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.MDFCN_DT IS '수정일시';
+COMMENT ON TABLE irsuser.FILE_GROUP_BSC IS '파일그룹기본';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.FILE_GROUP_SN IS '파일그룹일련번호';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.FILE_TYPE_CL_CD IS '파일유형구분코드';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.MENU_ID IS '메뉴ID';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.DEL_YN IS '삭제여부';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.RGTR_ID IS '등록ID';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.REG_DT IS '등록일시';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.MDFR_ID IS '수정ID';
+COMMENT ON COLUMN irsuser.FILE_GROUP_BSC.MDFCN_DT IS '수정일시';
 
 
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
@@ -36,7 +36,7 @@ COMMENT ON COLUMN irs_user.FILE_GROUP_BSC.MDFCN_DT IS '수정일시';
 /* ▶ 파일 관리 */
 /* 파일상세 목록 */
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-CREATE TABLE irs_user.FILE_DTL (
+CREATE TABLE irsuser.FILE_DTL (
 	FILE_GROUP_SN INTEGER NOT NULL,
 	FILE_DTL_SN INTEGER NOT NULL,
 	ORGNL_FILE_NM VARCHAR(256) NOT NULL,
@@ -56,20 +56,20 @@ CREATE TABLE irs_user.FILE_DTL (
 
 
 
-COMMENT ON TABLE irs_user.FILE_DTL IS '파일상세';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_GROUP_SN IS '파일그룹일련번호';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_DTL_SN IS '파일상세일련번호';
-COMMENT ON COLUMN irs_user.FILE_DTL.ORGNL_FILE_NM IS '원본파일명';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_PATH_NM IS '파일경로명';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_NM IS '파일명';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_SZ IS '파일크기';
-COMMENT ON COLUMN irs_user.FILE_DTL.FILE_EXTN_NM IS '파일확장자명';
-COMMENT ON COLUMN irs_user.FILE_DTL.DWNLD_CNT IS '다운로드수';
-COMMENT ON COLUMN irs_user.FILE_DTL.DEL_YN IS '삭제여부';
-COMMENT ON COLUMN irs_user.FILE_DTL.RGTR_ID IS '등록ID';
-COMMENT ON COLUMN irs_user.FILE_DTL.REG_DT IS '등록일시';
-COMMENT ON COLUMN irs_user.FILE_DTL.MDFR_ID IS '수정ID';
-COMMENT ON COLUMN irs_user.FILE_DTL.MDFCN_DT IS '수정일시';
+COMMENT ON TABLE irsuser.FILE_DTL IS '파일상세';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_GROUP_SN IS '파일그룹일련번호';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_DTL_SN IS '파일상세일련번호';
+COMMENT ON COLUMN irsuser.FILE_DTL.ORGNL_FILE_NM IS '원본파일명';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_PATH_NM IS '파일경로명';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_NM IS '파일명';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_SZ IS '파일크기';
+COMMENT ON COLUMN irsuser.FILE_DTL.FILE_EXTN_NM IS '파일확장자명';
+COMMENT ON COLUMN irsuser.FILE_DTL.DWNLD_CNT IS '다운로드수';
+COMMENT ON COLUMN irsuser.FILE_DTL.DEL_YN IS '삭제여부';
+COMMENT ON COLUMN irsuser.FILE_DTL.RGTR_ID IS '등록ID';
+COMMENT ON COLUMN irsuser.FILE_DTL.REG_DT IS '등록일시';
+COMMENT ON COLUMN irsuser.FILE_DTL.MDFR_ID IS '수정ID';
+COMMENT ON COLUMN irsuser.FILE_DTL.MDFCN_DT IS '수정일시';
 
 
 

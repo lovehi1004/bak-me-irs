@@ -107,7 +107,7 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"id\"/><Cell col=\"1\" text=\"name\"/><Cell col=\"2\" text=\"description\"/><Cell col=\"3\" text=\"uesYn\"/><Cell col=\"4\" text=\"regUser\"/></Band><Band id=\"body\"><Cell text=\"bind:id\"/><Cell col=\"1\" text=\"bind:name\"/><Cell col=\"2\" text=\"bind:description\"/><Cell col=\"3\" text=\"bind:uesYn\"/><Cell col=\"4\" text=\"bind:regUser\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button00_00","1004","23","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button00_00","1019","169","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("4");
             obj.set_text("로그인");
             obj.set_background("yellow");
@@ -310,7 +310,7 @@
             obj.set_color("black");
             this.addChild(obj.name, obj);
 
-            obj = new Edit("Edit_Role","890","21","104","38",null,null,null,null,null,null,this);
+            obj = new Edit("Edit_Role","908","166","104","38",null,null,null,null,null,null,this);
             obj.set_taborder("21");
             obj.set_background("yellow");
             obj.set_value("ROLE_BIZ");
@@ -331,6 +331,21 @@
             obj.set_binddataset("ds_rsa_reseult");
             obj.set_background("tomato");
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"767\"/></Columns><Rows><Row size=\"24\" band=\"head\"/><Row size=\"24\" band=\"head\"/><Row size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"RSAModulus\"/><Cell row=\"1\" text=\"RSAExponent\"/></Band><Band id=\"body\"><Cell text=\"bind:RSAModulus\"/><Cell row=\"1\" text=\"bind:RSAExponent\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonMenu","950","382","140","84",null,null,null,null,null,null,this);
+            obj.set_taborder("24");
+            obj.set_text("메뉴정보 조회테스트");
+            obj.set_background("#aaffaa");
+            obj.set_color("black");
+            obj.set_font("bold 10pt \"Arial\"");
+            this.addChild(obj.name, obj);
+
+            obj = new Edit("Edit_LoginId","742","166","158","38",null,null,null,null,null,null,this);
+            obj.set_taborder("25");
+            obj.set_background("yellow");
+            obj.set_value("ddeeff@gmail.com");
+            obj.set_text("ddeeff@gmail.com");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
@@ -428,7 +443,8 @@
 
 
         	this.ds_login.addRow();
-          this.ds_login.setColumn(0, "id", "ddeeff@gmail.com");
+
+          this.ds_login.setColumn(0, "id"  , this.Edit_LoginId.text);
           this.ds_login.setColumn(0, "password"  , "1234");
           this.ds_login.setColumn(0, "role"  , this.Edit_Role.value);
 
@@ -865,7 +881,7 @@
         this.ButtonRSA_onclick = function(obj,e)
         {
 
-          var strSvcId    = "404search";
+          var strSvcId    = "rsatest";
           var strSvcUrl   = "svc::common/rsa.irs";
           var inData      = "";
           var outData     = "ds_rsa_reseult=rsa";
@@ -887,12 +903,41 @@
           this.alert(errorCode+"\n"+errorMsg);
         };
 
+        this.ButtonMenu_onclick = function(obj,e)
+        {
+
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
+
+
+          var strSvcId    = "menutest";
+          var strSvcUrl   = "svc::common/initial/selectMenuList.irs";
+          var inData      = "";
+          var outData     = "ds_menu_reseult=menu";
+          var strArg      = "aaaa=1111";
+          var callBackFnc = "fnMenuCallback";
+          var isAsync     = true;
+
+          this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+              strSvcUrl ,       // trabsaction을 요청할 주소
+              inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+              outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+              strArg,         // 입력값으로 보낼 arguments, a=b
+              callBackFnc,       // transaction의 결과를 받을 Function 이름
+              isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+        this.fnMenuCallback = function(svcID,errorCode,errorMsg)
+        {
+          this.alert(errorCode+"\n"+errorMsg);
+        };
         });
         
         // Regist UI Components Event
         this.on_initEvent = function()
         {
             this.Button00.addEventHandler("onclick",this.Button00_onclick,this);
+            this.Combo00.addEventHandler("onitemchanged",this.Combo00_onitemchanged,this);
             this.Button00_00.addEventHandler("onclick",this.Button_login_onclick,this);
             this.Button404.addEventHandler("onclick",this.Button404_onclick,this);
             this.ButtonAuth.addEventHandler("onclick",this.ButtonAuth_onclick,this);
@@ -907,6 +952,7 @@
             this.ButtonFileDownPage.addEventHandler("onclick",this.ButtonFileDownPage_onclick,this);
             this.ButtonFileUpPage.addEventHandler("onclick",this.ButtonFileUpPage_onclick,this);
             this.ButtonRSA.addEventHandler("onclick",this.ButtonRSA_onclick,this);
+            this.ButtonMenu.addEventHandler("onclick",this.ButtonMenu_onclick,this);
             this.FileUpTransfer00.addEventHandler("onerror",this.FileUpTransfer00_onerror,this);
             this.FileUpTransfer00.addEventHandler("onprogress",this.FileUpTransfer00_onprogress,this);
             this.FileUpTransfer00.addEventHandler("onsuccess",this.FileUpTransfer00_onsuccess,this);

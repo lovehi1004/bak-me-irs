@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.agrstipl.mapper.BizAgrStiplPrcndMapper">
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정 현황 - 목록조회 총건수 조회 -->
+	<select id="selectAgrStiplPrcndListCnt" resultType="int" parameterType="map">
+		/* BizAgrStiplPrcndMapper.selectAgrStiplPrcndListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정 현황 - 목록조회 -->
+	<select id="selectAgrStiplPrcndList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* BizAgrStiplPrcndMapper.selectAgrStiplPrcndList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [공통] 협정.약정관리 > 협정.약정 현황 - 상세조회 -->
+	<select id="selectAgrStiplPrcndDetail" resultType="egovMap" parameterType="map">
+		/* BizAgrStiplPrcndMapper.selectAgrStiplPrcndDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [공통] 협정.약정관리 > 협정.약정 현황 - 액셀다운로드 -->
+	<select id="selectAgrStiplPrcndExcel" resultType="egovMap" parameterType="map">
+		/* BizAgrStiplPrcndMapper.selectAgrStiplPrcndExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

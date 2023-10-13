@@ -12,7 +12,7 @@
 			, temp_nm
 			, temp_desc
 		FROM
-			irs_user.TEMP_TABLE
+			irsuser.TEMP_TABLE
 		LIMIT 1
 	</select>
 	
@@ -24,7 +24,7 @@
 			, temp_nm
 			, temp_desc
 		FROM
-			irs_user.TEMP_TABLE
+			irsuser.TEMP_TABLE
 		LIMIT 10
 	</select>
 	

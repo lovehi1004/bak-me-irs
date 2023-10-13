@@ -3,7 +3,6 @@ package gov.me.irs.admin.mnm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -12,6 +11,8 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 import org.springframework.stereotype.Controller;
 
 import gov.me.irs.admin.mnm.service.MnmService;
+import gov.me.irs.common.constants.Const;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,9 @@ public class MnmController {
 	public NexacroResult selectMenuList(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
 		
+		requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
+		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_ID);
+		
 		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
 		nexacroResult.addDataSet("list", list);
 		
@@ -63,8 +67,10 @@ public class MnmController {
 	 * @return
 	 */
 	@PostMapping("/admin/mnm/insertMenu.irs")
-	public NexacroResult insertMenu(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = mnmService.insertMenu(requestMap);
@@ -79,8 +85,10 @@ public class MnmController {
 	 * @return
 	 */
 	@PostMapping("/admin/mnm/updateMenu.irs")
-	public NexacroResult updateMenu(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = mnmService.updateMenu(requestMap);
@@ -95,8 +103,10 @@ public class MnmController {
 	 * @return
 	 */
 	@PostMapping("/admin/mnm/deleteMenu.irs")
-	public NexacroResult deleteMenu(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = mnmService.deleteMenu(requestMap);

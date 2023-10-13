@@ -72,6 +72,13 @@ public class GlobalInteceptor implements HandlerInterceptor {
 				request.setAttribute("exception", jwtAuthEnum.getCode());
 				dispatcher.forward(request, response);
 				
+			} else {
+				JwtAuthEnum jwtAuthEnum = JwtAuthEnum.UNKNOWN_ERROR;
+				
+				RequestDispatcher dispatcher = request.getRequestDispatcher("/exception/common/" + jwtAuthEnum.getCode());
+				request.setAttribute("exception", jwtAuthEnum.getCode());
+				dispatcher.forward(request, response);
+				
 			}
 		}
 		

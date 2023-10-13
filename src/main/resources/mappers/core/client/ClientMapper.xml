@@ -6,34 +6,42 @@
 	
 	<!-- 사용자 접속정보 등록 -->
 	<insert id="insertClientDtl" parameterType="gov.me.irs.core.client.vo.ClientVo">
-		<selectKey keyProperty="sysCntnHstrySn" resultType="int" order="BEFORE">
+		<selectKey keyProperty="sn" resultType="int" order="BEFORE">
 			/* ClientMapper.insertClientDtl.selectKey */
-			SELECT COALESCE(MAX(SYS_CNTN_HSTRY_SN), 0) + 1 FROM irs_user.SYS_CNTN_HSTRY
+			SELECT COALESCE(MAX(SN), 0) + 1 FROM irsuser.USER_CNTN_DSCTN
 		</selectKey>
 		/* ClientMapper.insertClientDtl */
 		INSERT
-		  INTO irs_user.SYS_CNTN_HSTRY
-			 ( SYS_CNTN_HSTRY_SN
+		  INTO irsuser.USER_CNTN_DSCTN
+			 ( SN
 			 , USER_ID
 			 , USER_CL_CD
 			 , LGN_ID
 			 , LGN_SCS_YN
-			 , CNTN_IP_ADDR
+			 , IP_ADDR
 			 , BRWS_NM
 			 , OS_NM
-			 , CNTN_YMD
 			 , CNTN_YM
+			 , CNTN_YMD
+			 , CNTN_HR
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
 			 )
-			 ( SELECT #{sysCntnHstrySn}
-				   , (SELECT USER_ID FROM irs_user.USER_BSC WHERE LGN_ID = #{username})
-				   , (SELECT USER_CL_CD FROM irs_user.USER_BSC WHERE LGN_ID = #{username})
+			 ( SELECT #{sn}
+				   , (SELECT USER_ID FROM irsuser.USER_BSC WHERE LGN_ID = #{username})
+				   , (SELECT USER_CL_CD FROM irsuser.USER_BSC WHERE LGN_ID = #{username})
 				   , #{username}
 				   , #{lgnScsYn}
 				   , #{ip}
 				   , #{browser}
 				   , #{os}
-				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
 				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMM')
+				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+				   , TO_CHAR(CURRENT_TIMESTAMP, 'HHmmss')
+				   , 'N'
+				   , COALESCE((SELECT USER_ID FROM irsuser.USER_BSC WHERE LGN_ID = #{username}), 'SYSTEM')
+				   , CURRENT_TIMESTAMP
 			 )
 	</insert>
 	

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.mhdlg.mapper.BizMhdlgAplyMapper">
+	
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론목록조회 총건수 조회 -->
+	<select id="selectMhdlgAplyListCnt" resultType="int" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론목록조회 -->
+	<select id="selectMhdlgAplyList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* BizMhdlgAplyMapper.selectMhdlgAplyList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론상세조회 -->
+	<select id="selectMhdlgAplyDetail" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론등록 -->
+	<insert id="insertMhdlgAply" parameterType="map">
+		/* BizMhdlgAplyMapper.insertMhdlgAply */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론수정 -->
+	<update id="updateMhdlgAply" parameterType="map">
+		/* BizMhdlgAplyMapper.updateMhdlgAply */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 사업분야공통조회 -->
+	<select id="selectBizSectSrhList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectBizSectSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 협정공통조회 -->
+	<select id="selectAgrSrhList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectAgrSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 검토결과조회 -->
+	<select id="selectMhdlgAplyRvwRslt" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyRvwRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 문서보완등록 -->
+	<insert id="insertMhdlgAplyDocSplmnt" parameterType="map">
+		/* BizMhdlgAplyMapper.insertMhdlgAplyDocSplmnt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 사전심의결과조회 -->
+	<select id="selectMhdlgAplyDicDlbrRslt" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDicDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 이의신청등록 -->
+	<insert id="insertMhdlgAplyObjcAply" parameterType="map">
+		/* BizMhdlgAplyMapper.insertMhdlgAplyObjcAply */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 이의신청조회 -->
+	<select id="selectMhdlgAplyObjcAply" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyObjcAply */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 심의결과조회 -->
+	<select id="selectMhdlgAplyDlbrRslt" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 추가자료요청조회 -->
+	<select id="selectMhdlgAplyDataDmnd" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDataDmnd */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 추가자료등록 -->
+	<insert id="insertMhdlgAplyDataReg" parameterType="map">
+		/* BizMhdlgAplyMapper.insertMhdlgAplyDataReg */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 추가자료확인조회 -->
+	<select id="selectMhdlgAplyDataIdnty" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDataIdnty */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 추가자료결과조회 -->
+	<select id="selectMhdlgAplyDataRslt" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyDataRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 이력목록조회 -->
+	<select id="selectMhdlgAplyHistList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 보고서출력 -->
+	<select id="selectMhdlgAplyRpt" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 액셀다운로드 -->
+	<select id="selectMhdlgAplyExcel" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgAplyExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+	
+</mapper>

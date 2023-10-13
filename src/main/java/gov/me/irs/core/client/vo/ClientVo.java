@@ -6,6 +6,7 @@ import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.util.ClientUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * 사용자 접속정보
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
  * @author Justin
  *
  */
+@ToString
 @NoArgsConstructor
 public class ClientVo {
 	
@@ -31,7 +33,7 @@ public class ClientVo {
 	}
 	
 	@Getter
-	private int sysCntnHstrySn;				//Mybatis 에서 사용
+	private int sn;				//Mybatis 에서 사용
 	@Getter
 	private String username;
 	@Getter
@@ -42,11 +44,5 @@ public class ClientVo {
 	private String ip;
 	@Getter
 	private String lgnScsYn;
-	
-	@Override
-	public String toString() {
-		return "[username]["+String.valueOf(username)+"][browser]["+String.valueOf(browser)+"][os]["+String.valueOf(os)+"][ip]["+String.valueOf(ip)+"]";
-	}
-	
 	
 }

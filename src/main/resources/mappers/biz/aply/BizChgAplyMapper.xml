@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.aply.mapper.BizChgAplyMapper">
+	
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업변경목록조회 총건수 조회 -->
+	<select id="selectChgAplyListCnt" resultType="int" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업변경목록조회 -->
+	<select id="selectChgAplyList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* BizChgAplyMapper.selectChgAplyList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업변경상세조회 -->
+	<select id="selectChgAplyDetail" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업공통조회 -->
+	<select id="selectBizSrhList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectBizSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업변경등록 -->
+	<insert id="insertChgAply" parameterType="map">
+		/* BizChgAplyMapper.insertChgAply */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업변경수정 -->
+	<update id="updateChgAply" parameterType="map">
+		/* BizChgAplyMapper.updateChgAply */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업수행자공통조회 -->
+	<select id="selectCorpSrhList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectCorpSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업수행자동의등록 -->
+	<update id="updateChgAplyAgree" parameterType="map">
+		/* BizChgAplyMapper.updateChgAplyAgree */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사업분야공통조회 -->
+	<select id="selectBizSectSrhList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectBizSectSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 협정공통조회 -->
+	<select id="selectAgrSrhList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectAgrSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 방법론공통조회 -->
+	<select id="selectMhdlgSrhList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectMhdlgSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 평가결과조회 -->
+	<select id="selectChgAplyEvlRslt" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyEvlRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 문서보완등록 -->
+	<insert id="insertChgAplyDocSplmnt" parameterType="map">
+		/* BizChgAplyMapper.insertChgAplyDocSplmnt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 사전심의결과조회 -->
+	<select id="selectChgAplyDicDlbrRslt" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDicDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 이의신청등록 -->
+	<insert id="insertChgAplyObjcAply" parameterType="map">
+		/* BizChgAplyMapper.insertChgAplyObjcAply */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 이의신청조회 -->
+	<select id="selectChgAplyObjcAply" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyObjcAply */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 심의결과조회 -->
+	<select id="selectChgAplyDlbrRslt" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 추가자료요청조회 -->
+	<select id="selectChgAplyDataDmnd" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDataDmnd */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 추가자료등록 -->
+	<insert id="insertChgAplyDataReg" parameterType="map">
+		/* BizChgAplyMapper.insertChgAplyDataReg */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 추가자료확인조회 -->
+	<select id="selectChgAplyDataIdnty" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDataIdnty */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 추가자료결과조회 -->
+	<select id="selectChgAplyDataRslt" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyDataRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 이력목록조회 -->
+	<select id="selectChgAplyHistList" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 사업관리 > 사업 신청 관리 > 사업계획변경 신청 - 보고서출력 -->
+	<select id="selectChgAplyRpt" resultType="egovMap" parameterType="map">
+		/* BizChgAplyMapper.selectChgAplyRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+
+	
+</mapper>

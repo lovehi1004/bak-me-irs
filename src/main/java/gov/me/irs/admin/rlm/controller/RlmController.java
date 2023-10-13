@@ -3,7 +3,6 @@ package gov.me.irs.admin.rlm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -12,6 +11,7 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 import org.springframework.stereotype.Controller;
 
 import gov.me.irs.admin.rlm.service.RlmService;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +63,10 @@ public class RlmController {
 	 * @return
 	 */
 	@PostMapping("/admin/rlm/insertRole.irs")
-	public NexacroResult insertRole(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertRole(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = rlmService.insertRole(requestMap);
@@ -79,8 +81,10 @@ public class RlmController {
 	 * @return
 	 */
 	@PostMapping("/admin/rlm/updateRole.irs")
-	public NexacroResult updateRole(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateRole(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = rlmService.updateRole(requestMap);
@@ -95,8 +99,10 @@ public class RlmController {
 	 * @return
 	 */
 	@PostMapping("/admin/rlm/deleteRole.irs")
-	public NexacroResult deleteRole(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteRole(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = rlmService.deleteRole(requestMap);

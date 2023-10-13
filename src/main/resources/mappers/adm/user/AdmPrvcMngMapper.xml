@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmPrvcMngMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 개인정보취급자관리 - 목록조회 총건수 조회 -->
+	<select id="selectPrvcMngListCnt" resultType="int" parameterType="map">
+		/* AdmPrvcMngMapper.selectPrvcMngListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 개인정보취급자관리 - 목록조회 -->
+	<select id="selectPrvcMngList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmPrvcMngMapper.selectPrvcMngList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 개인정보취급자관리 - 액셀다운로드 -->
+	<select id="selectPrvcMngExcel" resultType="egovMap" parameterType="map">
+		/* AdmPrvcMngMapper.selectPrvcMngExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

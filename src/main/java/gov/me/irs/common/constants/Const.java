@@ -64,8 +64,8 @@ public final class Const {
 	 *
 	 */
 	public final static class MENU {
-		public final static String SCC0001_MENU_ID = "MNI000000000";		// IRS시스템 최상위메뉴 - Default
-		public final static String SCC0002_MENU_ID = "MNE000000000";		// 대고객시스템 최상위메뉴
+		public final static String SCC0001_MENU_ID = "MN00000000";		// IRS시스템 최상위메뉴 - Default
+		public final static String SCC0002_MENU_ID = "MX00000000";		// 대고객시스템 최상위메뉴 - 새로운 시스템 추가시, 임시코드 추가
 		
 		public final static String FOLDER = "MCC0001";		// 메뉴폴더
 		public final static String LINK = "MCC0002";			// 메뉴링크

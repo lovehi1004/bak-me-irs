@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -17,6 +16,7 @@ import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.enumeration.CustomResponseEnum;
 import gov.me.irs.common.vo.PagingVo;
 import gov.me.irs.core.config.util.CoreUtil;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,8 +99,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/insertGroupCd.irs")
-	public NexacroResult insertGroupCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertGroupCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		/* 코드 등록 가능여부 조회 후 등록가능한 경우 */
 		if(cdmService.checkCdRegCnt(requestMap)) {
@@ -121,8 +123,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/updateGroupCd.irs")
-	public NexacroResult updateGroupCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateGroupCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = cdmService.updateGroupCd(requestMap);
@@ -137,8 +141,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/deleteGroupCd.irs")
-	public NexacroResult deleteGroupCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteGroupCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = cdmService.deleteGroupCd(requestMap);
@@ -185,8 +191,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/insertCd.irs")
-	public NexacroResult insertCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = cdmService.insertCd(requestMap);
@@ -201,8 +209,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/updateCd.irs")
-	public NexacroResult updateCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = cdmService.updateCd(requestMap);
@@ -217,8 +227,10 @@ public class CdmController {
 	 * @return
 	 */
 	@PostMapping("/admin/cdm/deleteCd.irs")
-	public NexacroResult deleteCd(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteCd(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = cdmService.deleteCd(requestMap);

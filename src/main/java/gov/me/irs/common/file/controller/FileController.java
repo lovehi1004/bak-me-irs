@@ -28,7 +28,7 @@ import gov.me.irs.common.file.vo.FileVo;
 import gov.me.irs.common.util.FileUtil;
 import gov.me.irs.common.util.MultipartUtil;
 import gov.me.irs.core.config.util.CoreUtil;
-import gov.me.irs.core.config.util.SessionUtil;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
@@ -146,8 +146,8 @@ public class FileController {
 		/* 1. 세션정보 확인 하기 */
 		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
 		
-		if(SessionUtil.isAuthenticated()) {
-			TableUser tableUser = SessionUtil.getPrincipal();
+		if(UserSession.isAuthenticated()) {
+			TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 			sessionUserId = tableUser.getUserId();
 		}
 		

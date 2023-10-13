@@ -8,7 +8,7 @@
 	<select id="selectBbsGroupListCnt" resultType="int" parameterType="map">
 		/* BbmMapper.selectBbsGroupListCnt */
 		SELECT COUNT(*)
-		  FROM irs_user.BBS_GROUP_BSC
+		  FROM irsuser.BBS_GROUP_BSC
 		 WHERE 1 = 1
 		   AND DEL_YN = 'N'
 		<if test="bbsGroupId != null and !bbsGroupId.equals('')">
@@ -30,7 +30,7 @@
 			 , BBS_GROUP_NM									/* 게시판그룹명 */
 			 , BBS_GROUP_EXPLN									/* 게시판그룹설명 */
 			 , USE_YN											/* 사용여부 */		
-		  FROM irs_user.BBS_GROUP_BSC
+		  FROM irsuser.BBS_GROUP_BSC
 		 WHERE 1 = 1
 		   AND DEL_YN = 'N'
 		<if test="bbsGroupId != null and !bbsGroupId.equals('')">
@@ -49,14 +49,14 @@
 	<!-- 게시판그룹기본 중복 조회 -->
 	<select id="selectBbsGroup" resultType="int" parameterType="map">
 		/* BbmMapper.selectBbsGroup */
-		SELECT COUNT(*) AS CNT FROM irs_user.BBS_GROUP_BSC WHERE BBS_GROUP_ID = #{bbsGroupId} AND DEL_YN = 'N'
+		SELECT COUNT(*) AS CNT FROM irsuser.BBS_GROUP_BSC WHERE BBS_GROUP_ID = #{bbsGroupId} AND DEL_YN = 'N'
 	</select>
 	
 	<!-- 게시판그룹기본 등록 -->
 	<insert id="insertBbsGroup" parameterType="map">
 		/* BbmMapper.insertBbsGroup */
 		INSERT
-		  INTO irs_user.BBS_GROUP_BSC
+		  INTO irsuser.BBS_GROUP_BSC
 			 ( BBS_GROUP_ID
 			 , BBS_GROUP_NM
 			 , BBS_GROUP_EXPLN
@@ -75,7 +75,7 @@
 	<!-- 게시판그룹기본 수정 -->
 	<update id="updateBbsGroup" parameterType="map">
 		/* BbmMapper.updateBbsGroup */
-		UPDATE irs_user.BBS_GROUP_BSC
+		UPDATE irsuser.BBS_GROUP_BSC
 		   SET BBS_GROUP_NM = #{bbsGroupNm}
 		     , BBS_GROUP_EXPLN = #{bbsGroupExpln}
 		     , USE_YN = #{useYn}
@@ -87,7 +87,7 @@
 	<!-- 게시판그룹기본 삭제 -->
 	<update id="deleteBbsGroup" parameterType="map">
 		/* BbmMapper.deleteBbsGroup */
-		UPDATE irs_user.BBS_GROUP_BSC
+		UPDATE irsuser.BBS_GROUP_BSC
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
@@ -98,8 +98,8 @@
 	<select id="selectBbsListCnt" resultType="int" parameterType="map">
 		/* BbmMapper.selectBbsListCnt */
 		SELECT COUNT(*)
-		  FROM irs_user.BBS_DTL_SN C
-		 INNER JOIN irs_user.BBS_GROUP_BSC G
+		  FROM irsuser.BBS_DTL_SN C
+		 INNER JOIN irsuser.BBS_GROUP_BSC G
 		    ON G.BBS_GROUP_ID = C.BBS_GROUP_ID
 		   AND G.BBS_GROUP_ID = #{bbsGroupId}
 		 WHERE 1 = 1
@@ -121,8 +121,8 @@
 			 , BBS_SN
 			 , PSTAT_NM
 			 , USE_YN
-		  FROM irs_user.BBS_DTL_SN C
-		 INNER JOIN irs_user.BBS_GROUP_BSC G
+		  FROM irsuser.BBS_DTL_SN C
+		 INNER JOIN irsuser.BBS_GROUP_BSC G
 		    ON G.BBS_GROUP_ID = C.BBS_GROUP_ID
 		   AND G.BBS_GROUP_ID = #{bbsGroupId}
 		 WHERE 1 = 1
@@ -146,8 +146,8 @@
 			 , PSTAT_NM
 			 , PSTAT_CN
 			 , USE_YN
-		  FROM irs_user.BBS_DTL_SN C
-		 INNER JOIN irs_user.BBS_GROUP_BSC G
+		  FROM irsuser.BBS_DTL_SN C
+		 INNER JOIN irsuser.BBS_GROUP_BSC G
 		    ON G.BBS_GROUP_ID = C.BBS_GROUP_ID
 		   AND G.BBS_GROUP_ID = #{bbsGroupId}
 		 WHERE 1 = 1
@@ -160,7 +160,7 @@
 	<insert id="insertBbs" parameterType="map">
 		/* BbmMapper.insertBbs */
 		INSERT
-		  INTO irs_user.BBS_DTL
+		  INTO irsuser.BBS_DTL
 			 ( BBS_GROUP_ID
 			 , BBS_SN
 			 , PSTAT_NM
@@ -174,7 +174,7 @@
 				   , #{pstatCn}
 				   , #{useYn}
 				   , #{sessionUserId}
-				FROM irs_user.BBS_DTL
+				FROM irsuser.BBS_DTL
 			   WHERE BBS_GROUP_ID = #{bbsGroupId}
 			 )
 	</insert>
@@ -182,7 +182,7 @@
 	<!-- 게시판상세 수정 -->
 	<update id="updateBbs" parameterType="map">
 		/* BbmMapper.updateBbs */
-		UPDATE irs_user.BBS_DTL
+		UPDATE irsuser.BBS_DTL
 		   SET PSTAT_NM = #{pstatNm}
 		     , PSTAT_CN = #{pstatCn}
 		     , USE_YN = #{useYn}
@@ -195,7 +195,7 @@
 	<!-- 게시판상세 삭제 -->
 	<update id="deleteBbs" parameterType="map">
 		/* BbmMapper.deleteBbs */
-		UPDATE irs_user.BBS_DTL
+		UPDATE irsuser.BBS_DTL
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP

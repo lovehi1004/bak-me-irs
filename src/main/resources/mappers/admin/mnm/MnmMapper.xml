@@ -4,12 +4,12 @@
 
 <mapper namespace="gov.me.irs.admin.mnm.mapper.MnmMapper">
 	
-	<!-- 메뉴기본 목록조회 -->
+	<!-- 메뉴기본 목록조회 --><!-- ROOT 포함시 [NOT W.CYC] 로 조회, 제외시 [W.MENU_LVL > 0] 으로 조회 -->
 	<select id="selectMenuList" resultType="egovMap" parameterType="map">
 		/* MnmMapper.selectMenuList */
 		<include refid="gov.me.irs.common.TreeMenuMapper.treeMenuSql" />
-		SELECT W.MENU_ID
-			 , W.UP_MENU_ID
+		SELECT W.MENU_MGNO
+			 , W.UP_MENU_MGNO
 			 , W.MENU_CL_CD
 			 , W.MENU_NM
 			 , W.MENU_EXPLN
@@ -19,8 +19,8 @@
 			 , W.MENU_LVL
 			 , W.SORT_SEQO
 			 , W.SYS_CL_CD
-			 , W.PTH
-			 , 'TODO - 메뉴경로' AS MENU_PATH <!-- TODO - 메뉴정보 생성되면 메뉴경로 정보 : "가나 > 다라 > 마바사아 관리" 형태의 정보가 추가적으로 필요함 -->
+			 , ARRAY_TO_STRING(W.PTH, '.') AS PTH					<!-- MENU_MGNO경로 -->
+			 , ARRAY_TO_STRING(W.MENU_PATH, ' > ') AS MENU_PATH		<!-- 메뉴경로 -->
 		  FROM WITH_MENU_LIST W
 		 WHERE W.MENU_LVL > 0
 		 ORDER BY W.PTH
@@ -29,8 +29,8 @@
 	<!-- 메뉴기본 상세조회 -->
 	<select id="selectMenu" resultType="egovMap" parameterType="map">
 		/* MnmMapper.selectMenu */
-		SELECT MENU_ID
-			 , UP_MENU_ID
+		SELECT MENU_MGNO
+			 , UP_MENU_MGNO
 			 , MENU_CL_CD
 			 , MENU_NM
 			 , MENU_EXPLN
@@ -45,20 +45,20 @@
 			 , TO_CHAR(R.REG_DT, 'yyyyMMddHHmmss') AS REG_DT
 			 , MDFR_ID
 			 , TO_CHAR(R.MDFCN_DT, 'yyyyMMddHHmmss') AS MDFCN_DT
-		  FROM irs_user.MENU_BSC
-		 WHERE MENU_ID = #{menuId}
+		  FROM irsuser.MENU_BSC
+		 WHERE MENU_MGNO = #{menuId}
 	</select>
 	
 	<!-- 상위메뉴 메뉴구분정보 수정 -->
 	<update id="updateUpMenuSeCd" parameterType="map">
 		/* MnmMapper.updateUpMenuSeCd */
-		UPDATE irs_user.MENU_BSC
+		UPDATE irsuser.MENU_BSC
 		   SET MENU_CL_CD = #{menuClCd}
 			 , EXPSR_YN     = #{expsrYn}
 			 , POPUP_YN     = #{popupYn}
 			 , MDFR_ID     = #{sessionUserId}
 			 , MDFCN_DT     = CURRENT_TIMESTAMP
-		 WHERE MENU_ID = #{upMenuId}
+		 WHERE MENU_MGNO = #{upMenuId}
 	</update>
 	
 	<!-- 메뉴기본 등록 -->
@@ -68,19 +68,19 @@
 			/* MnmMapper.insertMenu.selectKey */
 			<!-- 총길이 12, 3번째부터 cutting --> 
 			SELECT CONCAT( LEFT(#{upMenuId}, 3)
-						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(MENU_ID, (3 + 1), 12)), '0') AS INTEGER) + 1 AS TEXT)
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(MENU_MGNO, (3 + 1), 12)), '0') AS INTEGER) + 1 AS TEXT)
 							   , 12 - 3
 							   , '0'
 						   )
 				   )
-			FROM irs_user.MENU_BSC
+			FROM irsuser.MENU_BSC
 			
 		</selectKey>
 		/* MnmMapper.insertMenu */
 		INSERT
-		  INTO irs_user.MENU_BSC
-		     ( MENU_ID
-			 , UP_MENU_ID
+		  INTO irsuser.MENU_BSC
+		     ( MENU_MGNO
+			 , UP_MENU_MGNO
 			 , MENU_CL_CD
 			 , MENU_NM
 			 , MENU_EXPLN
@@ -106,15 +106,15 @@
 				   , #{sysClCd}
 				   , #{useYn}
 				   , #{sessionUserId}
-				FROM irs_user.MENU_BSC
-			   WHERE UP_MENU_ID = #{upMenuId}
+				FROM irsuser.MENU_BSC
+			   WHERE UP_MENU_MGNO = #{upMenuId}
 			 )
 	</insert>
 	
 	<!-- 메뉴기본 수정 -->
 	<update id="updateMenu" parameterType="map">
 		/* MnmMapper.updateMenu */
-		UPDATE irs_user.MENU_BSC
+		UPDATE irsuser.MENU_BSC
 		   SET MENU_NM   = #{menuNm}
 			 , MENU_EXPLN = #{menuExpln}
 			 , MENU_URL_ADDR  = #{menuUrlAddr}
@@ -123,20 +123,20 @@
 			 , USE_YN    = #{useYn}
 			 , MDFR_ID    = #{sessionUserId}
 			 , MDFCN_DT    = CURRENT_TIMESTAMP
-		 WHERE UP_MENU_ID = #{upMenuId}
-		   AND MENU_ID = #{menuId}
+		 WHERE UP_MENU_MGNO = #{upMenuId}
+		   AND MENU_MGNO = #{menuId}
 	</update>
 	
 	<!-- 메뉴기본 삭제 - 기준점포함, 하위 모두 삭제처리 -->
 	<update id="deleteMenu" parameterType="map">
 		/* MnmMapper.deleteMenu */
 		<include refid="gov.me.irs.common.TreeMenuMapper.treeMenuSql" />
-		UPDATE irs_user.MENU_BSC M
+		UPDATE irsuser.MENU_BSC M
 		   SET M.DEL_YN   = 'Y'
 			 , M.MDFR_ID   = #{sessionUserId}
 			 , M.MDFCN_DT   = CURRENT_TIMESTAMP
 			 , M.SORT_SEQO  = -1				/* 삭제시 최소값 설정 */
-		 WHERE M.MENU_ID IN (SELECT W.MENU_ID
+		 WHERE M.MENU_MGNO IN (SELECT W.MENU_MGNO
 							   FROM WITH_MENU_LIST W
 							  WHERE W.MENU_LVL > 0)
 	</update>

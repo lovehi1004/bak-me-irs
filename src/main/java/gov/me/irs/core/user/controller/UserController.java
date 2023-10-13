@@ -1,5 +1,6 @@
 package gov.me.irs.core.user.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -133,10 +134,17 @@ public class UserController {
 			/* 선택된 권한정보 설정 */
 			if(!ObjectUtils.isEmpty(requestMap.get(Const.CORE.KEY_USER_ROLE))) {
 				role = (String) requestMap.get(Const.CORE.KEY_USER_ROLE);
+				log.debug("[선택된 role 있음, 권한지정 설정]["+role+"]");
+				
+				/* DB 권한정보내에 지정된 권한이 존재하지 않으면 예외처리 */
+				if(!user.getRoles().contains(role)) {
+					throw new SignException(JwtAuthEnum.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED.getCode(), new SignException(identifier));
+				}
 				
 			/* 선택된게 없으면 기본권한 설정 - 0번째꺼 */
 			} else {
 				role = user.getRoles().get(Const.NUMERIC.ZERO);
+				log.debug("[선택된 role 없음, 기본권한 설정]["+role+"]");
 			}
 			
 			/* 3. JWT Token 생성 */
@@ -189,6 +197,9 @@ public class UserController {
 			} else if(cause instanceof BadCredentialsException) {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				jwtAuthEnum = JwtAuthEnum.MISMATCH_USER_INFO;
+			} else if(cause instanceof SignException) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.of(e.getCode());
 			}
 			
 			/* 사용자 접속정보 저장 */
@@ -217,13 +228,23 @@ public class UserController {
 	public ResponseEntity<?> join(){
 		log.info("가입 시도됨");
 		
-		TableUser user1 = this.createNewUser1();
-		TableUser user2 = this.createNewUser2();
-		TableUser user3 = this.createNewUser3();
-		TableUser user4 = this.createNewUser4();
-		TableUser user5 = this.createNewUser5();
-		TableUser user6 = this.createNewUser6();
-		TableUser user7 = this.createNewUser7();
+		TableUser user1 = this.createNewUser("aabbcc@gmail.com", "URS000000001", "1234", UserClCdEnum.UNAPPROVED);
+		TableUser user2 = this.createNewUser("ddeeff@gmail.com", "URS000000002", "1234", UserClCdEnum.BIZADMIN);
+		TableUser user3 = this.createNewUser("gghhii@gmail.com", "URS000000003", "1234", UserClCdEnum.BIZREPRESENT);
+		TableUser user4 = this.createNewUser("jjkkll@gmail.com", "URS000000004", "1234", UserClCdEnum.OUTSOURCING);
+		
+		/* 관장기관, 사업수행장 권한 추가 */
+		TableUser user5 = TableUser.builder()
+				.lgnId("mmnnoo@gmail.com")
+				.userId("URS000000005")
+				.encptPswd(passwordEncoder.encode("1234"))
+				.userClCd(UserClCdEnum.DIRECTOR)
+				.roles(Arrays.asList("ROLE_DIRECTOR", "ROLE_BIZADMIN")) // 최초 가입시 USER 로 설정
+				.build();
+		
+		TableUser user6 = this.createNewUser("ppqqrr@gmail.com", "URS000000006", "1234", UserClCdEnum.MOFA);
+		TableUser user7 = this.createNewUser("ssttuu@gmail.com", "URS000000007", "1234", UserClCdEnum.ORGAN);
+		TableUser user8 = this.createNewUser("vvwwxx@gmail.com", "URS000000008", "1234", UserClCdEnum.SYSTEM);
 		
 		userRepository.save(user1);
 		userRepository.save(user2);
@@ -232,6 +253,7 @@ public class UserController {
 		userRepository.save(user5);
 		userRepository.save(user6);
 		userRepository.save(user7);
+		userRepository.save(user8);
 		
 		Map<String, Object> body = new HashMap<String, Object>();
 		return ResponseEntity.ok(body);
@@ -239,17 +261,12 @@ public class UserController {
 	}
 	
 	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-1 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성1 - 역할 : 슈퍼관리자
+	 * ■■■■■■■■■■■■■■■■■■■■ TEST ■■■■■■■■■■■■■■■■■■■■
+	 * 새로운 사용자 생성
 	 * 
 	 * @return
 	 */
-	private final TableUser createNewUser1() {
-		final String USER_LOGIN_ID = "aabbcc@gmail.com";
-		final String USER_SEQ_ID = "URS000000001";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.SUPER;
-		
+	private final TableUser createNewUser(String USER_LOGIN_ID, String USER_SEQ_ID, String PASSWORD, UserClCdEnum userClCd) {
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
 				.userId(USER_SEQ_ID)
@@ -259,131 +276,6 @@ public class UserController {
 				.build();
 	}
 	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-2 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성2 - 역할 : 시스템관리자
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser2() {
-		final String USER_LOGIN_ID = "ddeeff@gmail.com";
-		final String USER_SEQ_ID = "URS000000002";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.SYSTEM;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-3 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성3 - 역할 : 관장기관
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser3() {
-		final String USER_LOGIN_ID = "gghhii@gmail.com";
-		final String USER_SEQ_ID = "URS000000003";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.DIRECTOR;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-4 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성4 - 역할 : 위탁기관
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser4() {
-		final String USER_LOGIN_ID = "jjkkll@gmail.com";
-		final String USER_SEQ_ID = "URS000000004";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.OUTSOURCING;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-5 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성5 - 역할 : 사업수행자
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser5() {
-		final String USER_LOGIN_ID = "mmnnoo@gmail.com";
-		final String USER_SEQ_ID = "URS000000005";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.BIZ;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-6 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성6 - 역할 : 기타부처
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser6() {
-		final String USER_LOGIN_ID = "ppqqrr@gmail.com";
-		final String USER_SEQ_ID = "URS000000006";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.ORGAN;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST-7 ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성7 - 역할 : 외교부
-	 * 
-	 * @return
-	 */
-	private final TableUser createNewUser7() {
-		final String USER_LOGIN_ID = "ssttuu@gmail.com";
-		final String USER_SEQ_ID = "URS000000007";
-		final String PASSWORD = "1234";
-		final UserClCdEnum userClCd = UserClCdEnum.MOFA;
-		
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
-				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
-				.build();
-	}
 	
 	/*
 	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■

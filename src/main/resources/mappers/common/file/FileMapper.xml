@@ -8,14 +8,14 @@
 	<insert id="insertFileGroup" parameterType="gov.me.irs.common.file.vo.FileGroupVo">
 		<selectKey keyProperty="fileGroupSn" resultType="int" order="BEFORE">
 			/* FileMapper.insertFileGroup.selectKey */
-			SELECT COALESCE(MAX(FILE_GROUP_SN), 0) + 1 FROM irs_user.FILE_GROUP_BSC
+			SELECT COALESCE(MAX(FILE_GROUP_SN), 0) + 1 FROM irsuser.FILE_GROUP_BSC
 		</selectKey>
 		/* FileMapper.insertFileGroup */
 		INSERT
-		  INTO irs_user.FILE_GROUP_BSC
+		  INTO irsuser.FILE_GROUP_BSC
 		  	 ( FILE_GROUP_SN
 			 , FILE_TYPE_CL_CD
-			 , MENU_ID
+			 , MENU_MGNO
 			 , DEL_YN
 			 , RGTR_ID
 			 )
@@ -32,11 +32,11 @@
 	<insert id="insertFileDtl" parameterType="gov.me.irs.common.file.vo.FileVo">
 		<selectKey keyProperty="fileDtlSn" resultType="int" order="BEFORE">
 			/* FileMapper.insertFileDtl.selectKey */
-			SELECT COALESCE(MAX(FILE_DTL_SN), 0) + 1 FROM irs_user.FILE_DTL WHERE FILE_GROUP_SN = #{fileGroupSn}
+			SELECT COALESCE(MAX(FILE_DTL_SN), 0) + 1 FROM irsuser.FILE_DTL WHERE FILE_GROUP_SN = #{fileGroupSn}
 		</selectKey>
 		/* FileMapper.insertFileDtl */
 		INSERT
-		  INTO irs_user.FILE_DTL
+		  INTO irsuser.FILE_DTL
 		  	 ( FILE_GROUP_SN
 			 , FILE_DTL_SN
 			 , ORGNL_FILE_NM
@@ -65,7 +65,7 @@
 	<!-- SINGLE 업로드 파일 삭제 -->
 	<update id="deleteFile" parameterType="gov.me.irs.common.file.vo.FileVo">
 		/* FileMapper.deleteFile */
-		UPDATE irs_user.FILE_DTL
+		UPDATE irsuser.FILE_DTL
 		   SET DEL_YN = 'Y'
 			 , MDFR_ID = #{mdfrId}
 			 , MDFCN_DT = CURRENT_TIMESTAMP
@@ -97,8 +97,8 @@
 			 , DTL.REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irs_user.FILE_GROUP_BSC GRP
-		 INNER JOIN irs_user.FILE_DTL DTL
+		  FROM irsuser.FILE_GROUP_BSC GRP
+		 INNER JOIN irsuser.FILE_DTL DTL
 		    ON DTL.FILE_GROUP_SN = GRP.FILE_GROUP_SN
 		   AND GRP.FILE_GROUP_SN = #{fileGroupSn}
 		   AND GRP.FILE_TYPE_CL_CD = #{fileTypeClCd}
@@ -128,8 +128,8 @@
 			 , DTL.REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irs_user.FILE_GROUP_BSC GRP
-		 INNER JOIN irs_user.FILE_DTL DTL
+		  FROM irsuser.FILE_GROUP_BSC GRP
+		 INNER JOIN irsuser.FILE_DTL DTL
 		    ON DTL.FILE_GROUP_SN = GRP.FILE_GROUP_SN
 		   AND GRP.FILE_GROUP_SN = #{fileGroupSn}
 		   AND GRP.FILE_TYPE_CL_CD = #{fileTypeClCd}
@@ -150,7 +150,7 @@
 	<!-- 다운로드수 UPDATE 처리 -->
 	<update id="updateDwldCount" parameterType="gov.me.irs.common.file.vo.FileVo">
 		/* FileMapper.updateDwldCount */
-		UPDATE irs_user.FILE_DTL
+		UPDATE irsuser.FILE_DTL
 		   SET DWNLD_CNT = DWNLD_CNT + 1		<!-- 다운로드시에는 다운로드 수만 증가시칸다 -->
 		 WHERE FILE_GROUP_SN = #{fileGroupSn}
 		   AND FILE_DTL_SN = #{fileDtlSn}
@@ -159,7 +159,7 @@
 	<!-- SINGLE 파일정보 최종저장처리 -->
 	<update id="saveSingleFile" parameterType="gov.me.irs.common.file.vo.FileVo">
 		/* FileMapper.saveSingleFile */
-		UPDATE irs_user.FILE_DTL
+		UPDATE irsuser.FILE_DTL
 		   SET DEL_YN = CASE WHEN FILE_DTL_SN = #{fileDtlSn} THEN 'N' ELSE 'Y' END
 		<if test="filePathNm != null and !filePathNm.equals('')">
 			 , FILE_PATH_NM = CASE WHEN FILE_DTL_SN = #{fileDtlSn} THEN #{filePathNm} ELSE FILE_PATH_NM END
@@ -172,7 +172,7 @@
 	<!-- MULTI 파일정보 최종저장처리 -->
 	<update id="saveMultiFile" parameterType="gov.me.irs.common.file.vo.FileVo">
 		/* FileMapper.saveMultiFile */
-		UPDATE irs_user.FILE_DTL
+		UPDATE irsuser.FILE_DTL
 		   SET DEL_YN = 'N'
 			 , FILE_PATH_NM = #{filePathNm}
 			 , MDFR_ID = #{mdfrId}
@@ -189,11 +189,11 @@
 		/* FileMapper.selectFileGrp */
 		SELECT GRP.FILE_GROUP_SN
 			 , GRP.FILE_TYPE_CL_CD
-			 , GRP.MENU_ID
+			 , GRP.MENU_MGNO
 			 , GRP.DEL_YN
 			 , GRP.RGTR_ID
 			 , GRP.REG_DT
-		  FROM irs_user.FILE_GROUP_BSC GRP
+		  FROM irsuser.FILE_GROUP_BSC GRP
 		 WHERE GRP.FILE_GROUP_SN = #{fileGroupSn}
 	</select>
 	
@@ -201,23 +201,23 @@
 	<insert id="insertCloneFileGroup" parameterType="gov.me.irs.common.file.vo.FileGroupVo">
 		<selectKey keyProperty="fileGroupSn" resultType="int" order="BEFORE">
 			/* FileMapper.insertCloneFileGroup.selectKey */
-			SELECT COALESCE(MAX(FILE_GROUP_SN), 0) + 1 FROM irs_user.FILE_GROUP_BSC
+			SELECT COALESCE(MAX(FILE_GROUP_SN), 0) + 1 FROM irsuser.FILE_GROUP_BSC
 		</selectKey>
 		/* FileMapper.insertCloneFileGroup */
 		INSERT
-		  INTO irs_user.FILE_GROUP_BSC
+		  INTO irsuser.FILE_GROUP_BSC
 		  	 ( FILE_GROUP_SN
 			 , FILE_TYPE_CL_CD
-			 , MENU_ID
+			 , MENU_MGNO
 			 , DEL_YN
 			 , RGTR_ID
 			 )
 		SELECT #{fileGroupSn}
 			 , GRP.FILE_TYPE_CL_CD
-			 , GRP.MENU_ID
+			 , GRP.MENU_MGNO
 			 , GRP.DEL_YN
 			 , #{rgtrId}
-		  FROM irs_user.FILE_GROUP_BSC GRP
+		  FROM irsuser.FILE_GROUP_BSC GRP
 		 WHERE GRP.FILE_GROUP_SN = #{sourceFileGroupSn}
 	</insert>
 	
@@ -225,7 +225,7 @@
 	<insert id="insertCloneFileDtl" parameterType="gov.me.irs.common.file.vo.FileGroupVo">
 		/* FileMapper.insertCloneFileDtl */
 		INSERT
-		  INTO irs_user.FILE_DTL
+		  INTO irsuser.FILE_DTL
 		  	 ( FILE_GROUP_SN
 			 , FILE_DTL_SN
 			 , ORGNL_FILE_NM
@@ -247,7 +247,7 @@
 			 , 0
 			 , DTL.DEL_YN
 			 , #{rgtrId}
-		  FROM irs_user.FILE_DTL DTL
+		  FROM irsuser.FILE_DTL DTL
 		 WHERE DTL.FILE_GROUP_SN = #{sourceFileGroupSn}
 	</insert>
 	
@@ -268,8 +268,8 @@
 			 , DTL.REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irs_user.FILE_GROUP_BSC GRP
-		 INNER JOIN irs_user.FILE_DTL DTL
+		  FROM irsuser.FILE_GROUP_BSC GRP
+		 INNER JOIN irsuser.FILE_DTL DTL
 		    ON DTL.FILE_GROUP_SN = GRP.FILE_GROUP_SN
 		   AND GRP.FILE_GROUP_SN = #{fileGroupSn}
 		   AND GRP.DEL_YN = 'N'
@@ -279,7 +279,7 @@
 	<!-- 차수 생성 전용 파일상세 물리파일명 수정하기 -->
 	<update id="updateCloneFileNm" parameterType="gov.me.irs.common.file.vo.FileVo">
 		/* FileMapper.updateCloneFileNm */
-		UPDATE irs_user.FILE_DTL
+		UPDATE irsuser.FILE_DTL
 		   SET FILE_NM = #{cloneFileNm}
 		 WHERE FILE_GROUP_SN = #{fileGroupSn}
 		   AND FILE_DTL_SN = #{fileDtlSn}

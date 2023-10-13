@@ -7,7 +7,7 @@
 	<!-- 역할기본 목록조회 -->
 	<select id="selectRoleList" resultType="egovMap" parameterType="map">
 		/* RlmMapper.selectRoleList */
-		SELECT R.ROLE_ID
+		SELECT R.ROLE_ID_MGNO
 			 , R.ROLE_NM
 			 , R.ROLE_EXPLN
 			 , R.USER_CL_CD
@@ -16,7 +16,7 @@
 			 , TO_CHAR(R.REG_DT, 'yyyyMMddHHmmss') AS REG_DT
 			 , R.MDFR_ID
 			 , TO_CHAR(R.MDFCN_DT, 'yyyyMMddHHmmss') AS MDFCN_DT
-		  FROM irs_user.ROLE_BSC R
+		  FROM irsuser.ROLE_BSC R
 		 WHERE R.DEL_YN = 'N'					<!-- 삭제데이터 제외 -->
 		   AND R.SYS_CL_CD = #{sysClCd}
 		<if test="userClCd != null and !userClCd.equals('')"><!-- 사용자구분코드 -->
@@ -25,7 +25,7 @@
 		<if test="roleNm != null and !roleNm.equals('')"><!-- 역할명 -->
 		   AND R.ROLE_NM LIKE CONCAT('%', #{roleNm}, '%')
 		</if>
-		 ORDER BY R.ROLE_ID
+		 ORDER BY R.ROLE_ID_MGNO
 	</select>
 	
 	<!-- 역할기본 등록 -->
@@ -34,17 +34,17 @@
 			/* RlmMapper.insertRole.selectKey */
 			<!-- 총길이 12, 3번째부터 cutting --> 
 			SELECT CONCAT( 'ROL'
-						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(ROLE_ID, (3 + 1), 12)), '0') AS INTEGER) + 1 AS TEXT)
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(ROLE_ID_MGNO, (3 + 1), 12)), '0') AS INTEGER) + 1 AS TEXT)
 							   , 12 - 3
 							   , '0'
 						   )
 				   )
-			  FROM irs_user.ROLE_BSC
+			  FROM irsuser.ROLE_BSC
 		</selectKey>
 		/* RlmMapper.insertRole */
 		INSERT
-		  INTO irs_user.ROLE_BSC
-		     ( ROLE_ID
+		  INTO irsuser.ROLE_BSC
+		     ( ROLE_ID_MGNO
 		     , ROLE_NM
 		     , ROLE_EXPLN
 		     , USER_CL_CD
@@ -52,7 +52,7 @@
 		     , RGTR_ID
 		     )
 		VALUES
-		     ( #{roleId}
+		     ( #{roleIdMgno}
 		     , #{roleNm}
 		     , #{roleExpln}
 		     , #{userClCd}
@@ -64,24 +64,24 @@
 	<!-- 역할기본 수정 -->
 	<update id="updateRole" parameterType="map">
 		/* RlmMapper.updateRole */
-		UPDATE irs_user.ROLE_BSC
+		UPDATE irsuser.ROLE_BSC
 		   SET ROLE_NM = #{roleNm}
 		     , ROLE_EXPLN = #{roleExpln}
 		     , USER_CL_CD = #{userClCd}
 		     , SYS_CL_CD = #{sysClCd}
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
-		 WHERE ROLE_ID = #{roleId}
+		 WHERE ROLE_ID_MGNO = #{roleIdMgno}
 	</update>
 	
 	<!-- 역할기본 삭제 -->
 	<update id="deleteRole" parameterType="map">
 		/* RlmMapper.deleteRole */
-		UPDATE irs_user.ROLE_BSC
+		UPDATE irsuser.ROLE_BSC
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
-		 WHERE ROLE_ID = #{roleId}
+		 WHERE ROLE_ID_MGNO = #{roleIdMgno}
 	</update>
 	
 </mapper>

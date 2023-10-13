@@ -1,7 +1,6 @@
 package gov.me.irs.core.provider;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -147,26 +145,29 @@ public class JwtTokenProvider {
 	public Authentication getAuthentication(String token, String role) {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessTokenKey, token));
 		
-		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
-		
-		/**
-START #########################
-		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		authorities.add(new SimpleGrantedAuthority(role));
+//		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
+//		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+//		authorities.add(new SimpleGrantedAuthority(role));
+//		
+//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
+//		for (GrantedAuthority a : authorities) {
+//			log.debug("[roleName]["+a.getAuthority()+"]");
+//		}
+//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [END-service]");
+//
+//		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 		
 		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
-		for (GrantedAuthority a : authorities) {
-			log.debug("[roleName]["+a.getAuthority()+"]");
-		}
-		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [END-service]");
-
-		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
-END #########################
-		*/
 		
+		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
 		List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(role);
+		log.debug("[authorities]["+authorities+"]");
+		log.debug("[roleName]["+authorities+"]");
 		
-		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
+		
+		return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
+
 	}
 	
 	/**

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.main.mapper.MainMapper">
+	
+	<!-- 메인 협정정보 조회 -->
+	<select id="selectAgrInfo" resultType="egovMap" parameterType="map">
+		/* MainMapper.selectAgrInfo */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- 메인 방법론정보 조회 -->
+	<select id="selectMhdlgInfo" resultType="egovMap" parameterType="map">
+		/* MainMapper.selectMhdlgInfo */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- 메인 사업정보 조회 -->
+	<select id="selectBizInfo" resultType="egovMap" parameterType="map">
+		/* MainMapper.selectBizInfo */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- 메인 공지사항정보 조회 -->
+	<select id="selectBbsInfo" resultType="egovMap" parameterType="map">
+		/* MainMapper.selectBbsInfo */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

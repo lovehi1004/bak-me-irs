@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.prcnd.mapper.BizScsnChgPrcndMapper">
+	
+	<!-- [공통] 사업관리 > 사업 현황 관리 > 권리의무 승계 현황 - 목록조회 총건수 조회 -->
+	<select id="selectScsnChgPrcndListCnt" resultType="int" parameterType="map">
+		/* BizScsnChgPrcndMapper.selectScsnChgPrcndListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [공통] 사업관리 > 사업 현황 관리 > 권리의무 승계 현황 - 목록조회 -->
+	<select id="selectScsnChgPrcndList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* BizScsnChgPrcndMapper.selectScsnChgPrcndList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [공통] 사업관리 > 사업 현황 관리 > 권리의무 승계 현황 - 상세조회 -->
+	<select id="selectScsnChgPrcndDetail" resultType="egovMap" parameterType="map">
+		/* BizScsnChgPrcndMapper.selectScsnChgPrcndDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [공통] 사업관리 > 사업 현황 관리 > 권리의무 승계 현황 - 액셀다운로드 -->
+	<select id="selectScsnChgPrcndExcel" resultType="egovMap" parameterType="map">
+		/* BizScsnChgPrcndMapper.selectScsnChgPrcndExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

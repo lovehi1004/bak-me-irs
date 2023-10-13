@@ -8,7 +8,7 @@
 	<select id="selectGroupCdListCnt" resultType="int" parameterType="map">
 		/* CdmMapper.selectGroupCdListCnt */
 		SELECT COUNT(*)
-		  FROM irs_user.GROUP_CD_BSC
+		  FROM irsuser.GROUP_CD_BSC
 		 WHERE 1 = 1
 		   AND DEL_YN = 'N'
 		<if test="groupCd != null and !groupCd.equals('')">
@@ -34,7 +34,7 @@
 			 , GROUP_CD_ENG_NM								/* 그룹코드영문명 */
 			 , GROUP_CD_EXPLN									/* 그룹코드설명 */
 			 , USE_YN											/* 사용여부 */		
-		  FROM irs_user.GROUP_CD_BSC
+		  FROM irsuser.GROUP_CD_BSC
 		 WHERE 1 = 1
 		   AND DEL_YN = 'N'
 		<if test="groupCd != null and !groupCd.equals('')">
@@ -56,7 +56,7 @@
 	<!-- 그룹코드기본 중복 조회 -->
 	<select id="selectGroupCd" resultType="int" parameterType="map">
 		/* CdmMapper.selectGroupCd */
-		SELECT COUNT(*) AS CNT FROM irs_user.GROUP_CD_BSC WHERE GROUP_CD = #{groupCd} AND DEL_YN = 'N'
+		SELECT COUNT(*) AS CNT FROM irsuser.GROUP_CD_BSC WHERE GROUP_CD = #{groupCd} AND DEL_YN = 'N'
 	</select>
 	
 	<!-- 코드 등록 가능여부 조회 -->
@@ -67,8 +67,8 @@
 			 		ELSE 'Y'
 			   END
 		  FROM (SELECT G.GROUP_CD, G.CD_REG_LMT_CNT, COUNT(*) AS CNT
-				  FROM irs_user.CD_DTL C
-				 INNER JOIN irs_user.GROUP_CD_BSC G
+				  FROM irsuser.CD_DTL C
+				 INNER JOIN irsuser.GROUP_CD_BSC G
 				    ON G.GROUP_CD = C.GROUP_CD
 				   AND G.GROUP_CD = #{groupCd}
 				 WHERE 1 = 1
@@ -81,7 +81,7 @@
 	<insert id="insertGroupCd" parameterType="map">
 		/* CdmMapper.insertGroupCd */
 		INSERT
-		  INTO irs_user.GROUP_CD_BSC
+		  INTO irsuser.GROUP_CD_BSC
 			 ( GROUP_CD
 			 , GROUP_CD_NM
 			 , GROUP_CD_ENG_NM
@@ -104,7 +104,7 @@
 	<!-- 그룹코드기본 수정 -->
 	<update id="updateGroupCd" parameterType="map">
 		/* CdmMapper.updateGroupCd */
-		UPDATE irs_user.GROUP_CD_BSC
+		UPDATE irsuser.GROUP_CD_BSC
 		   SET GROUP_CD_NM = #{groupCdNm}
 		     , GROUP_CD_ENG_NM = #{groupCdEngNm}
 		     , GROUP_CD_EXPLN = #{groupCdExpln}
@@ -118,7 +118,7 @@
 	<!-- 그룹코드기본 삭제 -->
 	<update id="deleteGroupCd" parameterType="map">
 		/* CdmMapper.deleteGroupCd */
-		UPDATE irs_user.GROUP_CD_BSC
+		UPDATE irsuser.GROUP_CD_BSC
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
@@ -135,8 +135,8 @@
 			 , CD_EXPLN
 			 , SORT_SNO
 			 , USE_YN
-		  FROM irs_user.CD_DTL C
-		 INNER JOIN irs_user.GROUP_CD_BSC G
+		  FROM irsuser.CD_DTL C
+		 INNER JOIN irsuser.GROUP_CD_BSC G
 		    ON G.GROUP_CD = C.GROUP_CD
 		   AND G.GROUP_CD = #{groupCd}
 		 WHERE 1 = 1
@@ -161,7 +161,7 @@
 	<select id="selectCd" resultType="int" parameterType="map">
 		/* CdmMapper.selectCd */
 		SELECT COUNT(*) AS CNT
-		  FROM irs_user.CD_DTL
+		  FROM irsuser.CD_DTL
 		 WHERE GROUP_CD = #{groupCd}
 		   AND CD = #{cd}
 		   AND DEL_YN = 'N'
@@ -171,7 +171,7 @@
 	<insert id="insertCd" parameterType="map">
 		/* CdmMapper.insertCd */
 		INSERT
-		  INTO irs_user.CD_DTL
+		  INTO irsuser.CD_DTL
 			 ( GROUP_CD
 			 , CD
 			 , CD_NM
@@ -189,7 +189,7 @@
 				   , COALESCE(MAX(SORT_SNO), 0)+1
 				   , #{useYn}
 				   , #{sessionUserId}
-				FROM irs_user.CD_DTL
+				FROM irsuser.CD_DTL
 			   WHERE GROUP_CD = #{groupCd}
 			 )
 	</insert>
@@ -197,7 +197,7 @@
 	<!-- 코드상세 수정 -->
 	<update id="updateCd" parameterType="map">
 		/* CdmMapper.updateCd */
-		UPDATE irs_user.CD_DTL
+		UPDATE irsuser.CD_DTL
 		   SET CD_NM = #{cdNm}
 		     , CD_ENG_NM = #{cdEngNm}
 		     , CD_EXPLN = #{cdExpln}
@@ -211,7 +211,7 @@
 	<!-- 코드상세 삭제 -->
 	<update id="deleteCd" parameterType="map">
 		/* CdmMapper.deleteCd */
-		UPDATE irs_user.CD_DTL
+		UPDATE irsuser.CD_DTL
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP

@@ -188,6 +188,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     	
     	// Token정보로 부터 인증정보 취득
         Authentication authentication = jwtTokenProvider.getAuthentication(accessToken, role);
+        
+        log.debug("[role][{}][authentication.getPrincipal()][{}]", role, authentication.getPrincipal());
+        
         // 인증정보 갱신
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

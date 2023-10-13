@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Getter
-@Table(name = "IRS_USER.JWT_USER_REFRESH_TKN")
-@org.hibernate.annotations.Table(comment = "JWT사용자리프레시토큰", appliesTo = "IRS_USER.JWT_USER_REFRESH_TKN")
+@Table(name = "IRSUSER.JWT_USER_REFRESH_TKN_BSC")
+@org.hibernate.annotations.Table(comment = "JWT사용자리프레시토큰", appliesTo = "IRSUSER.JWT_USER_REFRESH_TKN_BSC")
 @NoArgsConstructor
 @AllArgsConstructor
 public class TableRefreshToken {
@@ -33,11 +33,11 @@ public class TableRefreshToken {
     private String lgnId;
     
     @Comment("리프레시토큰내용")
-    @Column(name = "REFRESH_TKN_CN", nullable = false, length = 500)
+    @Column(name = "REFRESH_TKN_CN", nullable = false, length = 2000)
     private String refreshTknCn;
     
     @Comment("사용자클라이언트내용")
-    @Column(name ="USER_CLNT_CN", nullable = false, length = 500)
+    @Column(name ="USER_CLNT_CN", nullable = false, length = 2000)
     private String userClntCn;
 	
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
+import gov.me.irs.admin.mnm.service.MnmService;
 import gov.me.irs.admin.statistics.service.StatisticsService;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.service.FileService;
@@ -24,7 +25,7 @@ import gov.me.irs.common.file.vo.FileVo;
 import gov.me.irs.core.config.property.JasyptProperties;
 import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.config.property.Sn3hcvProperties;
-import gov.me.irs.core.config.util.SessionUtil;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.constants.RoleConst;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
@@ -56,12 +57,13 @@ public class TestNexacroNController {
 	 * @param requestMap
 	 * @return
 	 */
-	@PreAuthorize("hasRole('" + RoleConst.ROLE_BIZ + "')")
+	@PreAuthorize("hasRole('" + RoleConst.BIZADMIN + "')")
 	@PostMapping("/test/selectConnectDailyStatisticsList.irs")
 	public NexacroResult selectConnectDailyStatisticsList(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ 조회 테스트용 - 시스템접속통계 일별통계조회 ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
+		
 		
 		log.debug("[############################################################]");
 		log.debug("[home][{}]", sn3hcvProperties.home);
@@ -79,6 +81,22 @@ public class TestNexacroNController {
 		log.debug("[JwtProperties.refreshToken.validTime][{}]", jwtProperties.refreshToken.validTime);
 		log.debug("[############################################################]");
 		
+		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ 세션확인 START ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
+		
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
+		
+		log.debug("[tableUser ▶▶▶▶▶▶▶▶▶▶ ]["+tableUser+"]");
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][xxxxxx][{}]", (tableUser == null));
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][getUserId][{}]", tableUser.getUserId());
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][getUsername][{}]", tableUser.getUsername());
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][getLgnId][{}]", tableUser.getLgnId());
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][getUserClCd][{}]", tableUser.getUserClCd());
+		log.debug("[authUser ▶▶▶▶▶▶▶▶▶▶ ][getRoles][{}]", tableUser.getRoles());
+		
+		
+		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ 세션확인 END ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
+		
 		/* US 테스트 */
 		LocaleContextHolder.setLocale(Locale.US);
     	log.debug("i18n 테스트 : {}", messageSource.getMessage("i18n.message.test1", null, LocaleContextHolder.getLocale()));
@@ -90,7 +108,7 @@ public class TestNexacroNController {
 		return nexacroResult;
 	}
 	
-	@PreAuthorize("hasRole('" + RoleConst.ROLE_SUPER + "')")
+	@PreAuthorize("hasRole('" + RoleConst.ROLE_SYSTEM + "')")
 	@PostMapping("/test/selectSampleList.do")
 	public NexacroResult selectSampleList(@ParamDataSet(name = "input1") Map<String, Object> requestMap, @ParamDataSet(name = "input1") List<Map<String, Object>> requestList) throws Exception {
 		
@@ -133,8 +151,8 @@ public class TestNexacroNController {
 		/* 1. 세션정보 확인 하기 */
 		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
 		
-		if(SessionUtil.isAuthenticated()) {
-			TableUser tableUser = SessionUtil.getPrincipal();
+		if(UserSession.isAuthenticated()) {
+			TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 			sessionUserId = tableUser.getUserId();
 		}
 		
@@ -199,6 +217,22 @@ public class TestNexacroNController {
 		NexacroResult nexacroResult = new NexacroResult();
 		nexacroResult.addDataSet("output1", "xxxx");
 		nexacroResult.setErrorCode(result ? 0 : -1);
+		
+		return nexacroResult;
+	}
+	
+	private final MnmService mnmService;
+	
+	@PostMapping("/test/common/menu.irs")
+	public NexacroResult testMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap) throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		
+		requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
+		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_ID);
+		
+		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
+		nexacroResult.addDataSet("list", list);
 		
 		return nexacroResult;
 	}

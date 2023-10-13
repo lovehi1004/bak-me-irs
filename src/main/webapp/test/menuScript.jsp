@@ -111,6 +111,24 @@
 	
 	
 	<script type="text/javascript">
+		
+		/* 숫자형 컬럼 single quotation 제거하기 - 도메인 정의 */
+		const numericDomains = [
+			"_lVL"
+			, "_SEQO"
+			, "_SN"
+			, "_CNT"
+			, "_NO"
+			, "QTY"
+		];
+		
+		/* 날짜형 컬럼 키워드 삽입 - 도메인 정의 */
+		const dateDomains = [
+			"_DT"
+		];
+		
+		const DATE_KEYWORD = "CURRENT_TIMESTAMP";
+		
 		$(function(){
 			
 			/* 열추가 */
@@ -144,8 +162,11 @@
 					let colSize = colArray.length;
 					console.log("[colSize]["+colSize+"]");
 					
-					for(let idx = 1; idx < colSize; idx++) {
-						$("div.container").find("div.row.header").find("div.add-col").find("a[data-link=add-col]").click();
+					/* 최초실행시에만 컬럼 늘리기, [변환하기]버튼 2번째 클릭부터는 데이터 행만 추가 */
+					if($("div.container").find("div.row.data").length == 1) {
+						for(let idx = 1; idx < colSize; idx++) {
+							$("div.container").find("div.row.header").find("div.add-col").find("a[data-link=add-col]").click();
+						}
 					}
 					
 					for(let idx = 1; idx < (rowSize - 1); idx++) {
@@ -179,11 +200,43 @@ ddd|||444|||라라라|||ccc|||400
 				
 				let headerList = [];
 				let rowDataList = [];
+				let numericDomainIndexList = [];
+				let dateDomainIndexList = [];
 				
 				$("div.container").find("div.row").each(function(idx, item){
 					let colDataList = [];
 					$(this).find("div.col > input").each(function(kdx, ktem){
 						colDataList.push($(this).val());
+						
+						if(idx == 0) {
+							let fieldName = $(this).val();
+							console.log("[numericDomains]["+numericDomains+"]");
+							console.log("[fieldName]["+fieldName+"]");
+							
+							for(let xdx = 0; xdx < numericDomains.length; xdx++) {
+								if(fieldName.endsWith(numericDomains[xdx])) {			/* 숫자형 도메인 감지 */
+									console.log("[numericDomains[xdx]]["+numericDomains[xdx]+"]");
+									console.log("[kdx]["+kdx+"]");
+									numericDomainIndexList.push(kdx);
+									break;
+								}
+							}
+						}
+						
+						if(idx == 0) {
+							let fieldName = $(this).val();
+							console.log("[dateDomains]["+dateDomains+"]");
+							console.log("[fieldName]["+fieldName+"]");
+							
+							for(let xdx = 0; xdx < dateDomains.length; xdx++) {
+								if(fieldName.endsWith(dateDomains[xdx])) {			/* 날짜형 도메인 감지 */
+									console.log("[dateDomains[xdx]]["+dateDomains[xdx]+"]");
+									console.log("[kdx]["+kdx+"]");
+									dateDomainIndexList.push(kdx);
+									break;
+								}
+							}
+						}
 					});
 					
 					if(idx == 0) {
@@ -193,6 +246,8 @@ ddd|||444|||라라라|||ccc|||400
 					}
 				});
 				
+				console.log("[numericDomainIndexList]["+numericDomainIndexList+"]");
+				console.log("[dateDomainIndexList]["+dateDomainIndexList+"]");
 				console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ SQL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
 				
 				let allInsertSqlClause = "";
@@ -201,16 +256,27 @@ ddd|||444|||라라라|||ccc|||400
 				
 				$(rowDataList).each(function(idx, item){
 					
+					/* #################### INSERT START #################### */
 					let valuesClauseList = [];
 					
-					$(rowDataList[idx]).each(function(kdx, ktem){
-						valuesClauseList.push("'" + ktem + "'");
-					});
+					for(let cdx = 0; cdx < rowDataList[idx].length; cdx++) {
+						
+						if(numericDomainIndexList.includes(cdx)) {			//숫자형
+							valuesClauseList.push(rowDataList[idx][cdx]);
+							
+						} else if(dateDomainIndexList.includes(cdx)) {			//날짜형
+							valuesClauseList.push(DATE_KEYWORD);
+						} else {											//문자형
+							valuesClauseList.push("'" + rowDataList[idx][cdx] + "'");
+						}
+					}
 					
 					let tableName = $("#tableName").val();
 					
 					let itemInsertSqlClause = "INSERT INTO "+tableName+"("+headerList.join(', ')+") VALUES("+valuesClauseList.join(', ')+");";
+					/* #################### INSERT END #################### */
 					
+					/* #################### UPDATE START #################### */
 					let itemSetterUpdateSqlClause = "";
 					for(let idx = 0; idx < headerList.length; idx++) {
 						if(idx != 0) { itemSetterUpdateSqlClause += ", "; }
@@ -218,7 +284,9 @@ ddd|||444|||라라라|||ccc|||400
 					}
 					
 					let itemUpdateSqlClause = "UPDATE "+tableName+" SET "+itemSetterUpdateSqlClause+" WHERE 1 <> 1;";
+					/* #################### UPDATE END #################### */
 					
+					/* #################### DELETE START #################### */
 					let itemConditionDeleteSqlClause = "";
 					for(let idx = 0; idx < headerList.length; idx++) {
 						if(idx != 0) { itemConditionDeleteSqlClause += "AND "; }
@@ -226,6 +294,7 @@ ddd|||444|||라라라|||ccc|||400
 					}
 					
 					let itemDeleteSqlClause = "DELETE FROM "+tableName+" WHERE "+itemConditionDeleteSqlClause+";";
+					/* #################### DELETE END #################### */
 					
 					console.log("[itemInsertSqlClause]["+itemInsertSqlClause+"]");
 					console.log("[itemUpdateSqlClause]["+itemUpdateSqlClause+"]");
@@ -280,7 +349,7 @@ ddd|||444|||라라라|||ccc|||400</textarea>
 	<hr/>
 	<button data-link="convert" style="padding: 3px 5px; cursor: pointer;">변환하기 - 구분자 |||, 엔터</button>
 	<hr/>
-	테이블명 : <input id="tableName" type="text" value="irs_user.MENU_BSC"/>
+	테이블명 : <input id="tableName" type="text" value="irsuser.MENU_BSC"/>
 	<hr/>
 	<div class="container">
 	

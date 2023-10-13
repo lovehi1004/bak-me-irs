@@ -34,7 +34,7 @@ public class CoreControllerAdvice {
 	private final MultipartResolver multipartResolver;
 	
 	@ExceptionHandler(NoHandlerFoundException.class)
-	public void noHandlerFoundException(HttpServletRequest request, HttpServletResponse response, NoHandlerFoundException e) throws ServletException, IOException {
+	public void noHandlerFoundException(HttpServletRequest request, HttpServletResponse response, NoHandlerFoundException e) throws Exception {
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/exception/common/" + JwtAuthEnum.NOT_FOUND.getCode());
 		request.setAttribute("exception", JwtAuthEnum.NOT_FOUND.getCode());
@@ -51,7 +51,7 @@ public class CoreControllerAdvice {
 	 * @throws ServletException 
 	 */
 	@ExceptionHandler(Exception.class)
-	public void handleException(HttpServletRequest request, HttpServletResponse response, Exception e) throws ServletException, IOException {
+	public void handleException(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
 		
 		HttpServletRequest forwardRequest = null;
 		

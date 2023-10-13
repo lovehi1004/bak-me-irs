@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.prfmncutil.mapper.AdmPrfmncDspsMapper">
+	
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적처분목록조회 총건수 조회 -->
+	<select id="selectPrfmncDspsListCnt" resultType="int" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적처분목록조회 -->
+	<select id="selectPrfmncDspsList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적처분상세조회 -->
+	<select id="selectPrfmncDspsDetail" resultType="egovMap" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적처분등록 -->
+	<insert id="insertPrfmncDsps" parameterType="map">
+		/* AdmPrfmncDspsMapper.insertPrfmncDsps */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적처분수정 -->
+	<update id="updatePrfmncDsps" parameterType="map">
+		/* AdmPrfmncDspsMapper.updatePrfmncDsps */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 실적공통조회 -->
+	<select id="selectPrfmncSrhList" resultType="egovMap" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 이력목록조회 -->
+	<select id="selectPrfmncDspsHistList" resultType="egovMap" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 보고서출력 -->
+	<select id="selectPrfmncDspsRpt" resultType="egovMap" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 관장기관변경 -->
+	<update id="updatePrfmncDspsInst" parameterType="map">
+		/* AdmPrfmncDspsMapper.updatePrfmncDspsInst */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 실적관리 > 실적 활용 관리 > 실적처분 - 액셀다운로드 -->
+	<select id="selectPrfmncDspsExcel" resultType="egovMap" parameterType="map">
+		/* AdmPrfmncDspsMapper.selectPrfmncDspsExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

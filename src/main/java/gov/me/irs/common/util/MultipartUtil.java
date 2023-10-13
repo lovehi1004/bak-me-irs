@@ -34,7 +34,7 @@ import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.service.FileService;
 import gov.me.irs.common.file.vo.FileDownloadVo;
 import gov.me.irs.common.file.vo.FileVo;
-import gov.me.irs.core.config.util.SessionUtil;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,8 +81,8 @@ public class MultipartUtil {
 		/* 1. 세션정보 확인 하기 */
 		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
 		
-		if(SessionUtil.isAuthenticated()) {
-			TableUser tableUser = SessionUtil.getPrincipal();
+		if(UserSession.isAuthenticated()) {
+			TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 			sessionUserId = tableUser.getUserId();
 		}
 		

@@ -3,7 +3,6 @@ package gov.me.irs.admin.usm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import gov.me.irs.admin.usm.service.UsmService;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.vo.PagingVo;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,8 +95,10 @@ public class UsmController {
 	 * @return
 	 */
 	@PostMapping("/admin/usm/insertUser.irs")
-	public NexacroResult insertUser(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertUser(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = usmService.insertUser(requestMap);
@@ -111,8 +113,10 @@ public class UsmController {
 	 * @return
 	 */
 	@PostMapping("/admin/usm/updateUser.irs")
-	public NexacroResult updateUser(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateUser(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = usmService.updateUser(requestMap);
@@ -127,8 +131,10 @@ public class UsmController {
 	 * @return
 	 */
 	@PostMapping("/admin/usm/deleteUser.irs")
-	public NexacroResult deleteUser(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteUser(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = usmService.deleteUser(requestMap);

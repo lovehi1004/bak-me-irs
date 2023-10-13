@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cnsltngrp.mapper.AdmCnsltngrpMngMapper">
+	
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체목록조회 총건수 조회 -->
+	<select id="selectCnsltngrpMngListCnt" resultType="int" parameterType="map">
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpMngListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체목록조회 -->
+	<select id="selectCnsltngrpMngList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpMngList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체상세조회 -->
+	<select id="selectCnsltngrpMngDetail" resultType="egovMap" parameterType="map">
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpMngDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체등록 -->
+	<insert id="insertCnsltngrpMng" parameterType="map">
+		/* AdmCnsltngrpMngMapper.insertCnsltngrpMng */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체수정 -->
+	<update id="updateCnsltngrpMng" parameterType="map">
+		/* AdmCnsltngrpMngMapper.updateCnsltngrpMng */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협정공통조회 -->
+	<select id="selectAgrSrhList" resultType="egovMap" parameterType="map">
+		/* AdmCnsltngrpMngMapper.selectAgrSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체구성원목록조회 총건수 조회 -->
+	<select id="selectCnsltngrpUsrListCnt" resultType="int" parameterType="map">
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpUsrListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체구성원목록조회 -->
+	<select id="selectCnsltngrpUsrList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpUsrList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체구성원등록 -->
+	<insert id="insertCnsltngrpUsr" parameterType="map">
+		/* AdmCnsltngrpMngMapper.insertCnsltngrpUsr */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체구성원수정 -->
+	<update id="updateCnsltngrpUsr" parameterType="map">
+		/* AdmCnsltngrpMngMapper.updateCnsltngrpUsr */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체자료등록 -->
+	<insert id="insertCnsltngrpData" parameterType="map">
+		/* AdmCnsltngrpMngMapper.insertCnsltngrpData */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 협의체자료수정 -->
+	<update id="updateCnsltngrpData" parameterType="map">
+		/* AdmCnsltngrpMngMapper.updateCnsltngrpData */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 국제감축협의체관리 > 국제감축협의체 관리 - 액셀다운로드 -->
+	<select id="selectCnsltngrpMngExcel" resultType="egovMap" parameterType="map">
+		/* AdmCnsltngrpMngMapper.selectCnsltngrpMngExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

@@ -128,7 +128,7 @@ public class TestController {
 	@PostMapping("/onlyuser/test")
 	public ResponseEntity<?> onlyuser_test(){
 		Map<String, Object> body = new HashMap<String, Object>();
-		body.put("사용자정의메세지", "<h1>onlyuser_test - [RoleConst.BIZ] test 통과</h1>");
+		body.put("사용자정의메세지", "<h1>onlyuser_test - [RoleConst.BIZADMIN] test 통과</h1>");
 		return ResponseEntity.ok(body);
 	}
 	

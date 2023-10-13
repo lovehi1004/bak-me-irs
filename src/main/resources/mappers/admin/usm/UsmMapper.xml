@@ -8,8 +8,8 @@
 	<select id="selectUserListCnt" resultType="int" parameterType="map">
 		/* UsmMapper.selectUserListCnt */
 		SELECT COUNT(*)
-		  FROM irs_user.USER_BSC U
-		 INNER JOIN irs_user.ROLE_BSC R
+		  FROM irsuser.USER_BSC U
+		 INNER JOIN irsuser.ROLE_BSC R
 		    ON R.USER_ID = U.USER_ID
 		   AND R.SYS_CL_CD = #{sysClCd}
 		 WHERE 1 = 1
@@ -36,10 +36,10 @@
 		     , U.LGN_ID
 		     , U.USER_NM
 		     , U.DEL_YN
-		     , R.ROLE_ID
+		     , R.ROLE_ID_MGNO
 		     , R.ROLE_NM
-		  FROM irs_user.USER_BSC U
-		 INNER JOIN irs_user.ROLE_BSC R
+		  FROM irsuser.USER_BSC U
+		 INNER JOIN irsuser.ROLE_BSC R
 		    ON R.USER_ID = U.USER_ID
 		   AND R.USER_CL_CD = U.USER_CL_CD
 		   AND R.SYS_CL_CD = #{sysClCd}
@@ -66,10 +66,10 @@
 		     , U.LGN_ID
 		     , U.USER_NM
 		     , U.DEL_YN
-		     , R.ROLE_ID
+		     , R.ROLE_ID_MGNO
 		     , R.ROLE_NM
-		  FROM irs_user.USER_BSC U
-		 INNER JOIN irs_user.ROLE_BSC R
+		  FROM irsuser.USER_BSC U
+		 INNER JOIN irsuser.ROLE_BSC R
 		    ON R.USER_ID = U.USER_ID
 		   AND R.USER_CL_CD = U.USER_CL_CD
 		   AND R.SYS_CL_CD = #{sysClCd}
@@ -88,11 +88,11 @@
 							   , '0'
 						   )
 				   )
-			FROM irs_user.USER_BSC
+			FROM irsuser.USER_BSC
 		</selectKey>
 		/* UsmMapper.insertUser */
 		INSERT
-		  INTO irs_user.USER_BSC
+		  INTO irsuser.USER_BSC
 		     ( USER_ID
 		     , USER_CL_CD
 		     , LGN_ID
@@ -113,7 +113,7 @@
 	<!-- 사용자기본 수정 -->
 	<update id="updateUser" parameterType="map">
 		/* UsmMapper.updateUser */
-		UPDATE irs_user.USER_BSC
+		UPDATE irsuser.USER_BSC
 		   SET USER_NM = #{userNm}
 		     , LGN_ID = #{lgnId}
 		     , MDFR_ID = #{sessionUserId}
@@ -124,7 +124,7 @@
 	<!-- 사용자기본 삭제 -->
 	<update id="deleteUser" parameterType="map">
 		/* UsmMapper.deleteUser */
-		UPDATE irs_user.USER_BSC
+		UPDATE irsuser.USER_BSC
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sessionUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP

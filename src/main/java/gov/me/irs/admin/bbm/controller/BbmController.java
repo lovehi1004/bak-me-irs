@@ -3,7 +3,6 @@ package gov.me.irs.admin.bbm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import gov.me.irs.admin.bbm.service.BbmService;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.vo.PagingVo;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,8 +96,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/insertBbsGroup.irs")
-	public NexacroResult insertBbsGroup(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertBbsGroup(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.insertBbsGroup(requestMap);
@@ -112,8 +114,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/updateBbsGroup.irs")
-	public NexacroResult updateBbsGroup(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateBbsGroup(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.updateBbsGroup(requestMap);
@@ -128,8 +132,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/deleteBbsGroup.irs")
-	public NexacroResult deleteBbsGroup(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteBbsGroup(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.deleteBbsGroup(requestMap);
@@ -190,8 +196,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/insertBbs.irs")
-	public NexacroResult insertBbs(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult insertBbs(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.insertBbs(requestMap);
@@ -206,8 +214,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/updateBbs.irs")
-	public NexacroResult updateBbs(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult updateBbs(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.updateBbs(requestMap);
@@ -222,8 +232,10 @@ public class BbmController {
 	 * @return
 	 */
 	@PostMapping("/admin/bbm/deleteBbs.irs")
-	public NexacroResult deleteBbs(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult deleteBbs(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = bbmService.deleteBbs(requestMap);

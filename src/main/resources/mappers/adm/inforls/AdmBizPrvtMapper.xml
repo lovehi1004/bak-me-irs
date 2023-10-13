@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.inforls.mapper.AdmBizPrvtMapper">
+	
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 목록조회 총건수 조회 -->
+	<select id="selectBizPrvtListCnt" resultType="int" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 목록조회 -->
+	<select id="selectBizPrvtList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmBizPrvtMapper.selectBizPrvtList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 상세조회 -->
+	<select id="selectBizPrvtDetail" resultType="egovMap" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 심의결과등록 -->
+	<insert id="insertBizPrvtRvwRslt" parameterType="map">
+		/* AdmBizPrvtMapper.insertBizPrvtRvwRslt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 심의결과조회 -->
+	<select id="selectBizPrvtRvwRslt" resultType="egovMap" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtRvwRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 이력목록조회 -->
+	<select id="selectBizPrvtHistList" resultType="egovMap" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 보고서출력 -->
+	<select id="selectBizPrvtRpt" resultType="egovMap" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 관장기관변경 -->
+	<update id="updateBizPrvtInst" parameterType="map">
+		/* AdmBizPrvtMapper.updateBizPrvtInst */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 정보공개관리 > 사업비공개관리 - 액셀다운로드 -->
+	<select id="selectBizPrvtExcel" resultType="egovMap" parameterType="map">
+		/* AdmBizPrvtMapper.selectBizPrvtExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

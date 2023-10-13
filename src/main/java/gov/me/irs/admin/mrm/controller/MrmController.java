@@ -3,7 +3,6 @@ package gov.me.irs.admin.mrm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -12,6 +11,7 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 import org.springframework.stereotype.Controller;
 
 import gov.me.irs.admin.mrm.service.MrmService;
+import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +63,10 @@ public class MrmController {
 	 * @return
 	 */
 	@PostMapping("/admin/mrm/saveMenuRole.irs")
-	public NexacroResult saveMenuRole(@AuthenticationPrincipal TableUser tableUser, @ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
+	public NexacroResult saveMenuRole(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
 		requestMap.put("sessionUserId", tableUser.getUserId());
 		int result = mrmService.saveMenuRole(requestMap);

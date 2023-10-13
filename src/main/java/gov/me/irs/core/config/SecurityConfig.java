@@ -108,22 +108,19 @@ public class SecurityConfig {
                 .antMatchers("/common/report.irs").permitAll()						/* URL고정 - 리포트, 인증체크 없음 */
                 .antMatchers("/common/rsa.irs").permitAll()							/* URL고정 - RSA 공개키, 개인키 생성 */
                 .antMatchers("/common/file/**").permitAll()							/* URL고정 - 파일업로드 and 파일다운로드 */
-                
-                
-                
-                
+                .antMatchers("/common/initial/**").authenticated()					/* URL고정 - 인증 사용자용 공통, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
                 
                 
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZ, RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZ)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SYSTEM, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
                 
                 
-                .antMatchers("/admin/**").hasAnyRole(RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
+                .antMatchers("/admin/**").hasAnyRole(RoleConst.SYSTEM, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
                 .antMatchers("/user/**").authenticated()																	/* 권한설정 예시2 - 인증상태만 접근가능 */
-                .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZ)															/* 권한설정 예시3 - 인증상태만 접근가능 */
+                .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZADMIN)															/* 권한설정 예시3 - 인증상태만 접근가능 */
                 .antMatchers("/**").permitAll()																				/* 권한설정 예시4 - 인증체크 없음 */
                 .and()
                 	.logout().logoutUrl("/logout")
