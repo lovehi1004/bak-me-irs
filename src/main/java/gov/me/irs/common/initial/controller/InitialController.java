@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nexacro.uiadapter.spring.core.annotation.ParamVariable;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
 import gov.me.irs.common.constants.Const;
@@ -87,7 +87,10 @@ public class InitialController {
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ selectGroupCodeList ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
-		List<Map<String, Object>> list = initialService.selectGroupCodeList(null);
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("delYn", Const.DEL.N);
+		
+		List<Map<String, Object>> list = initialService.selectGroupCodeList(parameterMap);
 		nexacroResult.addDataSet("groupCodeList", list);
 		
 		return nexacroResult;
@@ -102,13 +105,17 @@ public class InitialController {
 	 */
 	@PostMapping("/common/initial/selectCodeList.irs")
 	public NexacroResult selectCodeList(HttpServletRequest request
-			, @RequestParam(required=true, value="groupCode") String groupCode) throws Exception {
+			, @ParamVariable(name="groupCode") String groupCode) throws Exception {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ selectCodeList ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
-		List<Map<String, Object>> list = initialService.selectCodeList(null);
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("delYn", Const.DEL.N);
+		parameterMap.put("groupCode", groupCode);
+		
+		List<Map<String, Object>> list = initialService.selectCodeList(parameterMap);
 		nexacroResult.addDataSet("codeList", list);
 		
 		return nexacroResult;
@@ -128,7 +135,10 @@ public class InitialController {
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ selectErrorMessegeList ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
-		List<Map<String, Object>> list = initialService.selectErrorMessegeList(null);
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("delYn", Const.DEL.N);
+		
+		List<Map<String, Object>> list = initialService.selectErrorMessegeList(parameterMap);
 		nexacroResult.addDataSet("errorMessegeList", list);
 		
 		return nexacroResult;

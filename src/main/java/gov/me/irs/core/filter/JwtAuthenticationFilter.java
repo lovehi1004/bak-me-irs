@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import gov.me.irs.common.constants.Const;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	private final JwtTokenProvider jwtTokenProvider;
@@ -56,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		
+		log.debug("▶▶▶▶▶▶▶▶▶▶ [JwtAuthenticationFilter]");
+
 		try {
 			if(request.getAttribute("exception") == null) {
 				
@@ -161,6 +165,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				log.debug("▶▶▶▶▶▶▶▶▶▶ [예외처리 리다이렉트]");
 			}
 			
+			filterChain.doFilter(request, response);
+			
 		} catch (ExpiredJwtException e) {
 			//만료 에러 - Jwt Libarary내부처리
             request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_EXTRA_ERROR_8011.getCode());
@@ -175,7 +181,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode());
 		}
         
-		filterChain.doFilter(request, response);
 	}
 	
 	/**

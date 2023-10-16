@@ -13,7 +13,7 @@
             this.set_titletext("Form_Work");
             if (Form == this.constructor)
             {
-                this._setFormPosition(1280,830);
+                this._setFormPosition(2070,1360);
             }
             
             // Object(Dataset, ExcelExportObject) Initialize
@@ -72,6 +72,26 @@
             this.addChild(obj.name, obj);
 
 
+            obj = new Dataset("dsGroupCode", this);
+            obj._setContents("<ColumnInfo><ConstColumn id=\"groupCdMgno\" type=\"STRING\" size=\"20\"/><ConstColumn id=\"groupCdEngNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"groupCdKornNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"cdRegLmtCnt\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"cdCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsCode", this);
+            obj._setContents("<ColumnInfo><ConstColumn id=\"groupCdMgno\" type=\"STRING\" size=\"20\"/><ConstColumn id=\"cdMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"cdEngNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"cdKornNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"sortSeqo\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsErrMessage", this);
+            obj._setContents("<ColumnInfo><ConstColumn id=\"errMsgCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"errMsgClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"errMsgNtnCd\" type=\"STRING\" size=\"2\"/><ConstColumn id=\"errMsgNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"inptCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsMenu", this);
+            obj._setContents("<ColumnInfo><ConstColumn id=\"menuMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"upMenuMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"menuClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"menuNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"menuUrlAddr\" type=\"STRING\" size=\"100\"/><ConstColumn id=\"menuLvl\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"sortSeqo\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"sysClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"roleIdMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"inqAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"regAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"mdfcnAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"delAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"excnAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"topMenuId\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"menuPath\" type=\"STRING\" size=\"500\"/><ConstColumn id=\"srchMenuNm\" type=\"STRING\" size=\"300\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
             obj = new FileUpTransfer("FileUpTransfer00", this);
             this.addChild(obj.name, obj);
 
@@ -115,7 +135,7 @@
             obj.set_color("black");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button404","534","Button00_00:20","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button404","1019","Button00_00:28","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("5");
             obj.set_text("404");
             obj.set_font("bold 10pt \"Arial\"");
@@ -143,7 +163,7 @@
             obj.set_background("#ccccff");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button_Statistics","826","382","111","84",null,null,null,null,null,null,this);
+            obj = new Button("Button_Statistics","826","430","111","36",null,null,null,null,null,null,this);
             obj.set_taborder("9");
             obj.set_text("테스트 통계조회");
             obj.set_background("#aaffaa");
@@ -313,9 +333,9 @@
             obj = new Edit("Edit_Role","908","166","104","38",null,null,null,null,null,null,this);
             obj.set_taborder("21");
             obj.set_background("yellow");
-            obj.set_value("ROLE_BIZ");
+            obj.set_value("ROLE_SYSTEM");
             obj.set_displaynulltext("권한지정");
-            obj.set_text("ROLE_BIZ");
+            obj.set_text("ROLE_SYSTEM");
             this.addChild(obj.name, obj);
 
             obj = new Button("ButtonRSA","40","225","111","31",null,null,null,null,null,null,this);
@@ -333,7 +353,7 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"767\"/></Columns><Rows><Row size=\"24\" band=\"head\"/><Row size=\"24\" band=\"head\"/><Row size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"RSAModulus\"/><Cell row=\"1\" text=\"RSAExponent\"/></Band><Band id=\"body\"><Cell text=\"bind:RSAModulus\"/><Cell row=\"1\" text=\"bind:RSAExponent\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonMenu","950","382","140","84",null,null,null,null,null,null,this);
+            obj = new Button("ButtonMenu","950","672","125","38",null,null,null,null,null,null,this);
             obj.set_taborder("24");
             obj.set_text("메뉴정보 조회테스트");
             obj.set_background("#aaffaa");
@@ -344,8 +364,65 @@
             obj = new Edit("Edit_LoginId","742","166","158","38",null,null,null,null,null,null,this);
             obj.set_taborder("25");
             obj.set_background("yellow");
-            obj.set_value("ddeeff@gmail.com");
-            obj.set_text("ddeeff@gmail.com");
+            obj.set_value("vvwwxx@gmail.com");
+            obj.set_text("vvwwxx@gmail.com");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonGroupCode","961","380","140","40",null,null,null,null,null,null,this);
+            obj.set_taborder("26");
+            obj.set_text("그룹코드 조회테스트");
+            obj.set_background("#aaffaa");
+            obj.set_color("black");
+            obj.set_font("bold 10pt \"Arial\"");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonCode","1540","380","140","40",null,null,null,null,null,null,this);
+            obj.set_taborder("27");
+            obj.set_text("코드상세 조회테스트");
+            obj.set_background("#aaffaa");
+            obj.set_color("black");
+            obj.set_font("bold 10pt \"Arial\"");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonErrMessage","1710","382","140","40",null,null,null,null,null,null,this);
+            obj.set_taborder("28");
+            obj.set_text("오류메세지 조회테스트");
+            obj.set_background("#aaffaa");
+            obj.set_color("black");
+            obj.set_font("bold 10pt \"Arial\"");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid03","951","431","389","229",null,null,null,null,null,null,this);
+            obj.set_taborder("29");
+            obj.set_binddataset("dsGroupCode");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"groupCdMgno\"/><Cell col=\"1\" text=\"groupCdEngNm\"/><Cell col=\"2\" text=\"groupCdKornNm\"/><Cell col=\"3\" text=\"cdRegLmtCnt\"/><Cell col=\"4\" text=\"cdCnt\"/></Band><Band id=\"body\"><Cell text=\"bind:groupCdMgno\"/><Cell col=\"1\" text=\"bind:groupCdEngNm\"/><Cell col=\"2\" text=\"bind:groupCdKornNm\"/><Cell col=\"3\" text=\"bind:cdRegLmtCnt\"/><Cell col=\"4\" text=\"bind:cdCnt\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid04","1348","432","352","228",null,null,null,null,null,null,this);
+            obj.set_taborder("30");
+            obj.set_binddataset("dsCode");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"groupCdMgno\"/><Cell col=\"1\" text=\"cdMgno\"/><Cell col=\"2\" text=\"cdEngNm\"/><Cell col=\"3\" text=\"cdKornNm\"/><Cell col=\"4\" text=\"sortSeqo\"/></Band><Band id=\"body\"><Cell text=\"bind:groupCdMgno\"/><Cell col=\"1\" text=\"bind:cdMgno\"/><Cell col=\"2\" text=\"bind:cdEngNm\"/><Cell col=\"3\" text=\"bind:cdKornNm\"/><Cell col=\"4\" text=\"bind:sortSeqo\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid05","1705","432","348","228",null,null,null,null,null,null,this);
+            obj.set_taborder("31");
+            obj.set_binddataset("dsErrMessage");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"errMsgCd\"/><Cell col=\"1\" text=\"errMsgClCd\"/><Cell col=\"2\" text=\"errMsgNtnCd\"/><Cell col=\"3\" text=\"errMsgNm\"/><Cell col=\"4\" text=\"inptCnt\"/></Band><Band id=\"body\"><Cell text=\"bind:errMsgCd\"/><Cell col=\"1\" text=\"bind:errMsgClCd\"/><Cell col=\"2\" text=\"bind:errMsgNtnCd\"/><Cell col=\"3\" text=\"bind:errMsgNm\"/><Cell col=\"4\" text=\"bind:inptCnt\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Edit("Edit_GroupCode","1350","381","156","38",null,null,null,null,null,null,this);
+            obj.set_taborder("32");
+            obj.set_background("#aaffaa");
+            obj.set_displaynulltext("그룹코드값");
+            obj.set_color("black");
+            obj.set_value("DGR_REG_RSN_CD");
+            obj.set_text("DGR_REG_RSN_CD");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid06","958","732","1092","578",null,null,null,null,null,null,this);
+            obj.set_taborder("33");
+            obj.set_binddataset("dsMenu");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"menuMgno\"/><Cell col=\"1\" text=\"upMenuMgno\"/><Cell col=\"2\" text=\"menuClCd\"/><Cell col=\"3\" text=\"menuNm\"/><Cell col=\"4\" text=\"menuUrlAddr\"/><Cell col=\"5\" text=\"menuLvl\"/><Cell col=\"6\" text=\"sortSeqo\"/><Cell col=\"7\" text=\"sysClCd\"/><Cell col=\"8\" text=\"roleIdMgno\"/><Cell col=\"9\" text=\"inqAuthrtYn\"/><Cell col=\"10\" text=\"regAuthrtYn\"/><Cell col=\"11\" text=\"mdfcnAuthrtYn\"/><Cell col=\"12\" text=\"delAuthrtYn\"/><Cell col=\"13\" text=\"excnAuthrtYn\"/><Cell col=\"14\" text=\"topMenuId\"/><Cell col=\"15\" text=\"menuPath\"/><Cell col=\"16\" text=\"srchMenuNm\"/></Band><Band id=\"body\"><Cell text=\"bind:menuMgno\"/><Cell col=\"1\" text=\"bind:upMenuMgno\"/><Cell col=\"2\" text=\"bind:menuClCd\"/><Cell col=\"3\" text=\"bind:menuNm\"/><Cell col=\"4\" text=\"bind:menuUrlAddr\"/><Cell col=\"5\" text=\"bind:menuLvl\"/><Cell col=\"6\" text=\"bind:sortSeqo\"/><Cell col=\"7\" text=\"bind:sysClCd\"/><Cell col=\"8\" text=\"bind:roleIdMgno\"/><Cell col=\"9\" text=\"bind:inqAuthrtYn\"/><Cell col=\"10\" text=\"bind:regAuthrtYn\"/><Cell col=\"11\" text=\"bind:mdfcnAuthrtYn\"/><Cell col=\"12\" text=\"bind:delAuthrtYn\"/><Cell col=\"13\" text=\"bind:excnAuthrtYn\"/><Cell col=\"14\" text=\"bind:topMenuId\"/><Cell col=\"15\" text=\"bind:menuPath\"/><Cell col=\"16\" text=\"bind:srchMenuNm\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
@@ -353,7 +430,7 @@
             this.Div00_Report.form.addLayout(obj.name, obj);
 
             //-- Default Layout : this
-            obj = new Layout("default","Desktop_screen",1280,830,this,function(p){});
+            obj = new Layout("default","Desktop_screen",2070,1360,this,function(p){});
             this.addLayout(obj.name, obj);
             
             // BindItem Information
@@ -913,7 +990,7 @@
           var strSvcId    = "menutest";
           var strSvcUrl   = "svc::common/initial/selectMenuList.irs";
           var inData      = "";
-          var outData     = "ds_menu_reseult=menu";
+          var outData     = "dsMenu=menuList";
           var strArg      = "aaaa=1111";
           var callBackFnc = "fnMenuCallback";
           var isAsync     = true;
@@ -931,6 +1008,83 @@
         {
           this.alert(errorCode+"\n"+errorMsg);
         };
+
+        /* 그룹코드 목록 - 로그인 후 조회 */
+        this.ButtonGroupCode_onclick = function(obj,e)
+        {
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
+
+
+          var strSvcId    = "GroupCodetest";
+          var strSvcUrl   = "svc::common/initial/selectGroupCodeList.irs";
+          var inData      = "";
+          var outData     = "dsGroupCode=groupCodeList";
+          var strArg      = "aaaa=1111";
+          var callBackFnc = "fnCallback";
+          var isAsync     = true;
+
+          this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+              strSvcUrl ,       // trabsaction을 요청할 주소
+              inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+              outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+              strArg,         // 입력값으로 보낼 arguments, a=b
+              callBackFnc,       // transaction의 결과를 받을 Function 이름
+              isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+        /* 코드상세 목록 - 로그인 후 조회 */
+        this.ButtonCode_onclick = function(obj,e)
+        {
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
+
+        var groupCode = this.Edit_GroupCode.value;
+
+
+
+          var strSvcId    = "Codetest";
+          var strSvcUrl   = "svc::common/initial/selectCodeList.irs";
+          var inData      = "";
+          var outData     = "dsCode=codeList";
+          var strArg      = "groupCode=" + groupCode;
+          var callBackFnc = "fnCallback";
+          var isAsync     = true;
+
+          this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+              strSvcUrl ,       // trabsaction을 요청할 주소
+              inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+              outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+              strArg,         // 입력값으로 보낼 arguments, a=b
+              callBackFnc,       // transaction의 결과를 받을 Function 이름
+              isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+        /* 오류메세지 목록 - 로그인 후 조회 */
+        this.ButtonErrMessage_onclick = function(obj,e)
+        {
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
+
+
+          var strSvcId    = "ErrMessagtest";
+          var strSvcUrl   = "svc::common/initial/selectErrorMessegeList.irs";
+          var inData      = "";
+          var outData     = "dsErrMessage=errorMessegeList";
+          var strArg      = "aaaa=1111";
+          var callBackFnc = "fnCallback";
+          var isAsync     = true;
+
+          this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+              strSvcUrl ,       // trabsaction을 요청할 주소
+              inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+              outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+              strArg,         // 입력값으로 보낼 arguments, a=b
+              callBackFnc,       // transaction의 결과를 받을 Function 이름
+              isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+
         });
         
         // Regist UI Components Event
@@ -953,6 +1107,11 @@
             this.ButtonFileUpPage.addEventHandler("onclick",this.ButtonFileUpPage_onclick,this);
             this.ButtonRSA.addEventHandler("onclick",this.ButtonRSA_onclick,this);
             this.ButtonMenu.addEventHandler("onclick",this.ButtonMenu_onclick,this);
+            this.Edit_LoginId.addEventHandler("onchanged",this.Edit_LoginId_onchanged,this);
+            this.ButtonGroupCode.addEventHandler("onclick",this.ButtonGroupCode_onclick,this);
+            this.ButtonCode.addEventHandler("onclick",this.ButtonCode_onclick,this);
+            this.ButtonErrMessage.addEventHandler("onclick",this.ButtonErrMessage_onclick,this);
+            this.Edit_GroupCode.addEventHandler("onchanged",this.Edit_GroupCode_onchanged,this);
             this.FileUpTransfer00.addEventHandler("onerror",this.FileUpTransfer00_onerror,this);
             this.FileUpTransfer00.addEventHandler("onprogress",this.FileUpTransfer00_onprogress,this);
             this.FileUpTransfer00.addEventHandler("onsuccess",this.FileUpTransfer00_onsuccess,this);

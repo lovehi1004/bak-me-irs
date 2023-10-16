@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import gov.me.irs.core.filter.JwtAuthenticationFilter;
-import gov.me.irs.core.provider.JwtTokenProvider;
+import gov.me.irs.core.config.handler.CoreAccessDeniedHandler;
 import gov.me.irs.core.constants.RoleConst;
 import gov.me.irs.core.user.handler.CoreLogoutSuccessHandler;
 
@@ -36,9 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 	
-	private final JwtTokenProvider jwtTokenProvider;
 	private final SecurityAuthenticationEntryPoint securityAuthenticationEntryPoint;
 	private final CoreLogoutSuccessHandler coreLogoutSuccessHandler;
+	
+	private final CoreAccessDeniedHandler coreAccessDeniedHandler;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	/**
 	 * 비밀번호 암호화
@@ -103,6 +105,7 @@ public class SecurityConfig {
         http.httpBasic().disable()					// jwt설정
                 .authorizeRequests()
                 .antMatchers(IGNORING_MATCH_LIST).permitAll()
+                .antMatchers("/install.irs").permitAll()							/* URL고정 - 초기데이터 생성 */
                 .antMatchers("/exception/**").permitAll()							/* URL고정 - 인증 예외처리 전용 */
                 .antMatchers("/login").permitAll()									/* URL고정 - 인증체크 없음 */
                 .antMatchers("/common/report.irs").permitAll()						/* URL고정 - 리포트, 인증체크 없음 */
@@ -114,7 +117,7 @@ public class SecurityConfig {
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SYSTEM, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SYSTEM)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
                 
                 
@@ -127,9 +130,10 @@ public class SecurityConfig {
                 	.logoutSuccessHandler(coreLogoutSuccessHandler).permitAll()
                 .and()
                 	.exceptionHandling()
-                	.authenticationEntryPoint(securityAuthenticationEntryPoint)
+                	.authenticationEntryPoint(securityAuthenticationEntryPoint)				/* 인증예외 처리 */
+                	.accessDeniedHandler(coreAccessDeniedHandler)							/* 인가예외 처리 */
                 .and()
-        			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+        			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         http.headers()
         		.xssProtection()																//X-XSS-Protection 헤더 설정

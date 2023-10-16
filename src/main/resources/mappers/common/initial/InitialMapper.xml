@@ -12,23 +12,17 @@
 			 , W.UP_MENU_MGNO
 			 , W.MENU_CL_CD
 			 , W.MENU_NM
-			 , W.MENU_EXPLN
 			 , W.MENU_URL_ADDR
 			 , W.MENU_LVL
 			 , W.SORT_SEQO
-			 , W.SYS_CL_CD
-			 , W.PTH
-			 , MR.ROLE_ID_MGNO
 			 , CASE WHEN MR.INQ_AUTHRT_YN IS NULL THEN 'N' ELSE MR.INQ_AUTHRT_YN END AS INQ_AUTHRT_YN
 			 , CASE WHEN MR.REG_AUTHRT_YN IS NULL THEN 'N' ELSE MR.REG_AUTHRT_YN END AS REG_AUTHRT_YN
 			 , CASE WHEN MR.MDFCN_AUTHRT_YN IS NULL THEN 'N' ELSE MR.MDFCN_AUTHRT_YN END AS MDFCN_AUTHRT_YN
 			 , CASE WHEN MR.DEL_AUTHRT_YN IS NULL THEN 'N' ELSE MR.DEL_AUTHRT_YN END AS DEL_AUTHRT_YN
 			 , CASE WHEN MR.EXCN_AUTHRT_YN IS NULL THEN 'N' ELSE MR.EXCN_AUTHRT_YN END AS EXCN_AUTHRT_YN
-			 , CASE WHEN MR.ROLE_ID_MGNO IS NULL THEN 'N'
-			 		ELSE 'Y'
-			   END AS ROLE_YN
 			 , W.PTH[2] AS TOP_MENU_ID
 			 , ARRAY_TO_STRING(ARRAY_REMOVE(ARRAY_REMOVE(W.MENU_PATH, W.MENU_PATH[ARRAY_LENGTH(W.MENU_PATH, 1)]), W.MENU_PATH[1]), ' > ') AS MENU_PATH
+			 , W.MENU_NM AS SRCH_MENU_NM
 		  FROM WITH_MENU_LIST W
 		 INNER JOIN irsuser.MENU_ROLE_DTL MR
 		    ON MR.MENU_MGNO = W.MENU_MGNO
@@ -45,16 +39,53 @@
 	<!-- 그룹코드 목록 조회 -->
 	<select id="selectGroupCodeList" resultType="egovMap" parameterType="map">
 		/* InitialMapper.selectGroupCodeList */
+		SELECT GC.GROUP_CD_MGNO				/* 그룹코드관리번호 */
+			 , GC.GROUP_CD_ENG_NM				/* 그룹코드영문명 */
+			 , GC.GROUP_CD_KORN_NM				/* 그룹코드한글명 */
+			 , GC.CD_REG_LMT_CNT				/* 코드등록제한수 */
+			 , (SELECT COUNT(*) FROM irsuser.COM_CD_DTL CD WHERE CD.GROUP_CD_MGNO = GC.GROUP_CD_MGNO) AS CD_CNT			/* 코드건수 */
+		  FROM irsuser.COM_GROUP_CD_BSC GC
+		 WHERE 1 = 1
+		<if test="delYn != null and !delYn.equals('')">
+		   AND GC.DEL_YN = #{delYn}
+		</if>
+		 ORDER BY GC.GROUP_CD_KORN_NM
 	</select>
 	
 	<!-- 코드상세 목록 조회 -->
 	<select id="selectCodeList" resultType="egovMap" parameterType="map">
 		/* InitialMapper.selectCodeList */
+		SELECT GC.GROUP_CD_MGNO				/* 그룹코드관리번호 */
+			 , CD.CD_MGNO					/* 코드관리번호 */
+			 , CD.CD_ENG_NM					/* 코드영문명 */
+			 , CD.CD_KORN_NM				/* 코드한글명 */
+			 , CD.SORT_SEQO					/* 정렬순서 */	
+		  FROM irsuser.COM_GROUP_CD_BSC GC
+		 INNER JOIN irsuser.COM_CD_DTL CD
+		    ON CD.GROUP_CD_MGNO = GC.GROUP_CD_MGNO
+		   AND GC.GROUP_CD_MGNO = #{groupCode}
+		   AND GC.DEL_YN = 'N'
+		<if test="delYn != null and !delYn.equals('')">
+		   AND CD.DEL_YN = #{delYn}
+		</if>
+		 ORDER BY CD.SORT_SEQO
 	</select>
 	
 	<!-- 오류메세지 목록 조회 -->
 	<select id="selectErrorMessegeList" resultType="egovMap" parameterType="map">
 		/* InitialMapper.selectErrorMessegeList */
+		SELECT ERR_MSG_CD					/* 오류메시지코드 */
+			 , ERR_MSG_CL_CD				/* 오류메시지구분코드 */
+			 , ERR_MSG_NTN_CD				/* 오류메시지국가코드 */
+			 , ERR_MSG_NM					/* 오류메시지명 */
+			 , INPT_CNT						/* 입력수 */	
+			 , USE_YN						/* 사용여부 */
+		  FROM irsuser.COM_ERR_MSG_BSC
+		 WHERE 1 = 1
+		<if test="delYn != null and !delYn.equals('')">
+		   AND DEL_YN = #{delYn}
+		</if>
+		 ORDER BY ERR_MSG_CD
 	</select>
 	
 	
