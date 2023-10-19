@@ -19,10 +19,18 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum UserClCdEnum implements EnumType {
 	
-	UNAPPROVED(
-			RoleConst.CODE_UNAPPROVED,
-			RoleConst.ROLE_UNAPPROVED
-	),											//역할 : 비승인사용자
+	SUPER(
+			RoleConst.CODE_SUPER,
+			RoleConst.ROLE_SUPER
+	),											//역할 : 전체관리자
+	DIRECTOR(
+			RoleConst.CODE_DIRECTOR,
+			RoleConst.ROLE_DIRECTOR
+	),											//역할 : 관장기관
+	OUTSOURCING(
+			RoleConst.CODE_OUTSOURCING,
+			RoleConst.ROLE_OUTSOURCING
+	),											//역할 : 위탁기관
 	BIZADMIN(
 			RoleConst.CODE_BIZADMIN,
 			RoleConst.ROLE_BIZADMIN
@@ -31,14 +39,6 @@ public enum UserClCdEnum implements EnumType {
 			RoleConst.CODE_BIZREPRESENT,
 			RoleConst.ROLE_BIZREPRESENT
 	),											//역할 : 사업수행자_계정대표자
-	OUTSOURCING(
-			RoleConst.CODE_OUTSOURCING,
-			RoleConst.ROLE_OUTSOURCING
-	),											//역할 : 위탁기관
-	DIRECTOR(
-			RoleConst.CODE_DIRECTOR,
-			RoleConst.ROLE_DIRECTOR
-	),											//역할 : 관장기관
 	MOFA(
 			RoleConst.CODE_MOFA,
 			RoleConst.ROLE_MOFA
@@ -47,10 +47,18 @@ public enum UserClCdEnum implements EnumType {
 			RoleConst.CODE_ORGAN,
 			RoleConst.ROLE_ORGAN
 	),											//역할 : 기타부처
-	SYSTEM(
-			RoleConst.CODE_SYSTEM,
-			RoleConst.ROLE_SYSTEM
-	);											//역할 : 시스템관리자
+	UNAPPROVED(
+			RoleConst.CODE_UNAPPROVED,
+			RoleConst.ROLE_UNAPPROVED
+	),											//역할 : 비승인사용자
+	DIRECTORBIZ(
+			RoleConst.CODE_DIRECTORBIZ,
+			RoleConst.ROLE_DIRECTORBIZ
+	),											//역할 : 관장기관 사업수행자
+	OUTSOURCINGBIZ(
+			RoleConst.CODE_OUTSOURCINGBIZ,
+			RoleConst.ROLE_OUTSOURCINGBIZ
+	);											//역할 : 위탁기관 사업수행자
 	
     private String code;
     private String value;

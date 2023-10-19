@@ -58,7 +58,7 @@ public class SecurityConfig {
 	}
 	
 	/**
-	 * CORS 적용 - 로컬 개발용
+	 * CORS 적용
 	 * 
 	 * @return
 	 */
@@ -67,6 +67,7 @@ public class SecurityConfig {
         return new WebMvcConfigurer() {
             @Override
 			public void addCorsMappings(CorsRegistry registry) {
+            	/* 로컬 넥사크로 스튜디오 전용 */
             	registry.addMapping("/**").allowedOrigins("http://localhost:4098", "http://127.0.0.1:4098").allowedMethods("GET", "POST");
 			}
         };
@@ -105,23 +106,26 @@ public class SecurityConfig {
         http.httpBasic().disable()					// jwt설정
                 .authorizeRequests()
                 .antMatchers(IGNORING_MATCH_LIST).permitAll()
-                .antMatchers("/install.irs").permitAll()							/* URL고정 - 초기데이터 생성 */
-                .antMatchers("/exception/**").permitAll()							/* URL고정 - 인증 예외처리 전용 */
-                .antMatchers("/login").permitAll()									/* URL고정 - 인증체크 없음 */
-                .antMatchers("/common/report.irs").permitAll()						/* URL고정 - 리포트, 인증체크 없음 */
-                .antMatchers("/common/rsa.irs").permitAll()							/* URL고정 - RSA 공개키, 개인키 생성 */
-                .antMatchers("/common/file/**").permitAll()							/* URL고정 - 파일업로드 and 파일다운로드 */
-                .antMatchers("/common/initial/**").authenticated()					/* URL고정 - 인증 사용자용 공통, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/install.irs").permitAll()								/* URL고정 - 초기데이터 생성 */
+                .antMatchers("/exception/**").permitAll()								/* URL고정 - 인증 예외처리 전용 */
+                .antMatchers("/prepare/login").permitAll()								/* URL고정 - 인증체크 없음 */
+                .antMatchers("/login").permitAll()										/* URL고정 - 인증체크 없음 */
+                .antMatchers("/common/report.irs").permitAll()							/* URL고정 - 리포트, 인증체크 없음 */
+                .antMatchers("/common/rsa.irs").permitAll()								/* URL고정 - RSA 공개키, 개인키 생성 */
+                .antMatchers("/common/file/**").permitAll()								/* URL고정 - 파일업로드 and 파일다운로드 */
+                .antMatchers("/common/initial/selectGroupCodeList.irs").permitAll()		/* URL고정 - 그롭코드 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/selectCodeList.irs").permitAll()			/* URL고정 - 코드상세 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/**").authenticated()						/* URL고정 - 인증 사용자용 공통, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
                 
                 
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
 //                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SYSTEM, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SYSTEM)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
+                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SUPER)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
                 /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
                 
                 
-                .antMatchers("/admin/**").hasAnyRole(RoleConst.SYSTEM, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
+                .antMatchers("/admin/**").hasAnyRole(RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
                 .antMatchers("/user/**").authenticated()																	/* 권한설정 예시2 - 인증상태만 접근가능 */
                 .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZADMIN)															/* 권한설정 예시3 - 인증상태만 접근가능 */
                 .antMatchers("/**").permitAll()																				/* 권한설정 예시4 - 인증체크 없음 */

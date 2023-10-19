@@ -1,15 +1,17 @@
 package gov.me.irs.common.initial.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.nexacro.uiadapter.spring.core.annotation.ParamVariable;
+import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
 import gov.me.irs.common.constants.Const;
@@ -33,15 +35,38 @@ public class InitialController {
 	private final InitialService initialService;
 	
 	/**
+	 * 인증사용자 사용자정보 조회 - 넥사크로N 화면에서 사용할 로그인 후 인증된 사용자정보
+	 * 	- Client으로부터의 파라미터정보 : 불필요
+	 * 	- 인증정보로 조회
+	 * 
+	 * @return
+	 */
+	@PostMapping("/common/initial/selectUserInfo.irs")
+	public NexacroResult selectUserInfo() throws Exception {
+		
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("userId", tableUser.getUserId());
+		parameterMap.put("roleIdMgno", UserSession.getRoleKey());
+		
+		Map<String, Object> map = initialService.selectUserInfo(parameterMap);
+		nexacroResult.addDataSet("userInfo", map);
+		
+		return nexacroResult;
+	}
+	
+	/**
 	 * 사용자권한 메뉴 목록 조회
 	 * 	- Client으로부터의 파라미터정보 : 불필요
 	 * 	- 인증정보로 조회
 	 * 
-	 * @param requestMap
 	 * @return
 	 */
 	@PostMapping("/common/initial/selectMenuList.irs")
-	public NexacroResult selectMenuList(HttpServletRequest request) throws Exception {
+	public NexacroResult selectMenuList() throws Exception {
 		
 		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
 		
@@ -77,11 +102,10 @@ public class InitialController {
 	 * 그룹코드 목록 조회
 	 * 	- Client으로부터의 파라미터정보 : 불필요
 	 * 
-	 * @param requestMap
 	 * @return
 	 */
 	@PostMapping("/common/initial/selectGroupCodeList.irs")
-	public NexacroResult selectGroupCodeList(HttpServletRequest request) throws Exception {
+	public NexacroResult selectGroupCodeList() throws Exception {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
@@ -104,18 +128,40 @@ public class InitialController {
 	 * @return
 	 */
 	@PostMapping("/common/initial/selectCodeList.irs")
-	public NexacroResult selectCodeList(HttpServletRequest request
-			, @ParamVariable(name="groupCode") String groupCode) throws Exception {
+	public NexacroResult selectCodeList(@ParamDataSet(name = "searchCode") Map<String, Object> requestMap) throws Exception {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ selectCodeList ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
-		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		parameterMap.put("delYn", Const.DEL.N);
-		parameterMap.put("groupCode", groupCode);
+		/* 1. 파라미터에 값이 존재하면 */
+		if(!ObjectUtils.isEmpty(requestMap.get("groupCodes"))) {
+			String groupCodes = (String) requestMap.get("groupCodes");
+			
+			Set<String> groupCodeSet = new HashSet<String>();
+			
+			String groupCodeArray[] = groupCodes.split("\\|");
+			
+			for (String groupCode : groupCodeArray) {
+				
+				/* 2. 파라미터에 유효값이 존재하면 Set에 담기 */
+				if(!groupCode.trim().isEmpty()) {
+					groupCodeSet.add(groupCode);
+				}
+			}
+			
+			/* 3. Set에 유효값이 존재하면 */
+			if(groupCodeSet.size() > Const.NUMERIC.ZERO) {
+				Map<String, Object> parameterMap = new HashMap<String, Object>();
+				parameterMap.put("delYn", Const.DEL.N);
+				parameterMap.put("groupCodeSet", groupCodeSet);
+				
+				list = initialService.selectCodeList(parameterMap);
+			}
+		}
 		
-		List<Map<String, Object>> list = initialService.selectCodeList(parameterMap);
 		nexacroResult.addDataSet("codeList", list);
 		
 		return nexacroResult;
@@ -125,11 +171,10 @@ public class InitialController {
 	 * 오류메세지 목록 조회
 	 * 	- Client으로부터의 파라미터정보 : 불필요
 	 * 
-	 * @param requestMap
 	 * @return
 	 */
 	@PostMapping("/common/initial/selectErrorMessegeList.irs")
-	public NexacroResult selectErrorMessegeList(HttpServletRequest request) throws Exception {
+	public NexacroResult selectErrorMessegeList() throws Exception {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		

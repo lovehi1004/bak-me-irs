@@ -37,6 +37,8 @@ public class InstallService {
 		installMapper.insertMenuRoleData();
 		installMapper.insertUserData();
 		installMapper.insertUserRoleData();
+		
+		installMapper.insert_COM_NTN_CD_BSC_Data();
 	}
 	
 }

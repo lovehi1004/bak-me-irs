@@ -38,10 +38,11 @@ public class InstallController {
 		int menuRoleCnt = Integer.valueOf(String.valueOf(map.get("menuRoleCnt")));
 		int userCnt = Integer.valueOf(String.valueOf(map.get("userCnt")));
 		int userRoleCnt = Integer.valueOf(String.valueOf(map.get("userRoleCnt")));
+		int comNtnCdBscCnt = Integer.valueOf(String.valueOf(map.get("comNtnCdBscCnt")));
 		
 		log.info("[map][{}]", map);
 		
-		if((menuCnt + roleCnt + menuRoleCnt + userCnt + userRoleCnt) > Const.NUMERIC.ZERO) {
+		if((menuCnt + roleCnt + menuRoleCnt + userCnt + userRoleCnt + comNtnCdBscCnt) > Const.NUMERIC.ZERO) {
 			log.info("[초기데이터 생성이 불가합니다.]");
 		} else {
 			log.info("[초기데이터 생성을 진행합니다.]");

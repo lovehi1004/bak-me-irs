@@ -50,7 +50,7 @@ public enum JwtAuthEnum implements CoreResponseEnumType {
 	
 	AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED(
 			JwtConst.AUTH_CODE.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED,
-			JwtConst.AUTH_MESSAGE.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED),		//@PreAuthorize 전용 예외처리
+			JwtConst.AUTH_MESSAGE.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED),		//@PreAuthorize 전용 예외처리, /prepare/login 호출 후 /login 호출시점에 DB or 클라이언트에서 권한정보 조작시 발생
 	
 	NOT_FOUND_USER_ID(
 			JwtConst.AUTH_CODE.NOT_FOUND_USER_ID,

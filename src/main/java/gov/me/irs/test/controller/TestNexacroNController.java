@@ -57,7 +57,7 @@ public class TestNexacroNController {
 	 * @param requestMap
 	 * @return
 	 */
-	@PreAuthorize("hasRole('" + RoleConst.ROLE_BIZADMIN + "') or hasRole('" + RoleConst.ROLE_SYSTEM + "')")
+	@PreAuthorize("hasRole('" + RoleConst.ROLE_BIZADMIN + "') or hasRole('" + RoleConst.ROLE_SUPER + "')")
 	@PostMapping("/test/selectConnectDailyStatisticsList.irs")
 	public NexacroResult selectConnectDailyStatisticsList(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap){
 		NexacroResult nexacroResult = new NexacroResult();
@@ -108,7 +108,7 @@ public class TestNexacroNController {
 		return nexacroResult;
 	}
 	
-	@PreAuthorize("hasRole('" + RoleConst.ROLE_SYSTEM + "')")
+	@PreAuthorize("hasRole('" + RoleConst.ROLE_SUPER + "')")
 	@PostMapping("/test/selectSampleList.do")
 	public NexacroResult selectSampleList(@ParamDataSet(name = "input1") Map<String, Object> requestMap, @ParamDataSet(name = "input1") List<Map<String, Object>> requestList) throws Exception {
 		

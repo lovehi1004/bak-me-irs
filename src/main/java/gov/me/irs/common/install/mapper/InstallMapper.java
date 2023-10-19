@@ -26,4 +26,6 @@ public interface InstallMapper {
 	void insertUserData();
 	void insertUserRoleData();
 	
+	void insert_COM_NTN_CD_BSC_Data();
+	
 }

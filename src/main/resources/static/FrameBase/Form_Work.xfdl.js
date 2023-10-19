@@ -38,7 +38,7 @@
 
 
             obj = new Dataset("ds_common_reseult", this);
-            obj._setContents("<ColumnInfo><Column id=\"status\" type=\"STRING\" size=\"256\"/><Column id=\"code\" type=\"STRING\" size=\"256\"/><Column id=\"message\" type=\"STRING\" size=\"256\"/><Column id=\"systemMessage\" type=\"STRING\" size=\"256\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"status\" type=\"STRING\" size=\"256\"/><Column id=\"code\" type=\"STRING\" size=\"256\"/><Column id=\"message\" type=\"STRING\" size=\"256\"/><Column id=\"systemMessage\" type=\"STRING\" size=\"256\"/><Column id=\"accessToken\" type=\"STRING\" size=\"256\"/><Column id=\"refreshToken\" type=\"STRING\" size=\"256\"/><Column id=\"issueToken\" type=\"STRING\" size=\"256\"/><Column id=\"reissueToken\" type=\"STRING\" size=\"256\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
@@ -53,7 +53,7 @@
 
 
             obj = new Dataset("Dataset_Statistics", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"totDt\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"visitor\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"edge\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"chrome\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"safari\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"opera\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"whale\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"ie\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"unknown\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc1\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc2\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc3\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc4\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc5\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc6\" type=\"STRING\" size=\"30\"/><ConstColumn id=\"utc0\" type=\"STRING\" size=\"30\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"totDt\" type=\"STRING\" size=\"30\"/><Column id=\"visitor\" type=\"STRING\" size=\"30\"/><Column id=\"edge\" type=\"STRING\" size=\"30\"/><Column id=\"chrome\" type=\"STRING\" size=\"30\"/><Column id=\"safari\" type=\"STRING\" size=\"30\"/><Column id=\"opera\" type=\"STRING\" size=\"30\"/><Column id=\"whale\" type=\"STRING\" size=\"30\"/><Column id=\"ie\" type=\"STRING\" size=\"30\"/><Column id=\"unknown\" type=\"STRING\" size=\"30\"/><Column id=\"utc1\" type=\"STRING\" size=\"30\"/><Column id=\"utc2\" type=\"STRING\" size=\"30\"/><Column id=\"utc3\" type=\"STRING\" size=\"30\"/><Column id=\"utc4\" type=\"STRING\" size=\"30\"/><Column id=\"utc5\" type=\"STRING\" size=\"30\"/><Column id=\"utc6\" type=\"STRING\" size=\"30\"/><Column id=\"utc0\" type=\"STRING\" size=\"30\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
@@ -68,27 +68,42 @@
 
 
             obj = new Dataset("ds_rsa_reseult", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"RSAModulus\" type=\"STRING\" size=\"200\"/><ConstColumn id=\"RSAExponent\" type=\"STRING\" size=\"200\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"RSAModulus\" type=\"STRING\" size=\"200\"/><Column id=\"RSAExponent\" type=\"STRING\" size=\"200\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
             obj = new Dataset("dsGroupCode", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"groupCdMgno\" type=\"STRING\" size=\"20\"/><ConstColumn id=\"groupCdEngNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"groupCdKornNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"cdRegLmtCnt\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"cdCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"groupCdMgno\" type=\"STRING\" size=\"300\"/><Column id=\"groupCdEngNm\" type=\"STRING\" size=\"300\"/><Column id=\"groupCdKornNm\" type=\"STRING\" size=\"5\"/><Column id=\"cdRegLmtCnt\" type=\"STRING\" size=\"5\"/><Column id=\"cdCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
             obj = new Dataset("dsCode", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"groupCdMgno\" type=\"STRING\" size=\"20\"/><ConstColumn id=\"cdMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"cdEngNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"cdKornNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"sortSeqo\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"groupCdMgno\" type=\"STRING\" size=\"20\"/><Column id=\"cdMgno\" type=\"STRING\" size=\"10\"/><Column id=\"cdEngNm\" type=\"STRING\" size=\"300\"/><Column id=\"cdKornNm\" type=\"STRING\" size=\"300\"/><Column id=\"sortSeqo\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
             obj = new Dataset("dsErrMessage", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"errMsgCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"errMsgClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"errMsgNtnCd\" type=\"STRING\" size=\"2\"/><ConstColumn id=\"errMsgNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"inptCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"errMsgCd\" type=\"STRING\" size=\"7\"/><Column id=\"errMsgClCd\" type=\"STRING\" size=\"7\"/><Column id=\"errMsgNtnCd\" type=\"STRING\" size=\"2\"/><Column id=\"errMsgNm\" type=\"STRING\" size=\"300\"/><Column id=\"inptCnt\" type=\"STRING\" size=\"5\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
             obj = new Dataset("dsMenu", this);
-            obj._setContents("<ColumnInfo><ConstColumn id=\"menuMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"upMenuMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"menuClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"menuNm\" type=\"STRING\" size=\"300\"/><ConstColumn id=\"menuUrlAddr\" type=\"STRING\" size=\"100\"/><ConstColumn id=\"menuLvl\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"sortSeqo\" type=\"STRING\" size=\"5\"/><ConstColumn id=\"sysClCd\" type=\"STRING\" size=\"7\"/><ConstColumn id=\"roleIdMgno\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"inqAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"regAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"mdfcnAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"delAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"excnAuthrtYn\" type=\"STRING\" size=\"1\"/><ConstColumn id=\"topMenuId\" type=\"STRING\" size=\"10\"/><ConstColumn id=\"menuPath\" type=\"STRING\" size=\"500\"/><ConstColumn id=\"srchMenuNm\" type=\"STRING\" size=\"300\"/></ColumnInfo>");
+            obj._setContents("<ColumnInfo><Column id=\"menuMgno\" type=\"STRING\" size=\"10\"/><Column id=\"upMenuMgno\" type=\"STRING\" size=\"10\"/><Column id=\"menuClCd\" type=\"STRING\" size=\"7\"/><Column id=\"menuNm\" type=\"STRING\" size=\"300\"/><Column id=\"menuUrlAddr\" type=\"STRING\" size=\"100\"/><Column id=\"expsrYn\" type=\"STRING\" size=\"1\"/><Column id=\"popupYn\" type=\"STRING\" size=\"1\"/><Column id=\"menuLvl\" type=\"STRING\" size=\"5\"/><Column id=\"sortSeqo\" type=\"STRING\" size=\"5\"/><Column id=\"sysClCd\" type=\"STRING\" size=\"7\"/><Column id=\"roleIdMgno\" type=\"STRING\" size=\"10\"/><Column id=\"inqAuthrtYn\" type=\"STRING\" size=\"1\"/><Column id=\"regAuthrtYn\" type=\"STRING\" size=\"1\"/><Column id=\"mdfcnAuthrtYn\" type=\"STRING\" size=\"1\"/><Column id=\"delAuthrtYn\" type=\"STRING\" size=\"1\"/><Column id=\"excnAuthrtYn\" type=\"STRING\" size=\"1\"/><Column id=\"topMenuId\" type=\"STRING\" size=\"10\"/><Column id=\"menuPath\" type=\"STRING\" size=\"500\"/><Column id=\"srchMenuNm\" type=\"STRING\" size=\"300\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsSearchCode", this);
+            obj._setContents("<ColumnInfo><Column id=\"groupCodes\" type=\"STRING\" size=\"100\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsUserInfo", this);
+            obj._setContents("<ColumnInfo><Column id=\"userId\" type=\"STRING\" size=\"20\"/><Column id=\"upInstMgno\" type=\"STRING\" size=\"10\"/><Column id=\"instMgno\" type=\"STRING\" size=\"10\"/><Column id=\"userClCd\" type=\"STRING\" size=\"10\"/><Column id=\"flnm\" type=\"STRING\" size=\"7\"/><Column id=\"deptNm\" type=\"STRING\" size=\"50\"/><Column id=\"jbpsNm\" type=\"STRING\" size=\"300\"/><Column id=\"telDdd\" type=\"STRING\" size=\"300\"/><Column id=\"telTlpno\" type=\"STRING\" size=\"4\"/><Column id=\"telPhino\" type=\"STRING\" size=\"4\"/><Column id=\"acntRprsvYn\" type=\"STRING\" size=\"4\"/><Column id=\"instClsfCd\" type=\"STRING\" size=\"1\"/><Column id=\"instDtlsClsfCd\" type=\"STRING\" size=\"7\"/><Column id=\"govInstYn\" type=\"STRING\" size=\"7\"/><Column id=\"bzentNm\" type=\"STRING\" size=\"1\"/><Column id=\"bzentClCd\" type=\"STRING\" size=\"300\"/><Column id=\"rprsvNm\" type=\"STRING\" size=\"7\"/><Column id=\"roleIdMgno\" type=\"STRING\" size=\"256\"/><Column id=\"roleIdMgnoList\" type=\"STRING\" size=\"256\"/></ColumnInfo>");
+            this.addChild(obj.name, obj);
+
+
+            obj = new Dataset("dsUserRole", this);
+            obj._setContents("<ColumnInfo><Column id=\"roleIdMgno\" type=\"STRING\" size=\"10\"/><Column id=\"roleNm\" type=\"STRING\" size=\"20\"/></ColumnInfo>");
             this.addChild(obj.name, obj);
 
 
@@ -129,13 +144,13 @@
 
             obj = new Button("Button00_00","1019","169","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("4");
-            obj.set_text("로그인");
+            obj.set_text("2. 로그인");
             obj.set_background("yellow");
             obj.set_font("bold 10pt \"Arial\"");
             obj.set_color("black");
             this.addChild(obj.name, obj);
 
-            obj = new Button("Button404","1019","Button00_00:28","111","31",null,null,null,null,null,null,this);
+            obj = new Button("Button404","539","129","111","31",null,null,null,null,null,null,this);
             obj.set_taborder("5");
             obj.set_text("404");
             obj.set_font("bold 10pt \"Arial\"");
@@ -333,9 +348,8 @@
             obj = new Edit("Edit_Role","908","166","104","38",null,null,null,null,null,null,this);
             obj.set_taborder("21");
             obj.set_background("yellow");
-            obj.set_value("ROLE_SYSTEM");
             obj.set_displaynulltext("권한지정");
-            obj.set_text("ROLE_SYSTEM");
+            obj.set_text("");
             this.addChild(obj.name, obj);
 
             obj = new Button("ButtonRSA","40","225","111","31",null,null,null,null,null,null,this);
@@ -364,27 +378,27 @@
             obj = new Edit("Edit_LoginId","742","166","158","38",null,null,null,null,null,null,this);
             obj.set_taborder("25");
             obj.set_background("yellow");
-            obj.set_value("vvwwxx@gmail.com");
-            obj.set_text("vvwwxx@gmail.com");
+            obj.set_value("bbbbbb@gmail.com");
+            obj.set_text("bbbbbb@gmail.com");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonGroupCode","961","380","140","40",null,null,null,null,null,null,this);
+            obj = new Button("ButtonGroupCode","961","380","369","40",null,null,null,null,null,null,this);
             obj.set_taborder("26");
-            obj.set_text("그룹코드 조회테스트");
+            obj.set_text("미인증 조회가능 - 그룹코드 조회테스트");
             obj.set_background("#aaffaa");
             obj.set_color("black");
             obj.set_font("bold 10pt \"Arial\"");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonCode","1540","380","140","40",null,null,null,null,null,null,this);
+            obj = new Button("ButtonCode","1350","382","345","40",null,null,null,null,null,null,this);
             obj.set_taborder("27");
-            obj.set_text("코드상세 조회테스트");
+            obj.set_text("▲▲▲▲ 미인증 조회가능 - 코드세 조회테스트 ▲▲▲▲");
             obj.set_background("#aaffaa");
             obj.set_color("black");
             obj.set_font("bold 10pt \"Arial\"");
             this.addChild(obj.name, obj);
 
-            obj = new Button("ButtonErrMessage","1710","382","140","40",null,null,null,null,null,null,this);
+            obj = new Button("ButtonErrMessage","1710","382","330","40",null,null,null,null,null,null,this);
             obj.set_taborder("28");
             obj.set_text("오류메세지 조회테스트");
             obj.set_background("#aaffaa");
@@ -410,19 +424,54 @@
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"errMsgCd\"/><Cell col=\"1\" text=\"errMsgClCd\"/><Cell col=\"2\" text=\"errMsgNtnCd\"/><Cell col=\"3\" text=\"errMsgNm\"/><Cell col=\"4\" text=\"inptCnt\"/></Band><Band id=\"body\"><Cell text=\"bind:errMsgCd\"/><Cell col=\"1\" text=\"bind:errMsgClCd\"/><Cell col=\"2\" text=\"bind:errMsgNtnCd\"/><Cell col=\"3\" text=\"bind:errMsgNm\"/><Cell col=\"4\" text=\"bind:inptCnt\"/></Band></Format></Formats>");
             this.addChild(obj.name, obj);
 
-            obj = new Edit("Edit_GroupCode","1350","381","156","38",null,null,null,null,null,null,this);
+            obj = new Edit("Edit_GroupCode","1348","322","540","38",null,null,null,null,null,null,this);
             obj.set_taborder("32");
             obj.set_background("#aaffaa");
             obj.set_displaynulltext("그룹코드값");
             obj.set_color("black");
-            obj.set_value("DGR_REG_RSN_CD");
-            obj.set_text("DGR_REG_RSN_CD");
+            obj.set_value("APLY_CL_CD|AGREE_CLAUS_CD|PRCS_TYPE_CD|BIZ_TYPE_CD|BIZ_SCAL_CD|BIZ_FORM_CD|SYS_CL_CD|USER_CL_CD|ERR_MSG_CL_CD|BZENT_CL_CD|INST_CLSF_CD|INST_DTLS_CLSF_CD|USER_APLY_TYPE_CD");
+            obj.set_text("APLY_CL_CD|AGREE_CLAUS_CD|PRCS_TYPE_CD|BIZ_TYPE_CD|BIZ_SCAL_CD|BIZ_FORM_CD|SYS_CL_CD|USER_CL_CD|ERR_MSG_CL_CD|BZENT_CL_CD|INST_CLSF_CD|INST_DTLS_CLSF_CD|USER_APLY_TYPE_CD");
             this.addChild(obj.name, obj);
 
             obj = new Grid("Grid06","958","732","1092","578",null,null,null,null,null,null,this);
             obj.set_taborder("33");
             obj.set_binddataset("dsMenu");
             obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"menuMgno\"/><Cell col=\"1\" text=\"upMenuMgno\"/><Cell col=\"2\" text=\"menuClCd\"/><Cell col=\"3\" text=\"menuNm\"/><Cell col=\"4\" text=\"menuUrlAddr\"/><Cell col=\"5\" text=\"menuLvl\"/><Cell col=\"6\" text=\"sortSeqo\"/><Cell col=\"7\" text=\"sysClCd\"/><Cell col=\"8\" text=\"roleIdMgno\"/><Cell col=\"9\" text=\"inqAuthrtYn\"/><Cell col=\"10\" text=\"regAuthrtYn\"/><Cell col=\"11\" text=\"mdfcnAuthrtYn\"/><Cell col=\"12\" text=\"delAuthrtYn\"/><Cell col=\"13\" text=\"excnAuthrtYn\"/><Cell col=\"14\" text=\"topMenuId\"/><Cell col=\"15\" text=\"menuPath\"/><Cell col=\"16\" text=\"srchMenuNm\"/></Band><Band id=\"body\"><Cell text=\"bind:menuMgno\"/><Cell col=\"1\" text=\"bind:upMenuMgno\"/><Cell col=\"2\" text=\"bind:menuClCd\"/><Cell col=\"3\" text=\"bind:menuNm\"/><Cell col=\"4\" text=\"bind:menuUrlAddr\"/><Cell col=\"5\" text=\"bind:menuLvl\"/><Cell col=\"6\" text=\"bind:sortSeqo\"/><Cell col=\"7\" text=\"bind:sysClCd\"/><Cell col=\"8\" text=\"bind:roleIdMgno\"/><Cell col=\"9\" text=\"bind:inqAuthrtYn\"/><Cell col=\"10\" text=\"bind:regAuthrtYn\"/><Cell col=\"11\" text=\"bind:mdfcnAuthrtYn\"/><Cell col=\"12\" text=\"bind:delAuthrtYn\"/><Cell col=\"13\" text=\"bind:excnAuthrtYn\"/><Cell col=\"14\" text=\"bind:topMenuId\"/><Cell col=\"15\" text=\"bind:menuPath\"/><Cell col=\"16\" text=\"bind:srchMenuNm\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid07","73","886","839","184",null,null,null,null,null,null,this);
+            obj.set_taborder("34");
+            obj.set_binddataset("dsUserInfo");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/><Column size=\"80\"/></Columns><Rows><Row band=\"head\" size=\"24\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"userId\"/><Cell col=\"1\" text=\"upInstMgno\"/><Cell col=\"2\" text=\"instMgno\"/><Cell col=\"3\" text=\"userClCd\"/><Cell col=\"4\" text=\"flnm\"/><Cell col=\"5\" text=\"deptNm\"/><Cell col=\"6\" text=\"jbpsNm\"/><Cell col=\"7\" text=\"telDdd\"/><Cell col=\"8\" text=\"telTlpno\"/><Cell col=\"9\" text=\"telPhino\"/><Cell col=\"10\" text=\"acntRprsvYn\"/><Cell col=\"11\" text=\"instClsfCd\"/><Cell col=\"12\" text=\"instDtlsClsfCd\"/><Cell col=\"13\" text=\"govInstYn\"/><Cell col=\"14\" text=\"bzentNm\"/><Cell col=\"15\" text=\"bzentClCd\"/><Cell col=\"16\" text=\"rprsvNm\"/><Cell col=\"17\" text=\"roleIdMgno\"/><Cell col=\"18\" text=\"roleIdMgnoList\"/></Band><Band id=\"body\"><Cell text=\"bind:userId\"/><Cell col=\"1\" text=\"bind:upInstMgno\"/><Cell col=\"2\" text=\"bind:instMgno\"/><Cell col=\"3\" text=\"bind:userClCd\"/><Cell col=\"4\" text=\"bind:flnm\"/><Cell col=\"5\" text=\"bind:deptNm\"/><Cell col=\"6\" text=\"bind:jbpsNm\"/><Cell col=\"7\" text=\"bind:telDdd\"/><Cell col=\"8\" text=\"bind:telTlpno\"/><Cell col=\"9\" text=\"bind:telPhino\"/><Cell col=\"10\" text=\"bind:acntRprsvYn\"/><Cell col=\"11\" text=\"bind:instClsfCd\"/><Cell col=\"12\" text=\"bind:instDtlsClsfCd\"/><Cell col=\"13\" text=\"bind:govInstYn\"/><Cell col=\"14\" text=\"bind:bzentNm\"/><Cell col=\"15\" text=\"bind:bzentClCd\"/><Cell col=\"16\" text=\"bind:rprsvNm\"/><Cell col=\"17\" text=\"bind:roleIdMgno\"/><Cell col=\"18\" text=\"bind:roleIdMgnoList\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("ButtonUserInfo","73","840","247","38",null,null,null,null,null,null,this);
+            obj.set_taborder("35");
+            obj.set_text("사용자정보 조회 - 세션정보");
+            obj.set_background("#aaffaa");
+            obj.set_color("black");
+            obj.set_font("bold 10pt \"Arial\"");
+            this.addChild(obj.name, obj);
+
+            obj = new Button("Button00_00_00","910","125","272","31",null,null,null,null,null,null,this);
+            obj.set_taborder("36");
+            obj.set_text("1. 로그인 처리전에 관장|위탁기관 체크하기");
+            obj.set_background("yellow");
+            obj.set_font("bold 10pt \"Arial\"");
+            obj.set_color("black");
+            this.addChild(obj.name, obj);
+
+            obj = new Grid("Grid08","1200","98","280","120",null,null,null,null,null,null,this);
+            obj.set_taborder("37");
+            obj.set_binddataset("dsUserRole");
+            obj.set_background("yellow");
+            obj._setContents("<Formats><Format id=\"default\"><Columns><Column size=\"116\"/><Column size=\"161\"/></Columns><Rows><Row size=\"24\" band=\"head\"/><Row size=\"24\"/></Rows><Band id=\"head\"><Cell text=\"roleIdMgno\"/><Cell col=\"1\" text=\"roleNm\"/></Band><Band id=\"body\"><Cell text=\"bind:roleIdMgno\"/><Cell col=\"1\" text=\"bind:roleNm\"/></Band></Format></Formats>");
+            this.addChild(obj.name, obj);
+
+            obj = new Static("Static00","870","217","266","153",null,null,null,null,null,null,this);
+            obj.set_taborder("38");
+            obj.set_text("로그인아이디정보 - 임시\r\n[전체관리자] aaaaaa@gmail.com\r\n[관장기관] bbbbbb@gmail.com\r\n[위탁기관] cccccc@gmail.com\r\n[사업수행자_계정관리인] dddddd@gmail.com\r\n[사업수행자_계정대표자] eeeeee@gmail.com\r\n[외교부] ffffff@gmail.com\r\n[기타부처] gggggg@gmail.com\r\n[비승인사용자] hhhhhh@gmail.com");
+            obj.set_background("#ffff99");
             this.addChild(obj.name, obj);
             // Layout Functions
             //-- Default Layout : this.Div00_Report.form
@@ -547,12 +596,26 @@
         this.fnLoginCallback = function(svcID,errorCode,errorMsg)
         {
 
-        	this.alert("로그인");
-        	console.log("[svcID]["+svcID+"]");
-        	trace("[svcID]["+svcID+"]");
-        	console.log("[errorCode]["+errorCode+"]");
-        	trace("[errorCode]["+errorCode+"]");
 
+
+
+
+          switch(svcID)
+          {
+            case "login":
+
+        			this.alert("로그인결과 ▶▶▶▶ [" + this.ds_common_reseult.getColumn(0, "message") + "]");
+        			console.log("[svcID]["+svcID+"]");
+        			trace("[svcID]["+svcID+"]");
+        			console.log("[errorCode]["+errorCode+"]");
+        			trace("[errorCode]["+errorCode+"]");
+
+        			this.Edit_AccessToken.set_value(this.ds_common_reseult.getColumn(0, "accessToken"));
+        			this.Edit_RefreshToken.set_value(this.ds_common_reseult.getColumn(0, "refreshToken"));
+
+
+              break;
+          }
         };
 
         this.Button01_onclick = function(obj,e)
@@ -1039,15 +1102,16 @@
         nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
         nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
 
-        var groupCode = this.Edit_GroupCode.value;
+          this.dsSearchCode.deleteAll();
 
-
+          this.dsSearchCode.addRow();
+          this.dsSearchCode.setColumn(0, "groupCodes"  , this.Edit_GroupCode.value);
 
           var strSvcId    = "Codetest";
           var strSvcUrl   = "svc::common/initial/selectCodeList.irs";
-          var inData      = "";
+          var inData      = "searchCode=dsSearchCode";
           var outData     = "dsCode=codeList";
-          var strArg      = "groupCode=" + groupCode;
+          var strArg      = "";
           var callBackFnc = "fnCallback";
           var isAsync     = true;
 
@@ -1085,6 +1149,70 @@
         };
 
 
+        this.ButtonUserInfo_onclick = function(obj,e)
+        {
+        nexacro.setHTTPHeaderVariable("Authorization", this.Edit_AccessToken.value);
+        nexacro.setHTTPHeaderVariable("RefreshToken", this.Edit_RefreshToken.value);
+
+
+          var strSvcId    = "UserInfotest";
+          var strSvcUrl   = "svc::common/initial/selectUserInfo.irs";
+          var inData      = "";
+          var outData     = "dsUserInfo=userInfo";
+          var strArg      = "aaaa=1111";
+          var callBackFnc = "fnCallback";
+          var isAsync     = true;
+
+          this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+              strSvcUrl ,       // trabsaction을 요청할 주소
+              inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+              outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+              strArg,         // 입력값으로 보낼 arguments, a=b
+              callBackFnc,       // transaction의 결과를 받을 Function 이름
+              isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+        /* 관장|위탁기관 체크하기 */
+        this.Button_prepare_login_onclick = function(obj,e)
+        {
+        	nexacro.setHTTPHeaderVariable("Authorization", "nexacro platform 12345");
+
+
+        	this.ds_login.addRow();
+
+          this.ds_login.setColumn(0, "id"  , this.Edit_LoginId.text);
+          this.ds_login.setColumn(0, "password"  , "1234");
+
+          var strSvcId    = "preparelogin";
+          var strSvcUrl   = "svc::prepare/login";
+          var inData      = "inputLogin=ds_login";
+          var outData     = "dsUserRole=userRoleList";
+          var strArg      = "";
+          var callBackFnc = "fnLoginCallback";
+          var isAsync     = true;
+
+
+           this.transaction(strSvcId ,   // transaction을 구분하기 위한 svc id값
+               strSvcUrl ,       // trabsaction을 요청할 주소
+               inData ,         // 입력값으로 보낼 dataset id , a=b형태로 실제이름과 입력이름을 매칭
+               outData ,         // 처리결과값으로 받을 dataset id, a=b형태로 실제이름과 입력이름을 매칭
+               strArg,         // 입력값으로 보낼 arguments, a=b
+               callBackFnc,       // transaction의 결과를 받을 Function 이름
+               isAsync, "3");         // 비동기통신 여부 [생략가능]
+        };
+
+        this.Grid08_oncellclick = function(obj,e)
+        {
+
+        		this.Edit_Role.set_value(this.dsUserRole.getColumn(e.row, "roleIdMgno"));
+
+        };
+
+        this.Static00_onclick = function(obj,e)
+        {
+
+        };
+
         });
         
         // Regist UI Components Event
@@ -1105,6 +1233,7 @@
             this.Button_Xeni.addEventHandler("onclick",this.Button_Xeni_onclick,this);
             this.ButtonFileDownPage.addEventHandler("onclick",this.ButtonFileDownPage_onclick,this);
             this.ButtonFileUpPage.addEventHandler("onclick",this.ButtonFileUpPage_onclick,this);
+            this.Edit_Role.addEventHandler("onchanged",this.Edit_Role_onchanged,this);
             this.ButtonRSA.addEventHandler("onclick",this.ButtonRSA_onclick,this);
             this.ButtonMenu.addEventHandler("onclick",this.ButtonMenu_onclick,this);
             this.Edit_LoginId.addEventHandler("onchanged",this.Edit_LoginId_onchanged,this);
@@ -1112,6 +1241,10 @@
             this.ButtonCode.addEventHandler("onclick",this.ButtonCode_onclick,this);
             this.ButtonErrMessage.addEventHandler("onclick",this.ButtonErrMessage_onclick,this);
             this.Edit_GroupCode.addEventHandler("onchanged",this.Edit_GroupCode_onchanged,this);
+            this.ButtonUserInfo.addEventHandler("onclick",this.ButtonUserInfo_onclick,this);
+            this.Button00_00_00.addEventHandler("onclick",this.Button_prepare_login_onclick,this);
+            this.Grid08.addEventHandler("oncellclick",this.Grid08_oncellclick,this);
+            this.Static00.addEventHandler("onclick",this.Static00_onclick,this);
             this.FileUpTransfer00.addEventHandler("onerror",this.FileUpTransfer00_onerror,this);
             this.FileUpTransfer00.addEventHandler("onprogress",this.FileUpTransfer00_onprogress,this);
             this.FileUpTransfer00.addEventHandler("onsuccess",this.FileUpTransfer00_onsuccess,this);

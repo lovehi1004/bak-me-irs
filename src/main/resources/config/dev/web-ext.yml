@@ -16,5 +16,11 @@ sol.sn3hcv:
   web.root: /opt/tomcat/apache-tomcat-9.0.80/webapps/irs/WEB-INF/classes/static/sn3hcv
   rs.root: /sn3hcv
 
+# juso api address
+juso:
+  api-key: U01TX0FVVEgyMDE4MDkxNTIzMzM1NjEwODE4MDI=
+  addr-link-api: https://business.juso.go.kr/addrlink/addrLinkApiJsonp.do
+  addr-link-api-domian: https://business.juso.go.kr
+  
 # examples
 web.example.prop: prop-dev
