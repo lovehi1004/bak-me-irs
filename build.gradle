@@ -13,6 +13,9 @@ bootWar {
     archiveBaseName='irs'
     archiveFileName='irs.war'
     archiveVersion='0.0.1-SNAPSHOT'
+    
+    /* 빌드시 로컬전용 설정 제외 */
+    rootSpec.exclude("SafeDBMap_config.xml")
 }
 
 configurations {
@@ -158,26 +161,6 @@ dependencies {
     // 암호화솔루션
     implementation fileTree(dir: 'libs/safedb'    , include: ['*.jar'])
     
-}
-
-
-if (project.hasProperty("spring.profiles.active") && project.properties["spring.profiles.active"].contains("local")) {
-    sourceSets {
-        main {
-            resources {
-                srcDirs = ['src/main/resources', 'local/config/safedb']
-            }
-        }
-    }
-} else {
-    sourceSets {
-        main {
-            resources {
-                srcDirs = ['src/main/resources']
-                exclude "local/**"
-            }
-        }
-    }
 }
 
 // 빌드 시 테스트 제외 추가
