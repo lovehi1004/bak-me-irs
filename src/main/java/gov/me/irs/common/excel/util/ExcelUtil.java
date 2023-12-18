@@ -277,13 +277,19 @@ public class ExcelUtil {
 						
 						Object dataValue = map.get(matrixCell[idx][kdx].getKey());
 						
-						if(matrixCell[idx][kdx].getType() == ExcelConst.INT) {
+						if(ObjectUtils.isEmpty(dataValue)) {			// null값 공백으로 처리
 							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-							cell.setCellValue((Integer) dataValue);
+							cell.setCellValue(StringUtils.EMPTY);
 						} else {
-							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-							cell.setCellValue(String.valueOf(dataValue));
+							if(matrixCell[idx][kdx].getType() == ExcelConst.INT) {
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
+								cell.setCellValue((Integer) dataValue);
+							} else {
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
+								cell.setCellValue(String.valueOf(dataValue));
+							}
 						}
+						
 					}
 					
 				}

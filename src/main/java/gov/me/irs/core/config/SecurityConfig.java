@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -17,6 +16,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import gov.me.irs.core.filter.JwtAuthenticationFilter;
+import gov.me.irs.core.safedb.Crypto;
+import gov.me.irs.core.security.password.CorePasswordEncoder;
 import gov.me.irs.core.config.handler.CoreAccessDeniedHandler;
 import gov.me.irs.core.user.handler.CoreLogoutSuccessHandler;
 
@@ -40,7 +41,9 @@ public class SecurityConfig {
 	
 	private final CoreAccessDeniedHandler coreAccessDeniedHandler;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
+	
+	private final Crypto crypto;
+	
 	/**
 	 * 비밀번호 암호화
 	 * 
@@ -48,7 +51,7 @@ public class SecurityConfig {
 	 */
 	@Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new CorePasswordEncoder(crypto);
     }
 	
 	@Bean
@@ -97,6 +100,18 @@ public class SecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain nexacroFilterChain(HttpSecurity http) throws Exception {
+		
+		
+		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
+		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
+		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
+		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
+		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
+		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
+		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
+		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
+		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
+		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
 		
 		log.info("Spring Security START !");
 		

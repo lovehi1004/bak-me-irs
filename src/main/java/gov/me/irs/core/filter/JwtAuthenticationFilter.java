@@ -128,7 +128,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
 							jwtTokenProvider.setAuthentication(accessToken, role, false);
 							
-							HttpSession session = request.getSession();
+							// Refresh Token으로 사용자인증 식별자 조회
+							String identifier = jwtTokenProvider.getLgnIdByRefreshToken(refreshToken);
+							
+							HttpSession session = request.getSession(true);
+							session.setAttribute(Const.SESSION.KEY, identifier);
 							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
 							
 						} else if (validateRefreshToken && !isRefreshToken) {
@@ -174,7 +178,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							// 재발급 된 Token정보로 인증정보 생성
 							jwtTokenProvider.setAuthentication(newAccessToken, role, true);
 							
-							HttpSession session = request.getSession();
+							HttpSession session = request.getSession(false);
 							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
 							
 						} else {

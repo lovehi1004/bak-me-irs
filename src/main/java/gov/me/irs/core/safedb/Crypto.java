@@ -1,7 +1,5 @@
 package gov.me.irs.core.safedb;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.stereotype.Component;
 
 import com.initech.safedb.SimpleSafeDB;
@@ -21,21 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public final class Crypto {
-	
-//	@PostConstruct
-//	public void init() {
-//		SimpleSafeDB safedb = SimpleSafeDB.getInstance();
-//		boolean loginResult = false;
-//		if(!safedb.login()){
-//			log.error("[암호화 솔루션 로그인 실패]");
-//			loginResult = safedb.getSafeDBConfigMgr().isLoginCheck();
-//			if(!loginResult) {
-//				log.error("[암호화 솔루션 로그인 에러 - 솔루션 업체에 문의]");
-//			}
-//		} else {
-//			log.info("[암호화 솔루션 로그인 성공]");
-//		}
-//	}
 	
 	private final SafeDBProperties p;
 	
