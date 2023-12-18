@@ -6,11 +6,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import gov.me.irs.common.constants.Const;
-import gov.me.irs.common.file.mapper.FileMapper;
-import gov.me.irs.common.file.vo.FileVo;
+import gov.me.irs.common.file.vo.RaonKFileVo;
 import gov.me.irs.core.config.property.Sn3hcvProperties;
+import gov.me.irs.core.raonk.mapper.RaonKMapper;
 import gov.me.irs.core.synap.util.SynapConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class ViewerService {
 	
 	private final SynapConverter synapConverter;
 	
-	private final FileMapper fileMapper;
+	private final RaonKMapper raonKMapper;
 	
 	private final Sn3hcvProperties props;
 	
@@ -39,15 +40,16 @@ public class ViewerService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, Object> convert(FileVo vo, HttpServletRequest request) throws Exception {
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> convert(RaonKFileVo vo, HttpServletRequest request) throws Exception {
 		
 		log.debug("["+this.getClass().getName()+"][executeTransformDoc] START");
 		
-		FileVo fileVo = fileMapper.selectFileDtl(vo);
+		RaonKFileVo raonKFileVo = raonKMapper.selectFileDtl(vo);
 		
-		String inputFile = fileVo.getFileFullPath();
-		String outputPath = fileVo.getFilePathNm();
-		String resultName = fileVo.getFileGroupSn() + "_" + fileVo.getFileDtlSn();
+		String inputFile = raonKFileVo.getFileFullPath();
+		String outputPath = raonKFileVo.getFilePath();
+		String resultName = raonKFileVo.getFileGroupMgno() + "_" + raonKFileVo.getFileMgno();
 		
 		log.debug("[inputFile]["+inputFile+"]");
 		log.debug("[outputPath]["+outputPath+"]");
@@ -63,8 +65,10 @@ public class ViewerService {
 		/* 변환에 성공한 경우만 파라미터정보를 반환한다. */
 		if(Const.CHARACTER.RESULT.Y .equals(result)) {
 			
-			resultMap.put("fileGroupSn", fileVo.getFileGroupSn());
-			resultMap.put("fileDtlSn", fileVo.getFileDtlSn());
+			raonKMapper.updateDwldCount(raonKFileVo);
+			
+			resultMap.put("fileGroupMgno", raonKFileVo.getFileGroupMgno());
+			resultMap.put("fileMgno", raonKFileVo.getFileMgno());
 			
 			outputPath = props.rs.root + outputPath;
 			

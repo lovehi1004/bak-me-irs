@@ -11,5 +11,27 @@ import gov.me.irs.core.user.entity.TableUser;
  *
  */
 public interface UserRepository extends JpaRepository<TableUser, Long> {
+	
+	/**
+	 * JWT사용자기본 조회
+	 * 
+	 * @param lgnId
+	 * @return
+	 */
 	TableUser findByLgnId(String lgnId);
+	
+	/**
+	 * JWT사용자기본 삭제
+	 * 
+	 * @param lgnId
+	 */
+	long deleteByLgnId(String lgnId);
+	
+	/**
+	 * JWT사용자기본 조회 - 사용자ID
+	 * 
+	 * @param lgnId
+	 * @return
+	 */
+	TableUser findByUserId(String userId);
 }

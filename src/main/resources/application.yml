@@ -1,10 +1,12 @@
+### 환경 공통
+---
 
 ##########################################################################################
---- # profiles
-spring.profiles.active: local
-
-##########################################################################################
---- # common
+--- # local 전용 설정
+spring:
+  config:
+    activate:
+      on-profile: "local"
 server:
   port: 28080
   servlet:
@@ -14,20 +16,23 @@ server:
       enabled: true
       force: true
       
-### 환경 공통
----
+##########################################################################################
+--- # common
 spring:
-  application.name: bak-me-irs-${spring.profiles.active}
+  application.name: gov-me-irs-${spring.profiles.active}
   config:
     import:
+      - classpath:config/core/common/core.yml
       - classpath:config/${spring.profiles.active}/web-ext.yml
+      - classpath:config/${spring.profiles.active}/raon-k.yml
       - classpath:config/${spring.profiles.active}/jwt.yml
+      - classpath:config/${spring.profiles.active}/safedb.yml
       - classpath:config/error/errorcode.properties
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 50MB
-    
+      
 ##########################################################################################
 --- # yml - properties
 spring:
@@ -72,24 +77,11 @@ mybatis:
     default-fetch-size: 500
   type-aliases-package: gov.me.irs.common.util, gov.me.irs.**.vo
   mapper-locations: classpath:mappers/**/*.xml
-  
-############################################
---- # Data Source
-spring:
-  datasource:
-    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    url: ENC(Sb2I3TheMFFLL6gNQhGlb13vji7bX7vJFjjcn43ttHySRrZLywLpKxF4pKbX864wuHVMDDKIPkFySsADJxY1gg==)
-    username: ENC(M844TzV46J5wj5Ew/r4ic/3MR1nVKzZ4)
-    password: ENC(+cbQdTVbVm7yVC7UWfy+WoPQ9S11OF0P)
 
 ############################################
 --- # Logging
 logging:
   config: classpath:config/core/${spring.profiles.active}/log4j2.xml
-
-##########################################################################################
---- # jasypt
-jasypt.encryptor.password: 1234567890QWERTYUIOPASDFGHJKLZXCVBNM30987654321
 
 ##########################################################################################
 --- # yml - cache : 캐싱방지

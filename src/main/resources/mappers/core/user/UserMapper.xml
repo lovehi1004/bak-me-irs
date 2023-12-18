@@ -18,4 +18,214 @@
 		 ORDER BY R.ROLE_ID_MGNO
 	</select>
 	
+	<!-- 사용자 조회 - 계정상태 및 기본정보 중 필요한 것만 -->
+	<select id="selectUser" resultType="egovMap" parameterType="string">
+		/* UserMapper.selectUser */
+		SELECT ACNT_STTS_CL_CD					/* 계정상태구분코드 */
+			 , INST_MGNO						/* 기관관리번호 */
+			 , LGN_ID							/* 로그인ID */
+			 , PSWD								/* 비밀번호 */
+			 , USER_CL_CD						/* 사용자구분코드 */
+			 , FLNM								/* 성명 */
+		  FROM irsuser.USER_BSC
+		 WHERE DEL_YN = 'N'
+		   AND USER_ID = #{userId}
+	</select>
+	
+	<!-- 사용자 권한정보 삭제 -->
+	<update id="deleteUserRole" parameterType="map">
+		/* UserMapper.deleteUserRole */
+		UPDATE irsuser.USER_ROLE_DTL
+		   SET DEL_YN = 'Y'
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE USER_ID = #{userId}
+		   AND ROLE_ID_MGNO = #{roleIdMgno}
+	</update>
+	
+	<!-- 사용자역할상세 등록 -->
+	<insert id="insertUserRole" parameterType="map">
+		<selectKey keyProperty="userRoleSn" resultType="int" order="BEFORE">
+			/* UserMapper.insertUserRole.selectKey */
+			SELECT COALESCE(MAX(USER_ROLE_SN), 0) + 1 FROM irsuser.USER_ROLE_DTL
+		</selectKey>
+		/* UrmMapper.insertUserRole */
+		INSERT
+		  INTO irsuser.USER_ROLE_DTL
+		     ( USER_ID
+		     , ROLE_ID_MGNO
+		     , USER_ROLE_SN
+		     , RGTR_ID
+		     , REG_DT
+		     )
+		VALUES
+		     ( #{userId}
+		     , #{roleIdMgno}
+		     , #{userRoleSn}
+		     , #{sUserId}
+		     , CURRENT_TIMESTAMP
+		     )
+	</insert>
+	
+	<!-- 사용자 권한정보 변경 -->
+	<update id="updateUserRole" parameterType="map">
+		/* UserMapper.updateUserRole */
+		UPDATE irsuser.USER_ROLE_DTL
+		   SET ROLE_ID_MGNO = #{newRoleIdMgno}
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE DEL_YN = 'N'
+		   AND USER_ID = #{userId}
+		   AND ROLE_ID_MGNO = #{roleIdMgno}
+	</update>
+	
+	<!-- 사용자 로그인실패건수 저장 -->
+	<update id="updateUserLgnFailCnt" parameterType="gov.me.irs.core.client.vo.ClientVo">
+		/* UserMapper.updateUserLgnFailCnt */
+		UPDATE irsuser.USER_BSC
+		<if test='lgnScsYn != null and lgnScsYn.equals("Y")'><!-- 로그인성공시 실패건수 0 으로 UPDATE 처리 -->
+		   SET LGN_FAIL_CNT = 0
+		     , LGN_SCS_CNT = LGN_SCS_CNT + 1				/* 로그인성공횟수 */
+		     , LAST_CNTN_DT = CURRENT_TIMESTAMP				/* 최종접속일시 */
+		</if>
+		<if test='lgnScsYn != null and lgnScsYn.equals("N")'><!-- 로그인성공시 실패건수 0 으로 UPDATE 처리 -->
+		   SET LGN_FAIL_CNT = LGN_FAIL_CNT + 1
+		     , LAST_LGN_FAIL_DT = CURRENT_TIMESTAMP				/* 최종로그인실패일자 */
+		</if>
+		     , MDFR_ID = 'SYSTEM'
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE DEL_YN = 'N'
+		   AND USER_ID = (
+		   		SELECT U.USER_ID
+		   		  FROM irsuser.USER_BSC U
+		   		 WHERE U.LGN_ID = #{username}
+		   )
+	</update>
+	
+	<!-- 사용자ID 채번 - USER_ID 채번 -->
+	<select id="selectUserId" resultType="string">
+		/* UserMapper.selectUserId */
+		SELECT CONCAT( 'UR'
+					 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(USER_ID, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+						   , 10 - 2
+						   , '0'
+					   )
+			   )
+		FROM irsuser.USER_BSC
+		WHERE LENGTH(USER_ID) = 10
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+	</select>
+	
+	<!-- 사용자정보 생성 [USER_BSC] -->
+	<insert id="insertUser" parameterType="map">
+		/* UserMapper.insertUser */
+		INSERT
+		  INTO irsuser.USER_BSC
+			 ( USER_ID                  /* 사용자ID */
+			 , INST_MGNO                /* 기관관리번호 */
+			 , USER_CL_CD               /* 사용자구분코드 */
+			 , LGN_ID                   /* 로그인ID */
+			 , PSWD                     /* 비밀번호 */
+			 , FLNM                     /* 성명 */
+			 , DEPT_NM                  /* 부서명 */
+			 , JBPS_NM                  /* 직위명 */
+			 , TEL_DDD                  /* 전화지역번호 */
+			 , TEL_TLPNO                /* 전화국번호 */
+			 , TEL_PHINO                /* 전화개별번호 */
+			 , HDPON_DDD                /* 핸드폰지역번호 */
+			 , HDPON_TLPNO              /* 핸드폰국번호 */
+			 , HDPON_PHINO              /* 핸드폰개별번호 */
+			 , FAX_DDD                  /* 팩스지역번호 */
+			 , FAX_TLPNO                /* 팩스국번호 */
+			 , FAX_PHINO                /* 팩스개별번호 */
+			 , EML_ID                   /* 이메일ID */
+			 , EML_ADDR                 /* 이메일주소 */
+			 , SMS_NTI_YN               /* sms알림여부 */
+			 , ACNT_RPRSV_YN            /* 계정대표자여부 */
+			 , ACNT_STTS_CL_CD          /* 계정상태구분코드 */
+	<if test='aprvYn != null and aprvYn.equals("")'>
+		<if test='aprvYn.equals("Y")'><!-- 승인처리여부 : 전체관리자가 사용자관리 메뉴에서 사용자등록시 발생함 -->
+			 , APRV_YMD
+		</if>
+	</if>
+			 , MHDLG_NTI_YN             /* 방법론알림여부 */
+			 , IRB_NTI_YN               /* 국제감축사업알림여부 */
+			 , RTADTI_SCSN_NTI_YN       /* 권리의무승계알림여부 */
+			 , IRP_NTI_YN               /* 국제감축실적알림여부 */
+			 , BFR_NTI_YN               /* 이전알림여부 */
+			 , DLNG_NTI_YN              /* 거래알림여부 */
+			 , SWOV_NTI_YN              /* 전환알림여부 */
+			 , RTRCN_NTI_YN             /* 취소알림여부 */
+			 , DSPS_NTI_YN              /* 처분알림여부 */
+			 , INFO_PRVT_NTI_YN         /* 정보비공개알림여부 */
+			 , DEL_YN                   /* 삭제여부 */
+			 , RGTR_ID                  /* 등록자ID */
+			 , REG_DT                   /* 등록일시 */
+			 , UP_INST_MGNO             /* 상위기관관리번호 */
+			 , LGN_FAIL_CNT             /* 로그인실패수 */
+			 , LGN_SCS_CNT              /* 로그인성공수 */
+			 )
+		VALUES
+			 ( #{userId}
+			 , #{instMgno}
+			 , #{userClCd}
+			 , #{lgnId}
+			 , #{encptPswd}
+			 , #{flnm}
+			 , #{deptNm}
+			 , #{jbpsNm}
+			 , #{telDdd}
+			 , #{telTlpno}
+			 , #{telPhino}
+			 , #{hdponDdd}
+			 , #{hdponTlpno}
+			 , #{hdponPhino}
+			 , #{faxDdd}
+			 , #{faxTlpno}
+			 , #{faxPhino}
+			 , #{emlId}
+			 , #{emlAddr}
+			 , #{smsNtiYn}
+			 , #{acntRprsvYn}
+			 , #{acntSttsClCd}		/* [ASC0001|ASC0002|...] [미승인|승인|...] */
+	<if test='aprvYn != null and aprvYn.equals("")'>
+		<if test='aprvYn.equals("Y")'><!-- 승인처리여부 : 전체관리자가 사용자관리 메뉴에서 사용자등록시 발생함 -->
+			 , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+		</if>
+	</if>
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+<choose>
+	<when test='sameInstMgnoYn != null and sameInstMgnoYn.equals("")'>
+		<if test='sameInstMgnoYn.equals("Y")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{instMgno}
+		</if>
+		<if test='sameInstMgnoYn.equals("N")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{upInstMgno}
+		</if>
+	</when>
+	<otherwise>
+			 , #{upInstMgno}
+	</otherwise>
+</choose>
+			 , 0
+			 , 0
+			 )
+	</insert>
 </mapper>

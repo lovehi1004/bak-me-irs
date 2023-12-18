@@ -70,4 +70,10 @@ public final class RoleConst {
 	public final static String CODE_OUTSOURCINGBIZ = "UCC0003";
 	public final static String ROLE_OUTSOURCINGBIZ_KEY = "RL00000010";
 	
+	/* 역할 : 비승인위탁기관 */
+	public final static String UNAPPROVEDOUTSOURCING = "UNAPPROVEDOUTSOURCING";
+	public final static String ROLE_UNAPPROVEDOUTSOURCING = ROLE_PREFIX + UNAPPROVEDOUTSOURCING;
+	public final static String CODE_UNAPPROVEDOUTSOURCING = "UCC0003";
+	public final static String ROLE_UNAPPROVEDOUTSOURCING_KEY = "RL00000011";
+	
 }

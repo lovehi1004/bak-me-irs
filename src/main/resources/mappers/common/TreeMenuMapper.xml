@@ -8,7 +8,7 @@
 		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 		■ 파라미터 정보
 		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-		@param targetMenuId - 트리구조 시작 기준점의 메뉴ID 
+		@param targetMenuMgno - 트리구조 시작 기준점의 메뉴ID 
 		@param sysClCd - 시스템구분코드 
 		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	 -->
@@ -47,8 +47,8 @@
 			  FROM irsuser.MENU_BSC M
 			 WHERE 1 = 1
 			<choose>
-				<when test="targetMenuId != null and !targetMenuId.equals('')"><!-- 기준점 지정 -->
-			   AND M.MENU_MGNO = #{targetMenuId}
+				<when test="targetMenuMgno != null and !targetMenuMgno.equals('')"><!-- 기준점 지정 -->
+			   AND M.MENU_MGNO = #{targetMenuMgno}
 				</when>
 				<otherwise>
 				<if test='sysClCd == "SCC0001"'><!-- IRS시스템 최상위메뉴 - Default -->

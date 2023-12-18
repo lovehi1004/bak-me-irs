@@ -1,0 +1,26 @@
+############################################
+--- # Data Source
+spring:
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:postgresql://아이피:포트/디비이름
+    username: 유저
+    password: 패스워드
+    hikari:
+      pool-name: irsHikari
+      # 유휴 connection - 5개
+      minimum-idle: 5
+      # connection 최대 시간 - 20초
+      connection-timeout: 20000
+      # pool size - 기본값 10
+      maximum-pool-size: 10
+      # connection 최대 유지시간, 수명, 반환시간 - 10분
+      max-lifetime: 600000
+      # connection 유효성 검사 - 3초
+      validation-timeout: 3000
+      connection-init-sql: SELECT 1
+
+##########################################################################################
+--- # jasypt
+jasypt.encryptor.password: jasypt패스워드
+    

@@ -58,7 +58,11 @@ public enum UserClCdEnum implements EnumType {
 	OUTSOURCINGBIZ(
 			RoleConst.CODE_OUTSOURCINGBIZ,
 			RoleConst.ROLE_OUTSOURCINGBIZ
-	);											//역할 : 위탁기관 사업수행자
+	),											//역할 : 위탁기관 사업수행자
+	UNAPPROVEDOUTSOURCING(
+			RoleConst.CODE_UNAPPROVEDOUTSOURCING,
+			RoleConst.ROLE_UNAPPROVEDOUTSOURCING
+	);											//역할 : 비승인위탁기관
 	
     private String code;
     private String value;
@@ -67,6 +71,13 @@ public enum UserClCdEnum implements EnumType {
     	return this.getValue();
     }
 
+    public static UserClCdEnum ofCode(String code) throws Exception {
+    	return Arrays.stream(UserClCdEnum.values())
+    			.filter(r -> r.getCode().equals(code))
+    			.findAny()
+    			.orElseThrow(() -> new Exception(""));
+    }
+    
     public static UserClCdEnum of(String value) throws Exception {
     	return Arrays.stream(UserClCdEnum.values())
     			.filter(r -> r.getValue().equals(value))

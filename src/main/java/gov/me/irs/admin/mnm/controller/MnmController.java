@@ -53,7 +53,7 @@ public class MnmController {
 		NexacroResult nexacroResult = new NexacroResult();
 		
 		requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
-		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_ID);
+		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_MGNO);
 		
 		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
 		nexacroResult.addDataSet("list", list);

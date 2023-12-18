@@ -70,7 +70,7 @@ public class FileUtil {
 	}
 	
 	/**
-	 * 파일업로드용 파일명 생성하기 - UUID - CAPSS꺼 활용
+	 * 파일업로드용 파일명 생성하기 - UUID
 	 * @param originalFilename 원본파일명
 	 * @return
 	 */
@@ -91,12 +91,12 @@ public class FileUtil {
 		String filename = this.getFilename(originalFilename);						//원본파일명
 		String tempFilename = this.getTempFilename();								//임시파일명
 		String extension = this.getFilenameExtension(originalFilename, false);
-		String filePathNm = this.getTempFilePathNm();									//파일경로
+		String filePath = this.getTempFilePath();									//파일경로
 		
 		/* 파일정보 생성하기 */
 		FileVo vo = FileVo.builder()
 				.orgnlFileNm(filename)        										//원본파일명    
-				.filePathNm(filePathNm)        				//파일 경로    
+				.filePath(filePath)        				//파일 경로    
 				.fileNm(tempFilename)        								//파일 명     
 				.fileSz(multipartFile.getSize())         //파일 크기    
 				.fileExtnNm(extension)    										//파일확장자명   
@@ -112,7 +112,7 @@ public class FileUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getTempFilePathNm() throws Exception {
+	public String getTempFilePath() throws Exception {
 		String uploadRootPath = commonProperties.getProperty("upload.root.path");		//File Repository Root
 		String uploadTemporaryPath = uploadRootPath + commonProperties.getProperty("upload.temporary.path");	//파일업로드 Temp 경로
 		
@@ -141,7 +141,7 @@ public class FileUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getRealFilePathNm() throws Exception {
+	public String getRealFilePath() throws Exception {
 		String uploadRootPath = commonProperties.getProperty("upload.root.path");		//File Repository Root
 		String uploadRealPath = uploadRootPath + commonProperties.getProperty("upload.real.path");		//파일업로드 Real 경로
 		

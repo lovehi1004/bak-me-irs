@@ -1,0 +1,10 @@
+# upload root path
+raon:
+  temporary:
+    # 라온K - 업로드 최종 경로 (=업무처리시 업무처리상 임시상태 파일정보, 업로드 기능이 정상적으로 수행되었으나 업무프로세스에서 최종 저장처리 미수행 상태의 파일들)
+    result-path: /data/file/temporary
+    # 라온K - 임시 업로드 경로 (=이곳에 파일이 장기간(프로세스 타임 오바시...) 잔존한다면 dummy이므로 삭제 가능)
+    temp-path: /data/file/temporary/raonk
+  real:
+    # 업무처리 후 최종 저장처리 완료시의 경로 (=업무처리 후 활성화 상태의 파일들, 이곳에 위치하고 DEL_YN = 'N' 이라면 조회, 다운로드 등 각종 서비스가 가능한 상태이다.)
+    path: /data/file/real

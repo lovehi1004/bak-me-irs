@@ -1,29 +1,22 @@
 package gov.me.irs.common.juso.controller;
 
-import java.net.URLEncoder;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.springframework.http.MediaType;
+import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.PostMapping;
 
-import gov.me.irs.core.config.property.JusoProperties;
+import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
+import com.nexacro.uiadapter.spring.core.data.NexacroResult;
+
+import gov.me.irs.common.vo.PagingVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 인증 사용자용 공통 Controller
+ * 도로명주소 검색 Controller
  * 
  * @author Justin
  *
@@ -33,80 +26,36 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JusoController {
 	
-	private final JusoProperties jusoProperties;
+	private final JusoService jusoService;
 	
-	@GetMapping(value = "/Sample.irs")
-	public ModelAndView Sample(HttpServletRequest request, ModelMap model) throws Exception {
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("Sample");
-		return mv;
-	}
-	
-	@RequestMapping(value = "/jusoPopup.irs", method = {RequestMethod.GET, RequestMethod.POST})
-	public ModelAndView jusoPopup(HttpServletRequest request, ModelMap model) throws Exception {
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("jusoPopup");
-		return mv;
-	}
-	
-	
-	
-	@GetMapping(value = "/juso.irs")
-	public ModelAndView juso(HttpServletRequest request, ModelMap model) throws Exception {
-		ModelAndView mv = new ModelAndView();
+	@PostMapping(value = "/common/selectJusoList.irs")
+	public NexacroResult selectJusoList(@ParamDataSet(name = "dsSrh") Map<String, Object> dsSrh
+			, @ParamDataSet(name = "dsPageInfo") Map<String, Object> dsPageInfo) throws ClientProtocolException, IOException {
+		log.debug("[■■■■■■■■■■▶][invoked!][{}]", new Object() {}.getClass().getEnclosingMethod().getName());
 		
-		/* 결과 */
-		String result = StringUtils.EMPTY;
+		NexacroResult nexacroResult = new NexacroResult();
 		
-		/*
-		Juso juso = Juso.builder()
-				.confmKey(jusoProperties.apiKey)
-				.currentPage(1)
-				.countPerPage(10)
-				.keyword("사당1동")
-				.build();
-		*/
+		/* ■■■■ 페이징처리 - 1. 페이징처리 필수정보 설정 ■■■■ */
+		PagingVo pagingVo = new PagingVo(dsPageInfo);
 		
-//		String jsonString = new GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(juso);
-		HttpClient httpClient = HttpClientBuilder.create().build();
+		/* 도로명주소 검색 */
+		Map<String, Object> resultMap = jusoService.selectJusoInfo(dsSrh, dsPageInfo);
 		
-		try {
-//			StringEntity stringEntity = new StringEntity(jsonString);
-			
-//			String jusoUrl = juso.getJusoURLWithQueryString(jusoProperties.addrLinkApi);
-//			System.out.println("[jusoUrl]["+jusoUrl+"]");
-			
-			
-			String jusoUrl = "https://business.juso.go.kr/addrlink/addrLinkApi.do?currentPage="+1
-					+"&countPerPage="+10+"&keyword="+URLEncoder.encode("사당1동","UTF-8")
-					+"&confmKey="+jusoProperties.apiKey+"&resultType="+"json";
-					
-			System.out.println("[jusoUrl]["+jusoUrl+"]");
-			HttpPost post = new HttpPost(jusoUrl);
-//			post.setEntity(stringEntity);
-			post.setHeader("Content-type", MediaType.APPLICATION_JSON_VALUE);
-			
-			HttpResponse  response = httpClient.execute(post);
-//			HttpEntity entity = response.getEntity();
-			result = EntityUtils.toString(response.getEntity());
-			System.out.println("■■■■■■■■■■■■■■■■■■■■ 주소 테스트 START ■■■■■■■■■■■■■■■■■■■■");
-			System.out.println("[result]["+result+"]");
-			System.out.println("■■■■■■■■■■■■■■■■■■■■ 주소 테스트 END ■■■■■■■■■■■■■■■■■■■■");
-			
-			
-//			InputStream is = null;
-//			
-//			if (entity != null) {
-//				is = entity.getContent();
-//			}
-//			xr.parse(new InputSource(instream));
-			
-		} catch(Exception e) {
-			log.error("[Juso Exception][{}]", e);
-		}
+		/* 페이징처리정보 추출 */
+		ResponseJusoCommonVo commonVo = (ResponseJusoCommonVo) resultMap.get("commonVo");
 		
-		mv.addObject("result", result);
-		mv.setViewName("juso");
-		return mv;
+		/* ■■■■ 페이징처리 - 2. 조회결과 총건수 설정 ■■■■ */
+		pagingVo.setTotalCount(commonVo.getTotalCount());
+		
+		/* 도로명주소 검색결과 추출 */
+		@SuppressWarnings("unchecked")
+		List<ResponseJusoVo> jusoVoList = (List<ResponseJusoVo>) resultMap.get("jusoVoList");
+
+		/* ■■■■ 페이징처리 - 3. 페이징정보 반환 ■■■■ */
+		nexacroResult.addDataSet("dsPageInfo", pagingVo);
+		nexacroResult.addDataSet("dsJusoList", jusoVoList);
+		
+		return nexacroResult;
+		
 	}
 }

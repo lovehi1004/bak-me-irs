@@ -1,0 +1,9 @@
+# upload root path
+core:
+  raon:
+    url:
+      # 라온K - handler url - 업로드/다운로드
+      raonkhandler: /raonk/handler/updownloader.irs
+      # 라온K - viewer url - 뷰어
+      raonkviewer: /raonk/handler/viewer.irs
+    view-js-path: /nexacrolib/component/raonkupload/js/raonkupload.viewer.js

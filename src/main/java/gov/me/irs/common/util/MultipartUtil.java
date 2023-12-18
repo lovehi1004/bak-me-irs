@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -58,17 +59,16 @@ public class MultipartUtil {
 	 * 
 	 * @param multipartRequest - 업로드용 MultipartRequest (필수)
 	 * @param outputDsName - 업로드 결과 데이터셋 (필수)
-	 * @param fileGroupSn - 파일그룹일련번호 (필수)
+	 * @param fileGroupMgno - 파일그룹일련번호 (필수)
 	 * @param fileTypeClCd - 파일유형구분코드 (필수)
-	 * @param menuId - 메뉴ID (옵션)
+	 * @param menuMgno - 메뉴ID (옵션)
 	 * @return
 	 * @throws Exception
 	 */
 	public DataSet upload(MultipartHttpServletRequest multipartRequest
+			, String inputDsName
 			, String outputDsName
-			, int fileGroupSn
-			, String uploadType
-			, String menuId) throws Exception {
+			, String uploadType) throws Exception {
 		
 		String fileTypeClCd = Const.UPLOAD.SINGLE;		//Default : single upload
 		
@@ -77,6 +77,35 @@ public class MultipartUtil {
 		}
 		
 		log.debug("[업로드 하기][{}]", Const.UPLOAD.SINGLE.equals(fileTypeClCd) ? "SINGLE" : "MULTI");
+		
+		String fileGroupMgno = StringUtils.EMPTY;
+		String menuMgno = StringUtils.EMPTY;
+		
+		//파일정보를 담고있는 XML문자열(Dataset 의 saveXML())
+		String fileInfoXml = multipartRequest.getParameter(inputDsName);
+		
+		DataSet dsFileInfo = null;
+		
+		log.debug("■■■■■■■■■■■ ◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆◆");
+		
+		//파일정보 Dataset saveXML 문자열
+		if(fileInfoXml != null) {
+			
+			log.debug("■■■■■■■■■■■ [fileInfoXml][{}]", fileInfoXml);
+			
+			dsFileInfo = new DataSet(inputDsName);
+			fileInfoXml = fileInfoXml.replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&gt;", ">");
+			
+			dsFileInfo.loadXml(fileInfoXml);
+			
+			fileGroupMgno = dsFileInfo.getString(0, "fileGroupMgno");
+			menuMgno = dsFileInfo.getString(0, "menuMgno");
+			
+			log.debug("■■■■■■■■■■■ [fileGroupMgno][{}]", fileGroupMgno);
+			log.debug("■■■■■■■■■■■ [menuMgno][{}]", menuMgno);
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		
 		/* 1. 세션정보 확인 하기 */
 		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
@@ -88,16 +117,18 @@ public class MultipartUtil {
 		
 		/* 2. 파일업로드 응답전용 데이터셋 생성하기 */
 		DataSet outputDs = new DataSet(outputDsName);
-		outputDs.addColumn("fileGroupSn", PlatformDataType.INT);
-		outputDs.addColumn("fileDtlSn", PlatformDataType.INT);
+		outputDs.addColumn("fileGroupMgno", PlatformDataType.STRING);
+		outputDs.addColumn("fileMgno", PlatformDataType.STRING);
 		outputDs.addColumn("orgnlFileNm", PlatformDataType.STRING);
 		outputDs.addColumn("fileNm", PlatformDataType.STRING);
 		outputDs.addColumn("fileSz", PlatformDataType.INT);
 		outputDs.addColumn("fileExtnNm", PlatformDataType.STRING);
+		outputDs.addColumn("regDt", PlatformDataType.STRING);
+		outputDs.addColumn("delYn", PlatformDataType.STRING);
 		
 		
 		log.debug("[outputDs]["+outputDsName+"]");
-		log.debug("[fileGroupSn]["+fileGroupSn+"]");
+		log.debug("[fileGroupMgno]["+fileGroupMgno+"]");
 		log.debug("[fileTypeClCd]["+fileTypeClCd+"]");
 		log.debug("[sessionUserId]["+sessionUserId+"]");
 		
@@ -123,9 +154,9 @@ public class MultipartUtil {
 			/* 넥사크로 예제 구간 END */
 			
 			FileVo vo = fileUtil.getFileVo(multipartFile);
-			vo.setFileGroupSn(fileGroupSn);																	//화면에서 넘어온 파일그룹 KEY
+			vo.setFileGroupMgno(fileGroupMgno);																	//화면에서 넘어온 파일그룹 KEY
 			vo.setFileTypeClCd(fileTypeClCd);
-			vo.setMenuId(menuId);
+			vo.setMenuMgno(menuMgno);
 			vo.setRgtrId(sessionUserId);
 			vo.setMdfrId(sessionUserId);
 			
@@ -139,7 +170,7 @@ public class MultipartUtil {
 				fileVo = fileService.saveFile(vo);
 				
 				/* 생성된 파일그룹 KEY 받아서 세팅하기 - 신규등록시 채번되는 값 */
-				fileGroupSn = fileVo.getFileGroupSn();
+				fileGroupMgno = fileVo.getFileGroupMgno();
 				
 			} catch (IOException e) {
 				
@@ -154,12 +185,14 @@ public class MultipartUtil {
 			} finally {
 				
 				int row = outputDs.newRow();
-				outputDs.set(row, "fileGroupSn", fileVo.getFileGroupSn());
-				outputDs.set(row, "fileDtlSn", fileVo.getFileDtlSn());
+				outputDs.set(row, "fileGroupMgno", fileVo.getFileGroupMgno());
+				outputDs.set(row, "fileMgno", fileVo.getFileMgno());
 				outputDs.set(row, "orgnlFileNm", fileVo.getOrgnlFileNm());
 				outputDs.set(row, "fileNm", fileVo.getFileNm());
 				outputDs.set(row, "fileSz", fileVo.getFileSz());
 				outputDs.set(row, "fileExtnNm", fileVo.getFileExtnNm());
+				outputDs.set(row, "regDt", fileVo.getRegDt());
+				outputDs.set(row, "delYn", fileVo.getDelYn());
 				
 			}
 			
@@ -190,6 +223,9 @@ public class MultipartUtil {
 		
 		//파일정보 Dataset saveXML 문자열
 		if(fileInfoXml != null) {
+			
+			log.debug("■■■■■■■■■■■ [fileInfoXml][{}]", fileInfoXml);
+			
 			dsFileInfo = new DataSet(inputDsName);
 			fileInfoXml = fileInfoXml.replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&gt;", ">");
 			
@@ -208,16 +244,16 @@ public class MultipartUtil {
 		/* 넥사크로 예제 구간 END */
 		
 		FileVo vo = new FileVo();
-		int fileGroupSn = Const.NUMERIC.ZERO;
-		List<Integer> fileDtlSnArray = new ArrayList<Integer>();
+		String fileGroupMgno = StringUtils.EMPTY;
+		List<String> fileMgnoArray = new ArrayList<String>();
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		for(int idx = 0; idx < dsFileInfo.getRowCount(); idx++ ) {
-			fileGroupSn = dsFileInfo.getInt(idx, "fileGroupSn");
-			int fileDtlSn = dsFileInfo.getInt(idx, "fileDtlSn");
-			fileDtlSnArray.add(fileDtlSn);
+			fileGroupMgno = dsFileInfo.getString(idx, "fileGroupMgno");
+			String fileMgno = dsFileInfo.getString(idx, "fileMgno");
+			fileMgnoArray.add(fileMgno);
 		}
-		vo.setFileGroupSn(fileGroupSn);
-		vo.setFileDtlSnArray(fileDtlSnArray);
+		vo.setFileGroupMgno(fileGroupMgno);
+		vo.setFileMgnoArray(fileMgnoArray);
 		vo.setFileTypeClCd(Const.UPLOAD.MULTI);
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일정보 DB조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
@@ -275,12 +311,12 @@ public class MultipartUtil {
 			
 			/* 압축결과물 - 임시파일 생성하기 */
 			FileVo tempVo = new FileVo();
-			tempVo.setFilePathNm(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
+			tempVo.setFilePath(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
 			tempVo.setFileNm(fileUtil.getTempFilename());
 			
 			compressedFile = new File(tempVo.getFileFullPath());
 			
-			File directory = new File(tempVo.getFilePathNm());
+			File directory = new File(tempVo.getFilePath());
 			if(!directory.exists()) {
 				directory.mkdirs();
 			}
@@ -337,6 +373,7 @@ public class MultipartUtil {
 	
 	/**
 	 * SINGLE 파일 다운로드
+	 * 	- MULTI 파일다운로드내에서 개별파일 다운로드시에도 사용됨
 	 * 
 	 * @param vo
 	 * @return
@@ -352,6 +389,9 @@ public class MultipartUtil {
 		
 		//파일정보 Dataset saveXML 문자열
 		if(fileInfoXml != null) {
+			
+			log.debug("■■■■■■■■■■■ [fileInfoXml][{}]", fileInfoXml);
+			
 			dsFileInfo = new DataSet(inputDsName);
 			fileInfoXml = fileInfoXml.replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&gt;", ">");
 			
@@ -370,13 +410,12 @@ public class MultipartUtil {
 		/* 넥사크로 예제 구간 END */
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		int fileGroupSn = dsFileInfo.getInt(0, "fileGroupSn");
-		int fileDtlSn = dsFileInfo.getInt(0, "fileDtlSn");
+		String fileGroupMgno = dsFileInfo.getString(0, "fileGroupMgno");
+		String fileMgno = dsFileInfo.getString(0, "fileMgno");
 		
 		FileVo vo = new FileVo();
-		vo.setFileGroupSn(fileGroupSn);
-		vo.setFileDtlSn(fileDtlSn);
-		vo.setFileTypeClCd(Const.UPLOAD.SINGLE);
+		vo.setFileGroupMgno(fileGroupMgno);
+		vo.setFileMgno(fileMgno);
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일정보 DB조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		FileVo fileVo = fileService.selectFileDtl(vo);
@@ -411,6 +450,14 @@ public class MultipartUtil {
 			
 			log.debug("[SINGLE][CHECK][FILE 다운로드 가능][{}]" , orgnlFileNm);
 		}else {
+			fileDownloadVo = FileDownloadVo.builder()
+					.contentType(mimeType)
+					.fileFullPath(fileVo.getFileFullPath())
+					.orgnlFileNm(orgnlFileNm)
+					.downloadFileNm(downloadFileNm)
+					.isAvailable(false)					//다운로드 가능여부
+					.build();
+			
 			log.debug("[SINGLE][CHECK][FILE 다운로드 불가능 - 파일 없음][{}]" , orgnlFileNm);
 		}
 		
@@ -424,35 +471,24 @@ public class MultipartUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean checkMultiFile(HttpServletRequest request, List<Map<String, Object>> requestList) throws Exception {
+	public boolean checkMultiFileDownloadVo(HttpServletRequest request, List<Map<String, Object>> dsFileInfo) throws Exception {
 		
-		boolean result = false;
-		
-		/* 넥사크로 예제 구간 START */
-		String characterEncoding = request.getCharacterEncoding();
-		
-		if(characterEncoding == null) {
-			characterEncoding = PlatformType.DEFAULT_CHAR_SET;
+		boolean result = true;
+		if(dsFileInfo.size() == Const.NUMERIC.ZERO) {		//선택된 파일이 존재하지 않은 경우
+			return false;
 		}
-		
-		//문자셋 타입
-		String charsetOfRequest = CharsetUtil.getCharsetOfRequest(request, characterEncoding);
-		log.debug("[charsetOfRequest][{}]", charsetOfRequest);
-		/* 넥사크로 예제 구간 END */
 		
 		FileVo vo = new FileVo();
-		int fileGroupSn = Const.NUMERIC.ZERO;
-		List<Integer> fileDtlSnArray = new ArrayList<Integer>();
+		String fileGroupMgno = StringUtils.EMPTY;
+		List<String> fileMgnoArray = new ArrayList<String>();
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		
-		for (Map<String, Object> fileMap : requestList) {
-			fileGroupSn = (int) fileMap.get("fileGroupSn");
-			int fileDtlSn = (int) fileMap.get("fileDtlSn");
-			fileDtlSnArray.add(fileDtlSn);
+		for (Map<String, Object> fileInfo : dsFileInfo) {
+			fileGroupMgno = (String) fileInfo.get("fileGroupMgno");
+			String fileMgno = (String) fileInfo.get("fileMgno");
+			fileMgnoArray.add(fileMgno);
 		}
-		
-		vo.setFileGroupSn(fileGroupSn);
-		vo.setFileDtlSnArray(fileDtlSnArray);
+		vo.setFileGroupMgno(fileGroupMgno);
+		vo.setFileMgnoArray(fileMgnoArray);
 		vo.setFileTypeClCd(Const.UPLOAD.MULTI);
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일정보 DB조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
@@ -468,52 +504,41 @@ public class MultipartUtil {
 			/* 파일시스템상에 물리파일정보가 있으면 - 다운로드 가능한 경우 */
 			if(file.exists()) {
 				log.debug("Physical File is Found!");
-				result = true;
 				log.debug("[MULTI][CHECK][FILE 다운로드 가능][{}]" , orgnlFileNm);
 			}else {
+				result = false;
 				log.debug("[MULTI][CHECK][FILE 다운로드 불가능 - 파일 없음][{}]" , orgnlFileNm);
+				break;
 			}
-			
 			
 		}
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 4. 다운로드 체크 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		/* 압축대상 파일이 존재하면 */
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 4. 다운로드 가능여부 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		return result;
 	}
 	
 	/**
 	 * SINGLE 파일 다운로드 체크
+	 * 	- MULTI 파일다운로드내에서 개별파일 다운로드시에도 사용됨
 	 * 
 	 * @param vo
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean checkSingleFile(HttpServletRequest request, List<Map<String, Object>> requestList) throws Exception {
+	public boolean checkSingleFileDownloadVo(HttpServletRequest request, List<Map<String, Object>> dsFileInfo) throws Exception {
 		
-		boolean result = false;
-		
-		/* 넥사크로 예제 구간 START */
-		String characterEncoding = request.getCharacterEncoding();
-		
-		if(characterEncoding == null) {
-			characterEncoding = PlatformType.DEFAULT_CHAR_SET;
+		boolean result = true;
+		if(dsFileInfo.size() == Const.NUMERIC.ZERO) {		//선택된 파일이 존재하지 않은 경우
+			return false;
 		}
 		
-		//문자셋 타입
-		String charsetOfRequest = CharsetUtil.getCharsetOfRequest(request, characterEncoding);
-		log.debug("[charsetOfRequest][{}]", charsetOfRequest);
-		/* 넥사크로 예제 구간 END */
-		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		
-		int fileGroupSn = (int) requestList.get(0).get("fileGroupSn");
-		int fileDtlSn = (int) requestList.get(0).get("fileDtlSn");
+		String fileGroupMgno = (String) dsFileInfo.get(0).get("fileGroupMgno");
+		String fileMgno = (String) dsFileInfo.get(0).get("fileMgno");
 		
 		FileVo vo = new FileVo();
-		vo.setFileGroupSn(fileGroupSn);
-		vo.setFileDtlSn(fileDtlSn);
-		vo.setFileTypeClCd(Const.UPLOAD.SINGLE);
+		vo.setFileGroupMgno(fileGroupMgno);
+		vo.setFileMgno(fileMgno);
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일정보 DB조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		FileVo fileVo = fileService.selectFileDtl(vo);
@@ -528,14 +553,68 @@ public class MultipartUtil {
 		if(file.exists()) {
 			log.debug("Physical File is Found!");
 			log.debug("[SINGLE][CHECK][FILE 다운로드 가능][{}]" , orgnlFileNm);
-			result = true;
 		}else {
-			log.debug("[SINGLE][CHECK][FILE 다운로드 불가능 - 파일 없음][{}]" , orgnlFileNm);
 			result = false;
+			log.debug("[SINGLE][CHECK][FILE 다운로드 불가능 - 파일 없음][{}]" , orgnlFileNm);
 		}
 		
 		return result;
 	}
+	
+	/**
+	 * SINGLE 파일 다운로드 체크
+	 * 
+	 * @param vo
+	 * @return
+	 * @throws Exception
+	 */
+//	public boolean checkSingleFile(HttpServletRequest request, List<Map<String, Object>> requestList) throws Exception {
+//		
+//		boolean result = false;
+//		
+//		/* 넥사크로 예제 구간 START */
+//		String characterEncoding = request.getCharacterEncoding();
+//		
+//		if(characterEncoding == null) {
+//			characterEncoding = PlatformType.DEFAULT_CHAR_SET;
+//		}
+//		
+//		//문자셋 타입
+//		String charsetOfRequest = CharsetUtil.getCharsetOfRequest(request, characterEncoding);
+//		log.debug("[charsetOfRequest][{}]", charsetOfRequest);
+//		/* 넥사크로 예제 구간 END */
+//		
+//		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파라미터 정보 읽기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+//		
+//		String fileGroupMgno = (String) requestList.get(0).get("fileGroupMgno");
+//		String fileMgno = (String) requestList.get(0).get("fileMgno");
+//		
+//		FileVo vo = new FileVo();
+//		vo.setFileGroupMgno(fileGroupMgno);
+//		vo.setFileMgno(fileMgno);
+//		vo.setFileTypeClCd(Const.UPLOAD.SINGLE);
+//		
+//		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일정보 DB조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+//		FileVo fileVo = fileService.selectFileDtl(vo);
+//		
+//		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3. 파일상태 확인하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+//		File file = new File(fileVo.getFileFullPath());			//저장된 파일명으로 File 객체 생성
+//		
+//		/* 원본파일명 */
+//		String orgnlFileNm = fileVo.getOrgnlFileNmWithExt();
+//		
+//		/* 파일시스템상에 물리파일정보가 있으면 - 다운로드 가능한 경우 */
+//		if(file.exists()) {
+//			log.debug("Physical File is Found!");
+//			log.debug("[SINGLE][CHECK][FILE 다운로드 가능][{}]" , orgnlFileNm);
+//			result = true;
+//		}else {
+//			log.debug("[SINGLE][CHECK][FILE 다운로드 불가능 - 파일 없음][{}]" , orgnlFileNm);
+//			result = false;
+//		}
+//		
+//		return result;
+//	}
 	
 	/**
 	 * 엑셀 업로드 처리기

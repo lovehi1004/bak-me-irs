@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
-import gov.me.irs.admin.mnm.service.MnmService;
-import gov.me.irs.admin.statistics.service.StatisticsService;
+//import gov.me.irs.admin.mnm.service.MnmService;
+//import gov.me.irs.admin.statistics.service.StatisticsService;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.service.FileService;
 import gov.me.irs.common.file.vo.FileVo;
@@ -50,7 +50,7 @@ public class TestNexacroNController {
 	
 	private final FileService fileService;
 	
-	private final StatisticsService statisticsService;
+//	private final StatisticsService statisticsService;
 	
 	/**
 	 * 조회 테스트용 - 시스템접속통계 일별통계조회
@@ -102,8 +102,8 @@ public class TestNexacroNController {
     	log.debug("i18n 테스트 : {}", messageSource.getMessage("i18n.message.test1", null, LocaleContextHolder.getLocale()));
     	log.debug("i18n 파라미터 테스트 : {}", messageSource.getMessage("i18n.message.test2", Arrays.asList("테스트1", "테스트2").toArray(), LocaleContextHolder.getLocale()));
 
-		List<Map<String, Object>> list = statisticsService.selectConnectDailyStatisticsList(requestMap);
-		nexacroResult.addDataSet("list", list);
+//		List<Map<String, Object>> list = statisticsService.selectConnectDailyStatisticsList(requestMap);
+//		nexacroResult.addDataSet("list", list);
 		
 		return nexacroResult;
 	}
@@ -142,23 +142,19 @@ public class TestNexacroNController {
 		log.debug("[requestMap][{}]", requestMap);
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 		
-		if(ObjectUtils.isEmpty(requestMap.get("fileGroupSn"))) {
-			throw new Exception("fileGroupSn - 파라미터 없음");
+		if(ObjectUtils.isEmpty(requestMap.get("fileGroupMgno"))) {
+			throw new Exception("fileGroupMgno - 파라미터 없음");
 		}
 		
-		int fileGroupSn = (int) requestMap.get("fileGroupSn");
 		
-		/* 1. 세션정보 확인 하기 */
-		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
-		
-		if(UserSession.isAuthenticated()) {
-			TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
-			sessionUserId = tableUser.getUserId();
-		}
-		
-		List<FileVo> list = fileService.saveCloneFile(fileGroupSn, sessionUserId);
-		
+		List<FileVo> list = fileService.saveCloneFileAndList(requestMap);
 		log.debug("[list][{}]", list);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 파일복제시 사용 START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		String newFileGroupMgno = fileService.saveCloneFile((String) requestMap.get("fileGroupMgno"));
+		log.debug("[newFileGroupMgno][{}]", newFileGroupMgno);
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 파일복제시 사용 END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		nexacroResult.addDataSet("output1", list);
@@ -172,20 +168,21 @@ public class TestNexacroNController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/test/single/save.do")
-	public NexacroResult testSingleSave(@ParamDataSet(name = "input1") Map<String, Object> requestMap) throws Exception {
-		
-		Map<String, Object> uploadMap = new HashMap<String, Object>();
-		uploadMap.put("fileGroupSn", 4);
-		uploadMap.put("fileDtlSn", 1);
-		
-		
-		
-		boolean result = fileService.saveSingleFile("sessionUserId", uploadMap);
-		
+	@PostMapping("/test/single/save.irs")
+	public NexacroResult testSingleSave(@ParamDataSet(name = "dsFileDetail") List<Map<String, Object>> dsAtchFileDetail
+			, @ParamDataSet(name = "dsSendFileDetail") Map<String, Object> dsSendFileDetail) throws Exception {
 		NexacroResult nexacroResult = new NexacroResult();
-		nexacroResult.addDataSet("output1", "xxxx");
-		nexacroResult.setErrorCode(result ? 0 : -1);
+		
+		/* #################### MULTI 파일정보 최종저장처리 START #################### */
+		/**
+		 * dsAtchFileDetail : 공통 파일 데이터셋 - 넥사크로 callback에서 넘어오는 정보
+		 * dsSendFileDetail : 업무 데이터셋
+		 */
+		if(!ObjectUtils.isEmpty(dsSendFileDetail.get("fileGroupMgno"))) {
+			boolean result = fileService.saveSingleFile(dsAtchFileDetail, dsSendFileDetail);
+			nexacroResult.addDataSet("output1", result);
+		}
+		/* #################### MULTI 파일정보 최종저장처리 END #################### */
 		
 		return nexacroResult;
 	}
@@ -197,31 +194,26 @@ public class TestNexacroNController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/test/multi/save.do")
-	public NexacroResult testMultiSave(@ParamDataSet(name = "input1") Map<String, Object> requestMap) throws Exception {
-		
-		List<Integer> fileDtlSnArray = new ArrayList<Integer>();
-		fileDtlSnArray.add(1);
-		fileDtlSnArray.add(2);
-		List<String> newFileYnArray = new ArrayList<String>();
-		newFileYnArray.add(Const.NEW.N);
-		newFileYnArray.add(Const.NEW.Y);
-		
-		Map<String, Object> uploadMap = new HashMap<String, Object>();
-		uploadMap.put("fileGroupSn", 3);
-		uploadMap.put("fileDtlSnArray", fileDtlSnArray);
-		uploadMap.put("newFileYnArray", newFileYnArray);
-		
-		boolean result = fileService.saveMultiFile("sessionUserId", uploadMap);
-		
+	@PostMapping("/test/multi/save.irs")
+	public NexacroResult testMultiSave(@ParamDataSet(name = "dsFileDetail") List<Map<String, Object>> dsAtchFileDetail
+			, @ParamDataSet(name = "dsSendFileDetail") Map<String, Object> dsSendFileDetail) throws Exception {
 		NexacroResult nexacroResult = new NexacroResult();
-		nexacroResult.addDataSet("output1", "xxxx");
-		nexacroResult.setErrorCode(result ? 0 : -1);
+		
+		/* #################### MULTI 파일정보 최종저장처리 START #################### */
+		/**
+		 * dsAtchFileDetail : 공통 파일 데이터셋 - 넥사크로 callback에서 넘어오는 정보
+		 * dsSendFileDetail : 업무 데이터셋
+		 */
+		if(!ObjectUtils.isEmpty(dsSendFileDetail.get("fileGroupMgno"))) {
+			boolean result = fileService.saveMultiFile(dsAtchFileDetail ,dsSendFileDetail);
+			nexacroResult.addDataSet("output1", result);
+		}
+		/* #################### MULTI 파일정보 최종저장처리 END #################### */
 		
 		return nexacroResult;
 	}
 	
-	private final MnmService mnmService;
+//	private final MnmService mnmService;
 	
 	@PostMapping("/test/common/menu.irs")
 	public NexacroResult testMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap) throws Exception {
@@ -229,10 +221,10 @@ public class TestNexacroNController {
 		NexacroResult nexacroResult = new NexacroResult();
 		
 		requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
-		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_ID);
+		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_MGNO);
 		
-		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
-		nexacroResult.addDataSet("list", list);
+//		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
+//		nexacroResult.addDataSet("list", list);
 		
 		return nexacroResult;
 	}

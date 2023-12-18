@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -52,7 +53,7 @@ public class JwtTokenProvider {
     	headers.put("alg", "HS256");			//HMAC with SHA-256
     }
     
-    private final JwtProperties props;
+    private final JwtProperties jwtProperties;
 	
 	/* Token 정보 (Signature) */
     private SecretKey accessTokenKey;
@@ -69,10 +70,27 @@ public class JwtTokenProvider {
 	 */
 	@PostConstruct
 	protected void init() {
-		this.accessTokenKey = Keys.hmacShaKeyFor(props.accessToken.secretKey.getBytes(StandardCharsets.UTF_8));
-		this.refreshTokenKey = Keys.hmacShaKeyFor(props.refreshToken.secretKey.getBytes(StandardCharsets.UTF_8));
+		this.accessTokenKey = Keys.hmacShaKeyFor(jwtProperties.accessToken.secretKey.getBytes(StandardCharsets.UTF_8));
+		this.refreshTokenKey = Keys.hmacShaKeyFor(jwtProperties.refreshToken.secretKey.getBytes(StandardCharsets.UTF_8));
 	}
 	
+	/**
+	 * Token정보로 인증정보 생성
+	 * 
+	 * @param accessToken
+	 */
+    public void setAuthentication(String accessToken, String role, boolean isReissued) {
+    	log.debug("▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ [setAuthentication][재발급여부][{}] ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶", String.valueOf(isReissued));
+    	
+    	// Token정보로 부터 인증정보 취득
+        Authentication authentication = this.getAuthentication(accessToken, role);
+        
+        log.debug("[role][{}][authentication.getPrincipal()][{}]", role, authentication.getPrincipal());
+        
+        // 인증정보 갱신
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+    
 	/**
 	 * RefreshToken정보로 부터 role 권한정보 취득
 	 * 
@@ -118,9 +136,8 @@ public class JwtTokenProvider {
      * @return
      */
 	public String createAccessToken(String lgnId, List<String> roles, String role){
-		log.debug("■■■■■■■■■■[AccessToken 생성완료]");
-		log.debug("■■■■■■■■■■[AccessToken 생성시 role 권한정보][{}]", role);
-		return this.createToken(lgnId, roles, accessTokenKey, props.accessToken.validTime, role);
+		log.debug("■■■■■■■■■■[AccessToken 생성완료, 생성시 role 권한정보][{}]", role);
+		return this.createToken(lgnId, roles, accessTokenKey, jwtProperties.accessToken.validTime, role);
 	}
 	
 	/**
@@ -131,9 +148,8 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String createRefreshToken(String lgnId, List<String> roles, String role) {
-		log.debug("■■■■■■■■■■[RefreshToken 생성완료]");
-		log.debug("■■■■■■■■■■[RefreshToken 생성시 role 권한정보][{}]", role);
-		return this.createToken(lgnId, roles, refreshTokenKey, props.refreshToken.validTime, role);
+		log.debug("■■■■■■■■■■[RefreshToken 생성완료, 생성시 role 권한정보][{}]", role);
+		return this.createToken(lgnId, roles, refreshTokenKey, jwtProperties.refreshToken.validTime, role);
 	}
     
 	/**
@@ -143,27 +159,13 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public Authentication getAuthentication(String token, String role) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessTokenKey, token));
-		
-//		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
-//		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-//		authorities.add(new SimpleGrantedAuthority(role));
-//		
-//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
-//		for (GrantedAuthority a : authorities) {
-//			log.debug("[roleName]["+a.getAuthority()+"]");
-//		}
-//		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [END-service]");
-//
-//		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getLgnId(accessTokenKey, token));
 		
 		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
 		
 		/* 기본권한 또는 선택된 권한으로 인증정보 생성하기 */
 		List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(role);
-		log.debug("[authorities]["+authorities+"]");
-		log.debug("[roleName]["+authorities+"]");
-		
+		log.debug("[authorities][role][{}][{}]", authorities, role);
 		log.debug("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 보유중인 사용자 인증 권한정보 확인 [START-service]");
 		
 		return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
@@ -177,7 +179,7 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	public String getUserId(SecretKey tokenKey, String token) {
+	public String getLgnId(SecretKey tokenKey, String token) {
 		return Jwts.parserBuilder().setSigningKey(tokenKey).build().parseClaimsJws(token).getBody().getSubject();
 	}
 	
@@ -188,8 +190,8 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	public String getUserIdByRefreshToken(String token) {
-		return this.getUserId(refreshTokenKey, token);
+	public String getLgnIdByRefreshToken(String token) {
+		return this.getLgnId(refreshTokenKey, token);
 	}
 	
 	/**
@@ -263,8 +265,7 @@ public class JwtTokenProvider {
 	 * @param accessToken
 	 */
     public void setHeaderIssueToken(HttpServletResponse response) {
-    	log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ 발급 됬어요! ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀]");
-    	log.debug("[Tokens is issued]");
+    	log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ [발급 됬어요!][Tokens is issued] ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀]");
         response.setHeader(JwtConst.JWT_HTTP_HEADER_ISSUE_TOKEN_KEY, Const.NEW.Y);
     }
     
@@ -275,8 +276,7 @@ public class JwtTokenProvider {
      * @param accessToken
      */
     public void setHeaderReissueToken(HttpServletResponse response) {
-    	log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ 재발급 됬어요! ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀]");
-    	log.debug("[Tokens is reissued]");
+    	log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ [재발급 됬어요!][Tokens is reissued] ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀]");
     	response.setHeader(JwtConst.JWT_HTTP_HEADER_REISSUE_TOKEN_KEY, Const.NEW.Y);
     }
     

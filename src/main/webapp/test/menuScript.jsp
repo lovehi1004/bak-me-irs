@@ -187,7 +187,7 @@
 --------------------------------------------------
 ▶ 샘플
 -------------------------------------------------- 
-MENU_ID|||MENU_NM|||MENU_DESC|||REG_ID|||REG_DT
+MENU_MGNO|||MENU_NM|||MENU_DESC|||REG_ID|||REG_DT
 aaa|||111|||가가가|||xxx|||100
 bbb|||222|||나나나|||yyy|||200
 ccc|||333|||다다다|||zzz|||300
@@ -341,7 +341,7 @@ const fnDelRow = function(){
 </head>
 
 <body>
-	<textarea id="txaInput" style="width: 100%; height:200px; background: cyan;">MENU_ID|||MENU_NM|||MENU_DESC|||REG_ID|||REG_DT
+	<textarea id="txaInput" style="width: 100%; height:200px; background: cyan;">MENU_MGNO|||MENU_NM|||MENU_DESC|||REG_ID|||REG_DT
 aaa|||111|||가가가|||xxx|||100
 bbb|||222|||나나나|||yyy|||200
 ccc|||333|||다다다|||zzz|||300

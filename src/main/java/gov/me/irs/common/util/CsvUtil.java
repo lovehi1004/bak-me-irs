@@ -39,23 +39,23 @@ public class CsvUtil {
 	 * @return
 	 * @throws Exception 
 	 */
-	public File getCsvFile(String[] headerList, List<Map<String, Object>> dataList) throws Exception {
+	public File getCsvFile(String[] headerList, String[] cellList, List<Map<String, Object>> dataList) throws Exception {
 		
 		if(dataList.size() > Const.NUMERIC.EMPTY_LIST) {
 			/* 헤더키 총건수가 데이터 item 총건수보다 크면 논리적 모순 이므로 예외처리 */
-			if(headerList.length > dataList.get(0).size()) {
-				throw new Exception("check headerList size");
+			if(cellList.length > dataList.get(0).size()) {
+				throw new Exception("check cellList size");
 			}
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 1. CSV파일 - 임시파일 생성하기 ■■■■■■■■■■■■■■■■■■■■ */
 		FileVo tempVo = new FileVo();
-		tempVo.setFilePathNm(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
+		tempVo.setFilePath(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
 		tempVo.setFileNm(fileUtil.getTempFilename());
 		
 		File file = new File(tempVo.getFileFullPath());
 		
-		File directory = new File(tempVo.getFilePathNm());
+		File directory = new File(tempVo.getFilePath());
 		if(!directory.exists()) {
 			directory.mkdirs();
 		}
@@ -79,11 +79,11 @@ public class CsvUtil {
 				
 				StringBuffer sb = new StringBuffer();
 				
-				for (int idx = 0; idx < headerList.length; idx++) {
+				for (int idx = 0; idx < cellList.length; idx++) {
 					if(idx != 0) {
 						sb.append(Const.SYMBOL.COMMA);
 					}
-					sb.append(map.get(headerList[idx]));
+					sb.append(map.get(cellList[idx]));
 				}
 				bf.write(sb.toString());
 				bf.newLine();

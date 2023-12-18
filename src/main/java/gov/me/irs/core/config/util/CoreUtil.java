@@ -73,7 +73,11 @@ public final class CoreUtil {
 	 * @return
 	 */
 	public final static CoreResponse getCoreResponse(HttpStatus httpStatus, CoreResponseEnumType responseEnum, Throwable t) {
-		return CoreUtil.getCoreResponse(httpStatus, responseEnum, t.getMessage());
+		if(t == null) {
+			return CoreUtil.getCoreResponse(httpStatus, responseEnum);
+		} else {
+			return CoreUtil.getCoreResponse(httpStatus, responseEnum, t.getMessage());
+		}
 	}
 	
 	/**
@@ -86,8 +90,7 @@ public final class CoreUtil {
 	 */
 	public final static CoreResponse getCoreResponse(HttpStatus httpStatus, CoreResponseEnumType responseEnum, String message) {
 		
-		log.debug("[▶▶▶▶▶▶▶▶▶▶응답코드][{}]", responseEnum.getCode());
-		log.debug("[▶▶▶▶▶▶▶▶▶▶응답메세지][{}]", responseEnum.getMessage());
+		log.debug("[▶▶▶▶▶▶▶▶▶▶응답정보][응답코드][{}][응답메세지][{}]", responseEnum.getCode(), responseEnum.getMessage());
 		
 		if(ObjectUtils.isEmpty(message)) {
 			return CoreResponse.builder()
@@ -130,7 +133,7 @@ public final class CoreUtil {
 	 * @param jwtAuthEnum
 	 * @throws IOException
 	 */
-	public final static void setResponse(HttpServletResponse response, JwtAuthEnum jwtAuthEnum) throws IOException {
+	public final static void setResponse(HttpServletResponse response, JwtAuthEnum jwtAuthEnum, String systemMessage) throws IOException {
 		log.debug("▶▶▶▶▶▶▶▶▶▶ [setResponse]");
 		
 		HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;			/* default 500 */
@@ -156,6 +159,6 @@ public final class CoreUtil {
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(httpStatus.value());
-		response.getWriter().print(new ObjectMapper().writeValueAsString(CoreUtil.getCommonResponse(CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum))));
+		response.getWriter().print(new ObjectMapper().writeValueAsString(CoreUtil.getCommonResponse(CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, systemMessage))));
 	}
 }

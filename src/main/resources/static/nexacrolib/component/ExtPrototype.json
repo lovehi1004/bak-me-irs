@@ -1,0 +1,19 @@
+{
+	"name": "ExtPrototype",
+	"version": "1.0.0.0",
+	"description": "Library for nexacro platformN",
+	"license": "",
+	"scripts": [
+    "ExtPrototype/Frame.js",
+    "ExtPrototype/Util.js",
+    "ExtPrototype/Date.js",
+    "ExtPrototype/String.js",
+    "ExtPrototype/Transaction.js",
+    "ExtPrototype/Validation.js",
+    "ExtPrototype/Popup.js",
+    "ExtPrototype/Message.js",
+    "ExtPrototype/Grid.js",
+    "ExtPrototype/Excel.js",
+    "ExtPrototype/File.js"
+	]
+}

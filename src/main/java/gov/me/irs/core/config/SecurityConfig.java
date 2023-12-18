@@ -18,7 +18,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import gov.me.irs.core.filter.JwtAuthenticationFilter;
 import gov.me.irs.core.config.handler.CoreAccessDeniedHandler;
-import gov.me.irs.core.constants.RoleConst;
 import gov.me.irs.core.user.handler.CoreLogoutSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
@@ -99,36 +98,58 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain nexacroFilterChain(HttpSecurity http) throws Exception {
 		
-		log.debug("Spring Security START !");
+		log.info("Spring Security START !");
 		
 		http.csrf().disable();
 		
         http.httpBasic().disable()					// jwt설정
                 .authorizeRequests()
                 .antMatchers(IGNORING_MATCH_LIST).permitAll()
-                .antMatchers("/install.irs").permitAll()								/* URL고정 - 초기데이터 생성 */
-                .antMatchers("/exception/**").permitAll()								/* URL고정 - 인증 예외처리 전용 */
-                .antMatchers("/prepare/login").permitAll()								/* URL고정 - 인증체크 없음 */
-                .antMatchers("/login").permitAll()										/* URL고정 - 인증체크 없음 */
-                .antMatchers("/common/report.irs").permitAll()							/* URL고정 - 리포트, 인증체크 없음 */
-                .antMatchers("/common/rsa.irs").permitAll()								/* URL고정 - RSA 공개키, 개인키 생성 */
-                .antMatchers("/common/file/**").permitAll()								/* URL고정 - 파일업로드 and 파일다운로드 */
-                .antMatchers("/common/initial/selectGroupCodeList.irs").permitAll()		/* URL고정 - 그롭코드 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
-                .antMatchers("/common/initial/selectCodeList.irs").permitAll()			/* URL고정 - 코드상세 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
-                .antMatchers("/common/initial/**").authenticated()						/* URL고정 - 인증 사용자용 공통, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/install").permitAll()										/* URL고정 - 초기데이터 생성 */
                 
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ Raon-K 파일솔루션 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/raonk/handler/**").permitAll()								/* URL고정 - [모두허용] - 라온K Servlet */
+                .antMatchers("/common/raonk/**").permitAll()								/* URL고정 - [모두허용] - 라온K 공통 서비스 */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ Raon-K 파일솔루션 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
                 
-                /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 START ■■■■■■■■■■■■■■■■■■■■ */
-//                .antMatchers("/test/**").permitAll()								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectSampleList.do").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                .antMatchers("/test/selectConnectDailyStatisticsList.irs").hasAnyRole(RoleConst.BIZADMIN, RoleConst.SUPER)								/* TEST용 - 인증체크 없음 - 넥사크로 테스트 */
-                /* ■■■■■■■■■■■■■■■■■■■■ TEST 전용 END ■■■■■■■■■■■■■■■■■■■■ */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 예외처리 서비스 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/exception/**").permitAll()									/* URL고정 - [모두허용] - 예외처리 전용 */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 예외처리 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
                 
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 인증 서비스 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/prepare/login").permitAll()									/* URL고정 - [모두허용] */
+                .antMatchers("/login").permitAll()											/* URL고정 - [모두허용] */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 인증 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
                 
-                .antMatchers("/admin/**").hasAnyRole(RoleConst.SUPER, RoleConst.DIRECTOR, RoleConst.OUTSOURCING)			/* 권한설정 예시1 - 인증상태 + 지정된 ROLE만 접근가능 */
-                .antMatchers("/user/**").authenticated()																	/* 권한설정 예시2 - 인증상태만 접근가능 */
-                .antMatchers("/onlyuser/**").hasRole(RoleConst.BIZADMIN)															/* 권한설정 예시3 - 인증상태만 접근가능 */
-                .antMatchers("/**").permitAll()																				/* 권한설정 예시4 - 인증체크 없음 */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 인증정보 관련 공통 서비스 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/session/**").permitAll()										/* URL고정 - [모두허용] */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 인증정보 관련 공통 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 공통 서비스 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/common/report.irs").permitAll()								/* URL고정 - [모두허용] - 클립소프트 리포트 */
+                .antMatchers("/common/viewer.irs").permitAll()								/* URL고정 - [모두허용] - 사이냅소프트 문서뷰어 */
+                .antMatchers("/common/rsa.irs").permitAll()									/* URL고정 - [모두허용] - RSA 공개키, 개인키 생성 */
+                .antMatchers("/common/selectJusoList.irs").permitAll()						/* URL고정 - [모두허용] - 도로명주소 검색 */
+                .antMatchers("/common/file/**").permitAll()									/* URL고정 - [모두허용] - 파일업로드 and 파일다운로드 */
+                .antMatchers("/common/initial/selectUserInfo.irs").authenticated()			/* URL고정 - [인증필수] - 인증 사용자용 공통, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/selectMenuList.irs").authenticated()			/* URL고정 - [인증필수] - 사용자권한 메뉴 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/selectGroupCodeList.irs").permitAll()			/* URL고정 - [모두허용] - 그롭코드 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/selectCodeList.irs").permitAll()				/* URL고정 - [모두허용] - 코드상세 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                .antMatchers("/common/initial/selectErrorMessegeList.irs").permitAll()		/* URL고정 - [모두허용] - 오류메세지 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                
+                .antMatchers("/common/pop/**").permitAll()									/* URL고정 - [모두허용] - [사용자] 공통 */
+                
+                .antMatchers("/common/board/**").permitAll()								/* URL고정 - [모두허용] - [사용자] 공통 */
+                
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 공통 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 기본 서비스 URL START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                .antMatchers("/**/*Excel.irs").permitAll()									/* URL고정 - [모두허용] - 엑셀다운로드 */
+                .antMatchers("/biz/**").authenticated()										/* URL고정 - [인증필수] - 사업수행자 서비스 */
+                .antMatchers("/adm/**").authenticated()										/* URL고정 - [인증필수] - 관리자, 관장(위탁)기관 서비스 */
+                /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 기본 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+                
+                .antMatchers("/**").permitAll()												/* 기타 서비스 */
                 .and()
                 	.logout().logoutUrl("/logout")
                 	.logoutSuccessHandler(coreLogoutSuccessHandler).permitAll()

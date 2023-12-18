@@ -74,10 +74,7 @@ public class NexacroResultAdvice {
 			coreResponse.setIssueToken(ObjectUtils.isEmpty(issueToken) ? Const.NEW.N : Const.NEW.Y);
 			coreResponse.setReissueToken(ObjectUtils.isEmpty(reissueToken) ? Const.NEW.N : Const.NEW.Y);
 			
-			log.debug("[Access Token정보 헤더설정 값 추출]["+accessToken+"]");
-			log.debug("[Refresh Token정보 헤더설정 값 추출]["+refreshToken+"]");
-			log.debug("[Token 신규 - 발급정보 헤더설정 값 추출]["+issueToken+"]");
-			log.debug("[Token 재발급정보 헤더설정 값 추출]["+reissueToken+"]");
+			log.debug("[Access Token정보][{}][Refresh Token정보][{}][Token 신규여부][{}][Token 재발급여부][{}]", accessToken, refreshToken, issueToken, reissueToken);
 			
 			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ JWT 응답정보 처리가능 지점 END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 			

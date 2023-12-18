@@ -1,0 +1,110 @@
+<DBMAP>
+ 	<Config>
+<!-- 	 	<INILog4j path="" isIniLog4j="N"/> -->
+<!-- 	 	<Logging logPath="logs" isLogging="Y" option="file" alertLogPath="logs"/> -->
+	 	
+	 	<!-- mode : Y/N,  splitDate : N: YYYY-MM-DD,HH:MM:SS, Y: YYYY-MM-DD HH:MM:SS -->
+		<FileLog mode="N" splitDate="N" auditLog="N" bulkLog="N" path="logs"/>
+		
+	 	<!-- Proven mode="N"/ --> <!-- Not using tag -->
+		
+	 	<!-- type : NONE/NET -->
+		<Socket type="NONE" propertyPath="D:/INISafeNet/INISAFENet_Server.properties"/>
+		
+	 	<!-- type : JAVA/C(Not using), accessType : SDK/AGENT(Not using) -->
+		<Crypto type="JAVA" accessType="SDK" fixedUTF8="N" chkEncKeyDate="N" chkDecKeyDate="N"/>
+
+		<!-- Policy Key - Y:XOR, N:Enc -->
+		<KeyXor mode="Y"/>
+
+		<!-- KeyChange : Y/N, view Key Seq : Y/N -->
+		<KeyChange mode="N" viewSeq="Y"/>
+
+		<!-- Config Info Print on Screen : Y/N, Received Policy Print on Screen : Y/N -->
+		<ViewConfig mode="N" viewPolicy="N"/>
+
+		<!-- Stream Enc/Dec Buffer size -->
+		<StreamBuffer size="4096"/>
+
+		<!-- Capacity of log-memory-buffer, Waiting time of memory-buffer(minutes) -->
+		<LogBuffer size="1" time="1"/>
+
+		<!-- No Authority Decryption Message-->
+		<DecMessage value="You have no authority for decryption !"/>
+
+		<!-- Auto Check for Agent Policy Change: Y/N, period (min) -->
+		<AutoPolicyCheck use="N" period="10"/>
+
+		<!-- Add Value for Duplication Enc Check: Y(default)/N, Enc File Name (just use Mig. for Kernel) : Y/N(default), Dec Dir. Structure : Y/N, 
+			Enc of Dec File Name : Y(default)/N, Reuse Dec File : Y(default)/N, Multi User Log : Y(Using log4j2)/N(default), OS Account Check : Y/N(default), 
+			forcedOverwritePlainFileforEnc=Y(default)/N, debug_view : Y(default)/N -->
+		<FileEncryption autoDupCheck="Y" encNameEnc="N" decDirStructure="Y" decNameHash="N" reuseDecFile="Y" multiUserLog="N" 
+			osAccountCheck="N" forcedOverwritePlainFileforEnc="N" debug_view="N"/>
+
+		<!-- Auto Remove Decryption File -->
+		<AutoRemDecFile use="N" period="60" decryptedPath=""/>
+		
+		<!-- KT Block Chain Controller
+		<BlockChain use="N" host="172.20.25.191" port="48080"/>
+		 -->
+
+		<!-- TTA DateFormat -->
+		<DateFormat dateFormat="yyyy-MM-dd HH:mm" />
+- 
+		<!-- Integrity Check : value = I, B, C, PAC -->
+		<checkType value="PAC" binDirPath="dist" conDirPath="config" period="60"/>
+
+		<!-- IBK Auto Part Encryption
+		<autoPartEnc use="N" encOver="10" decOver="10"/>
+		 -->
+	</Config>
+
+	<!-- 
+		Safedb_log.properties  default package=Safedb.com.initech.safedb    Normal tag(<Normal......./>) depend on package level 
+	<SafedbLogProp>
+		<Package default="Normal" sdk="Normal" sdk.connect="Normal" sdk.crypto="Normal" sdk.exception="Normal" sdk.manager="Normal" sdk.util="Normal" sdk.vo="Normal"/>
+		<Normal level="INFO" path="D:/bitbucket/safedb_4.0.10/SDK/SDKforJava/SDK/logs" error.stack="N" log.use="Y" system.out="N"/>
+	</SafedbLogProp>
+	-->
+	
+	<!--
+		Safedb.com.initech.safedb = Normal
+		Safedb.com.initech.safedb.sdk = Normal
+		Safedb.com.initech.safedb.sdk.connect = Normal
+		Safedb.com.initech.safedb.sdk.crypto = Normal
+		Safedb.com.initech.safedb.sdk.exception = Normal
+		Safedb.com.initech.safedb.sdk.manager = Normal
+		Safedb.com.initech.safedb.sdk.util = Normal
+		Safedb.com.initech.safedb.sdk.vo = Normal
+
+		Normal.level = DEBUG
+		Normal.path = E:/eclipse_luna/workspace/SDK/logs
+		Normal.error.stack = N
+		Normal.log.use = Y
+		Normal.system.out = N
+	-->
+
+	<Agent id="1">
+	 	<Info ip="192.168.0.140" port="9201" timeOut="30000" />
+	 	<AccessControl macAddress="00:00:00:00:00:00" />
+	</Agent>
+
+		
+	<Agent id="2">
+	 	<Info ip="192.168.0.140" port="9202" timeOut="30000" />
+	 	<AccessControl macAddress="11:11:11:11:11:10" />
+	</Agent>
+	
+
+	<SafeDBUser id="SAFEDB" SDKName="SafeDBSDK">
+		<AUTH password="hsT1d16Fpf/Kx9HlxBIh+0jUCZyC2dWq2X0taNQNMvI=" amhoType="H"/>
+		<DB ip="127.0.0.1" port="1521" sid="orcl"/>
+	</SafeDBUser>
+	
+<!-- 	
+	<SafeDBUser id="test_user" SDKName="javaSDK">
+		<AUTH password="A6xnQhbz4Vx2HuGl4lXwZ5U2I8iziLRFnhP5eNfIRvQ=" amhoType="H"/>
+		<DB ip="172.20.25.177" port="1521" sid="ora10g"/>
+	</SafeDBUser>
+ -->
+</DBMAP>

@@ -7,15 +7,16 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.MDC;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.util.ClientUtil;
+import gov.me.irs.core.config.property.CoreProperties;
+import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -37,6 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	private final JwtTokenProvider jwtTokenProvider;
 	
+	private final JwtProperties jwtProperties;
+	
+	private final CoreProperties coreProperties;
+	
 	/**
 	 * Filter 제외 범위설정
 	 */
@@ -51,14 +56,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		/* uri 확장자 */
 		int lastIndex = uri.lastIndexOf(".");
 		String ext = lastIndex >= 0 ? uri.substring(lastIndex+1) : "";
-		log.debug("[URL][{}][ext][{}]", request.getRequestURL(), ext);
-		return !Const.SERVICE.EXT.equals(ext);
+//		log.debug("[URI][{}][URL][{}][ext][{}]", uri, request.getRequestURL(), ext);
+		
+		boolean isShouldNotFilter = false;
+		
+		/* 1. *.irs 패턴이 아니라면 필터 Skip */
+		if(!Const.SERVICE.EXT.equals(ext)) {
+			isShouldNotFilter = true;
+			
+		/* 2. 라온K 서블릿 이라면 Skip */
+		} else if(coreProperties.raon.url.raonkhandler.equals(uri) || coreProperties.raon.url.raonkviewer.equals(uri)) {
+			isShouldNotFilter = true;
+		/* 3. /common/rsa.irs - RSA Skip */
+		} else if("/common/rsa.irs".equals(uri)) {
+			isShouldNotFilter = true;
+		/* 4. /common/board/selectBoardListLogin.irs - 비로그인 서비스 Skip */
+		} else if("/common/board/selectBoardListLogin.irs".equals(uri)) {
+			isShouldNotFilter = true;
+		}
+		return isShouldNotFilter;
 	}
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		
 		log.debug("▶▶▶▶▶▶▶▶▶▶ [JwtAuthenticationFilter]");
+		String uri = request.getRequestURI().substring(request.getContextPath().length());
+		
+		/* uri 확장자 */
+		int lastIndex = uri.lastIndexOf(".");
+		String ext = lastIndex >= 0 ? uri.substring(lastIndex+1) : "";
+		log.debug("[Request 정보 확인 ▶▶▶▶▶▶▶▶▶▶][URI][{}][URL][{}][ext][{}]", uri, request.getRequestURL(), ext);
 
 		try {
 			if(request.getAttribute("exception") == null) {
@@ -98,7 +126,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							
 							log.debug("▶▶▶▶ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공");
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
-							this.setAuthentication(accessToken, role);
+							jwtTokenProvider.setAuthentication(accessToken, role, false);
+							
+							HttpSession session = request.getSession();
+							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
 							
 						} else if (validateRefreshToken && !isRefreshToken) {
 							log.debug("▶▶▶▶ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
@@ -120,7 +151,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						if (validateRefreshToken && isRefreshToken) {
 							log.debug("▶▶▶▶ 3. invalid accessToken and valid refreshToken");
 							// Refresh Token으로 사용자인증 식별자 조회
-							String identifier = jwtTokenProvider.getUserIdByRefreshToken(refreshToken);
+							String identifier = jwtTokenProvider.getLgnIdByRefreshToken(refreshToken);
 							// 사용자인증 식별자로 역할정보 조회
 							List<String> roles = jwtTokenProvider.getRoles(identifier);
 							
@@ -139,9 +170,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							jwtTokenProvider.setHeaderReissueToken(response);
 							jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
 							jwtTokenProvider.setHeaderRefreshToken(response, newRefreshToken);
-							
+														
 							// 재발급 된 Token정보로 인증정보 생성
-							this.setAuthentication(newAccessToken, role);
+							jwtTokenProvider.setAuthentication(newAccessToken, role, true);
+							
+							HttpSession session = request.getSession();
+							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
 							
 						} else {
 							log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");
@@ -162,7 +196,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				}
 				
 			} else {
-				log.debug("▶▶▶▶▶▶▶▶▶▶ [예외처리 리다이렉트]");
+				log.debug("▶▶▶▶▶▶▶▶▶▶ [예외처리 요청인 경우 ▶▶▶▶▶▶▶▶ 예외처리 리다이렉트]");
 			}
 			
 			filterChain.doFilter(request, response);
@@ -183,21 +217,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
 	}
 	
-	/**
-	 * Token정보로 인증정보 생성
-	 * 
-	 * @param accessToken
-	 */
-    public void setAuthentication(String accessToken, String role) {
-    	log.debug("▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶ [setAuthentication] ▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶");
-    	
-    	// Token정보로 부터 인증정보 취득
-        Authentication authentication = jwtTokenProvider.getAuthentication(accessToken, role);
-        
-        log.debug("[role][{}][authentication.getPrincipal()][{}]", role, authentication.getPrincipal());
-        
-        // 인증정보 갱신
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+
 
 }

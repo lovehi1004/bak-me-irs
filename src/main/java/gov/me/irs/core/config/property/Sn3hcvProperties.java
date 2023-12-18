@@ -19,12 +19,12 @@ public class Sn3hcvProperties {
 	public final Rs rs;
 	
 	@Setter
-	public static class Web {
+	public final static class Web {
 		public String root;
 	}
 	
 	@Setter
-	public static class Rs {
+	public final static class Rs {
 		public String root;
 	}
 	

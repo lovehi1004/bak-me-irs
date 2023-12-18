@@ -71,12 +71,13 @@ public class TestNexacroNCsvController {
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. header 목록 설정 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		String[] headerList = {"id", "name", "description", "age", "regDt", "uesYn", "regUser"};
+		String[] headerList = {"[헤더]id", "[헤더]name", "[헤더]description", "[헤더]age", "[헤더]regDt", "[헤더]uesYn", "[헤더]regUser"};
+		String[] cellList = {"id", "name", "description", "age", "regDt", "uesYn", "regUser"};
 		
 		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※ CSV 다운로드 테스트 예제 END ※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
 
 		/* CSV 파일 만들기 */
-		File file = csvUtil.getCsvFile(headerList, list);
+		File file = csvUtil.getCsvFile(headerList, cellList, list);
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일다운로드 처리 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		NexacroFileResult nexacroFileResult = new NexacroFileResult(file);

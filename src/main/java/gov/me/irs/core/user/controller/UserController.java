@@ -2,7 +2,6 @@ package gov.me.irs.core.user.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,6 +27,7 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.client.service.ClientService;
+import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.config.util.CoreUtil;
 import gov.me.irs.core.crypt.util.RsaUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
@@ -67,6 +68,8 @@ public class UserController {
 	
 	private final UserService userService;
 	
+	private final JwtProperties jwtProperties;
+	
 	/**
 	 * 로그인 선조회
 	 * 	- 관장기관, 위탁기관 로그인 선조회
@@ -98,30 +101,16 @@ public class UserController {
 			throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(identifier));
 		}
 		
-		/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		/* 2. 비밀번호 RSA 복호화 */
-		/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 START */
-		/**
-		 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-		 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-		 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-		 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-		 */
-		boolean isTest = true;
-		
-		if(!isTest) {
-			try {
-				password = RsaUtil.decryptRsa(session, password);
-			} catch (Exception e) {
-				throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
-			}
+		try {
+			password = RsaUtil.decryptRsa(session, password);
+		} catch (Exception e) {
+			throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
 		}
-		
-		/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 END */
-		/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 
-		log.debug("[xxx][{}]", user);
+		log.debug("[user][{}]", user);
 		log.debug("[param][{}][db][{}]", password, user.getPassword());
+		
 		// 비번 불일치
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(identifier));
@@ -139,12 +128,10 @@ public class UserController {
 /*  여기까지 ---- login 서비스 내부 예외처리 로직 동일 하게 처리 할 것 - TODO */
 /* ######################################################################## */
 		
-		System.out.println("여기여기 START ■■■■■■■■■■■");
-		
-		System.out.println("[user.getRoles()]["+user.getRoles().size()+"]");
+		log.debug("[user.getRoles()]["+user.getRoles().size()+"]");
 		List<String> roles = new ArrayList<String>();
 		for (String roleName : user.getRoles()) {
-			System.out.println("[roleName]["+roleName+"]");
+			log.debug("[roleName]["+roleName+"]");
 			RoleEnum roleEnum = RoleEnum.of(roleName);
 			roles.add(roleEnum.getCode());
 		}
@@ -152,7 +139,6 @@ public class UserController {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("roles", roles);
 		List<Map<String, Object>> userRoleList = userService.selectRoleList(parameterMap);
-		System.out.println("여기여기 END ■■■■■■■■■■■");
 		
 		switch (RoleEnum.of(user.getUserClCd().getValue())) {
 			case DIRECTOR: case OUTSOURCING:		/* 관장기관, 위탁기관은 복수권한 보유 가능 */
@@ -208,29 +194,14 @@ public class UserController {
 				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(identifier));
 			}
 			
-			/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 			/* 2. 비밀번호 RSA 복호화 */
-			/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 START */
-			/**
-			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-			 * TODO - 넥사크로N 화면작업시에 isTest 변수 삭제 할 것
-			 */
-			boolean isTest = true;
-			
-			if(!isTest) {
-				try {
-					password = RsaUtil.decryptRsa(session, password);
-				} catch (Exception e) {
-					throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
-				}
+			try {
+				password = RsaUtil.decryptRsa(session, password);
+			} catch (Exception e) {
+				throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
 			}
 			
-			/* TODO - 화면에서 비밀번호 암호화 후 복호화 처리 END */
-			/* TODO - ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-			
-			log.debug("[xxx][{}]", user);
+			log.debug("[user][{}]", user);
 			log.debug("[param][{}][db][{}]", password, user.getPassword());
 			// 비번 불일치
 			if (!passwordEncoder.matches(password, user.getPassword())) {
@@ -283,7 +254,37 @@ public class UserController {
 					
 			}
 			
-			/* 3. JWT Token 생성 */
+			/* 3. 사용자 승인상태 체크 */
+			Map<String, Object> userMap = userService.selectUser(user.getUserId());
+			if(ObjectUtils.isEmpty(userMap)) {
+				log.error("[사용자기본 정보 없음]");
+				throw new SignException(JwtAuthEnum.AUTHENTICATION_ACCESS_DENIED.getCode(), new SignException(identifier));
+			}
+			
+			String acntSttsClCd = (String) userMap.get("acntSttsClCd");			//계정상태
+			
+			boolean userStatus = false;
+			if("ASC0001".equals(acntSttsClCd) && (RoleEnum.of(jwtRoleNm) == RoleEnum.UNAPPROVED || RoleEnum.of(jwtRoleNm) == RoleEnum.UNAPPROVEDOUTSOURCING)) {			/* 미승인상태는 JWT권한이 ROLE_UNAPPROVED 만 허용 */
+				userStatus = true;
+			} else if("ASC0002".equals(acntSttsClCd) && RoleEnum.of(jwtRoleNm) != RoleEnum.UNAPPROVED) {		/* 승인상태는 JWT권한이 ROLE_UNAPPROVED 제외하고 모두 허용 */
+				userStatus = true;
+			}
+			
+			if(!userStatus) {
+				log.error("[사용자 계정상태 확인]");
+				
+				if("ASC0003".equals(acntSttsClCd)) {
+					throw new SignException(JwtAuthEnum.AUTHENTICATION_HOLD_USER.getCode(), new SignException(identifier));
+				} else if("ASC0004".equals(acntSttsClCd)) {
+					throw new SignException(JwtAuthEnum.AUTHENTICATION_SHUTDOWN_USER.getCode(), new SignException(identifier));
+				} else {
+					throw new SignException(JwtAuthEnum.AUTHENTICATION_ACCESS_DENIED.getCode(), new SignException(identifier));
+				}
+			}
+			
+			log.debug("[사용자 승인상태 체크][계정상태][{}][JWT권한][{}]", acntSttsClCd, jwtRoleNm);
+			
+			/* 4. JWT Token 생성 */
 			JwtToken jwtToken = JwtToken.builder()
 					.accessToken(jwtTokenProvider.createAccessToken(identifier, user.getRoles(), jwtRoleNm))
 					.refreshToken(jwtTokenProvider.createRefreshToken(identifier, user.getRoles(), jwtRoleNm))
@@ -298,20 +299,24 @@ public class UserController {
 			
 			
 			
-			/* 4. JWT Token 헤더 설정 */
+			/* 5. JWT Token 헤더 설정 */
 			jwtTokenProvider.setHeaderIssueToken(response);
 			jwtTokenProvider.setHeaderAccessToken(response, jwtToken.getAccessToken());
 			jwtTokenProvider.setHeaderRefreshToken(response, jwtToken.getRefreshToken());
 			
 			log.info("getroleeeee = {}", user.getRoles());
 			
-			/* 5. JWT Token - 인증정보 저장처리 */
+			/* 6. JWT Token - 인증정보 저장처리 */
 			jwtService.login(jwtToken, userAgent);
 			
-			/* 6. 사용자 접속정보 저장 */
+			/* 7. 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.Y);
 			
-			/* 7. 응답정보 설정 */
+			/* 세션생성 */
+			session.setAttribute(Const.SESSION.KEY, identifier);
+			session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
+			
+			/* 9. 응답정보 설정 */
 			NexacroResult nexacroResult = new NexacroResult();
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.LOGIN));
 			return nexacroResult;
@@ -364,7 +369,8 @@ public class UserController {
 	public ResponseEntity<?> join(){
 		log.info("가입 시도됨");
 		
-		TableUser user1 = this.createNewUser("aaaaaa@gmail.com", "URS000000001", "1234", UserClCdEnum.SUPER);
+		TableUser user1 = this.testCreateNewUser("aaaaaa@gmail.com", "URS000000001", passwordEncoder.encode("1234"), UserClCdEnum.SUPER, Arrays.asList("ROLE_SUPER"));
+		
 		/* 관장기관, 사업수행장 권한 추가 */
 		TableUser user2 = TableUser.builder()
 				.lgnId("bbbbbb@gmail.com")
@@ -383,11 +389,12 @@ public class UserController {
 				.roles(Arrays.asList("ROLE_OUTSOURCING", "ROLE_OUTSOURCINGBIZ")) // 최초 가입시 USER 로 설정
 				.build();
 		
-		TableUser user4 = this.createNewUser("dddddd@gmail.com", "URS000000004", "1234", UserClCdEnum.BIZADMIN);
-		TableUser user5 = this.createNewUser("eeeeee@gmail.com", "URS000000005", "1234", UserClCdEnum.BIZREPRESENT);
-		TableUser user6 = this.createNewUser("ffffff@gmail.com", "URS000000006", "1234", UserClCdEnum.MOFA);
-		TableUser user7 = this.createNewUser("gggggg@gmail.com", "URS000000007", "1234", UserClCdEnum.ORGAN);
-		TableUser user8 = this.createNewUser("hhhhhh@gmail.com", "URS000000008", "1234", UserClCdEnum.UNAPPROVED);
+		TableUser user4 = this.testCreateNewUser("dddddd@gmail.com", "URS000000004", passwordEncoder.encode("1234"), UserClCdEnum.BIZADMIN, Arrays.asList("ROLE_BIZADMIN"));
+		TableUser user5 = this.testCreateNewUser("eeeeee@gmail.com", "URS000000005", passwordEncoder.encode("1234"), UserClCdEnum.BIZREPRESENT, Arrays.asList("ROLE_BIZREPRESENT"));
+		TableUser user6 = this.testCreateNewUser("ffffff@gmail.com", "URS000000006", passwordEncoder.encode("1234"), UserClCdEnum.MOFA, Arrays.asList("ROLE_MOFA"));
+		TableUser user7 = this.testCreateNewUser("gggggg@gmail.com", "URS000000007", passwordEncoder.encode("1234"), UserClCdEnum.ORGAN, Arrays.asList("ROLE_ORGAN"));
+		TableUser user8 = this.testCreateNewUser("hhhhhh@gmail.com", "URS000000008", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVED, Arrays.asList("ROLE_UNAPPROVED"));
+		TableUser user9 = this.testCreateNewUser("gggggg@gmail.com", "URS000000009", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVEDOUTSOURCING, Arrays.asList("ROLE_UNAPPROVEDOUTSOURCING"));
 		
 		userRepository.save(user1);
 		userRepository.save(user2);
@@ -397,6 +404,7 @@ public class UserController {
 		userRepository.save(user6);
 		userRepository.save(user7);
 		userRepository.save(user8);
+		userRepository.save(user9);
 		
 		Map<String, Object> body = new HashMap<String, Object>();
 		return ResponseEntity.ok(body);
@@ -409,17 +417,16 @@ public class UserController {
 	 * 
 	 * @return
 	 */
-	private final TableUser createNewUser(String USER_LOGIN_ID, String USER_SEQ_ID, String PASSWORD, UserClCdEnum userClCd) {
+	@Transactional(rollbackFor = Exception.class)
+	private final TableUser testCreateNewUser(String USER_LOGIN_ID, String USER_SEQ_ID, String PASSWORD, UserClCdEnum userClCd, List<String> roles) {
 		return TableUser.builder()
 				.lgnId(USER_LOGIN_ID)
 				.userId(USER_SEQ_ID)
-				.encptPswd(passwordEncoder.encode(PASSWORD))
+				.encptPswd(PASSWORD)
 				.userClCd(userClCd)
-				.roles(Collections.singletonList(userClCd.getRole())) // 최초 가입시 USER 로 설정
+				.roles(roles) // 최초 가입시 USER 로 설정
 				.build();
 	}
-	
-	
 	/*
 	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	 * TEST 구간 END

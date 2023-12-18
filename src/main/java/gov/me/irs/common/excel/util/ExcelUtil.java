@@ -196,10 +196,11 @@ public class ExcelUtil {
 	 * @param cellMatrix
 	 * @param dataList
 	 * @param sheetname
+	 * @param isAddDateFooter
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public File getXssfFile(ExcelMatrix headerMatrix, ExcelMatrix cellMatrix, List<Map<String, Object>> dataList, String sheetname, boolean isAddDateHeader) throws Exception {
+	public File getXssfFile(ExcelMatrix headerMatrix, ExcelMatrix cellMatrix, List<Map<String, Object>> dataList, String sheetname, boolean isAddDateFooter) throws Exception {
 		ExcelCell matrixHeader[][] = headerMatrix.getMatrix();
 		ExcelCell matrixCell[][] = cellMatrix.getMatrix();
 		
@@ -281,7 +282,7 @@ public class ExcelUtil {
 							cell.setCellValue((Integer) dataValue);
 						} else {
 							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-							cell.setCellValue((String) dataValue);
+							cell.setCellValue(String.valueOf(dataValue));
 						}
 					}
 					
@@ -295,11 +296,11 @@ public class ExcelUtil {
 			sheet.autoSizeColumn(idx);
 		}
 		
-		/* ■■■■■■■■■■■■■■■■■■■■ 11. 엑셀 공통 헤더영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
-		if(isAddDateHeader) {
+		/* ■■■■■■■■■■■■■■■■■■■■ 11. 엑셀 공통 푸터영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
+		if(isAddDateFooter) {
 			Row commonRow = sheet.createRow(rowCount);
 			Cell commonCell = commonRow.createCell(0);
-			commonCell.setCellStyle(this.getDefaultCommonHeaderCellStyle(workbook));
+			commonCell.setCellStyle(this.getDefaultCommonFooterCellStyle(workbook));
 			final String dateInfo = DateUtil.getFullDate();
 			commonCell.setCellValue(dateInfo);
 			sheet.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, (matrixCell[0].length - 1)));
@@ -328,12 +329,12 @@ public class ExcelUtil {
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 13. 엑셀파일 - 임시파일 생성하기 ■■■■■■■■■■■■■■■■■■■■ */
 		FileVo tempVo = new FileVo();
-		tempVo.setFilePathNm(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
+		tempVo.setFilePath(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
 		tempVo.setFileNm(fileUtil.getTempFilename());
 		
 		File file = new File(tempVo.getFileFullPath());
 		
-		File directory = new File(tempVo.getFilePathNm());
+		File directory = new File(tempVo.getFilePath());
 		if(!directory.exists()) {
 			directory.mkdirs();
 		}
@@ -359,12 +360,12 @@ public class ExcelUtil {
 	}
 	
 	/**
-	 * 공통 헤더전용 CellStyle
+	 * 공통 푸터영역 CellStyle
 	 * 
 	 * @param workbook
 	 * @return
 	 */
-	private final CellStyle getDefaultCommonHeaderCellStyle(Workbook workbook) {
+	private final CellStyle getDefaultCommonFooterCellStyle(Workbook workbook) {
 		CellStyle style = workbook.createCellStyle();
 		
 		/* 정렬 설정 */
@@ -378,14 +379,15 @@ public class ExcelUtil {
 		style.setBorderBottom(XSSFCellStyle.BORDER_NONE);
 		
 		/* 배경색 설정 */
-		style.setFillForegroundColor(IndexedColors.CORAL.getIndex());
-		style.setFillPattern(CellStyle.SPARSE_DOTS);
+		style.setFillForegroundColor(IndexedColors.MAROON.getIndex());
+		style.setFillPattern(CellStyle.SOLID_FOREGROUND);
 		
 		/* 폰트 설정 */
 		Font font = workbook.createFont();
 		font.setFontName("맑은 고딕");					/* font type */
 		font.setFontHeight((short)(11*20));				/* font size */
-		font.setBoldweight(Font.BOLDWEIGHT_NORMAL);		/* font weight - bold */
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);		/* font weight - bold */
+		font.setColor(IndexedColors.WHITE.getIndex());
 		style.setFont(font);
 		
 		return style;

@@ -83,22 +83,17 @@ public final class ExcelMatrix {
 	}
 	
 	/**
-	 * key 설정
+	 * index 지정 key 설정 - index 0 설정만 필요한 경우
 	 * 
 	 * @param keyList
-	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void setRowKeyList(String... keyList) throws Exception {
-		
 		if(keyList.length != cellSize) {
 			throw new Exception("check keyList size");
 		}
 		
-		for (int idx = 0; idx < keyList.length; idx++) {
-			this.matrix[0][idx].setKey(keyList[idx]);
-		}
-		
+		this.setRowKeyList(0, keyList);
 	}
 	
 	/**
@@ -110,6 +105,9 @@ public final class ExcelMatrix {
 	 * @throws Exception 
 	 */
 	public void setRowKeyList(int rowIdx, String... keyList) throws Exception {
+		if(keyList.length != cellSize) {
+			throw new Exception("check keyList size");
+		}
 		
 		this.checkCellIndex(rowIdx, keyList);
 		for (int idx = 0; idx < keyList.length; idx++) {
@@ -119,12 +117,21 @@ public final class ExcelMatrix {
 	}
 	
 	/**
+	 * index 지정 key 설정 - index 0 설정만 필요한 경우
+	 * 
+	 * @param alignList
+	 * @throws Exception
+	 */
+	public void setRowAlignList(short... alignList) throws Exception {
+		this.setRowAlignList(0, alignList);
+	}
+	
+	/**
 	 * index 지정 key 설정
 	 * 
 	 * @param rowIdx
-	 * @param keyList
-	 * @return
-	 * @throws Exception 
+	 * @param alignList
+	 * @throws Exception
 	 */
 	public void setRowAlignList(int rowIdx, short... alignList) throws Exception {
 		

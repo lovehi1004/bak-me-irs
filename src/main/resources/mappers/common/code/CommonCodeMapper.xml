@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.common.code.mapper.CommonCodeMapper">
+	
+	<select id="selectErrMsgList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 ERR_MSG_CD 
+			,ERR_MSG_NM 
+		FROM IRSUSER.COM_ERR_MSG_BSC
+		WHERE 1=1
+		AND DEL_YN = 'N'
+	</select>
+	
+	<!-- [공통] 사업분야조회 -->
+	<select id="selectBizFldList" resultType="egovMap">
+		/* CommonCodeMapper.selectBizFldList */
+		SELECT BIZ_FLD_CD_MGNO
+			 , BIZ_FLD_KORN_NM
+		  FROM irsuser.COM_BIZ_FLD_BSC
+		 WHERE USE_YN = 'Y'
+		   AND DEL_YN = 'N'
+		 ORDER BY SORT_SEQO 
+	</select>
+	
+	<!-- [공통] 사업 세부분야조회 -->
+	<select id="selectBizDtlsFldList" resultType="egovMap">
+		/* CommonCodeMapper.selectBizDtlsFldList */
+		SELECT BIZ_FLD_DTLS_CD_MGNO
+			 , BIZ_FLD_CD_MGNO
+			 , BIZ_DTLS_FLD_KORN_NM
+		  FROM irsuser.COM_BIZ_FLD_DTL
+		 WHERE USE_YN = 'Y'
+		   AND DEL_YN = 'N'
+		 ORDER BY SORT_SEQO 
+	</select>
+	
+	<!-- [공통] 관장기관 조회 -->
+	<select id="selectMnofcCdList" resultType="egovMap">
+		/* CommonCodeMapper.selectMnofcCdList */
+		SELECT 
+			 INST_MGNO AS CODE
+			,BZENT_NM AS NAME
+		FROM IRSUSER.INST_BSC 
+		WHERE 1=1
+		AND INST_CLSF_CD = 'ICC0003'		
+		AND ACNT_STTS_CL_CD = 'ASC0002'
+		AND DEL_YN = 'N'
+		ORDER BY INST_MGNO ASC
+	</select>
+	
+	<!-- [공통] 국가코드 조회 -->
+	<select id="selectNtnCdList" resultType="egovMap">
+		/* CommonCodeMapper.selectNtnCdList */
+		SELECT IATA_NTN_CD
+			 , NTN_KORN_NM
+			 , NTN_ENG_NM
+		  FROM irsuser.COM_NTN_CD_BSC
+		 WHERE DEL_YN  = 'N'
+		 ORDER BY NTN_KORN_NM ;
+	</select>
+	
+</mapper>

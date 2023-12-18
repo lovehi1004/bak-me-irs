@@ -27,7 +27,7 @@ public class InstallController {
 	
 	private final InstallService installService;
 	
-	@GetMapping(value = "/install.irs")
+	@GetMapping(value = "/install")
 	public ModelAndView install(HttpServletRequest request, ModelMap model) throws Exception {
 		ModelAndView mv = new ModelAndView();
 		

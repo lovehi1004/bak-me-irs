@@ -77,11 +77,14 @@ public class CoreControllerAdvice {
 			}
 		}
 		
-		log.error("[@ExceptionHandler][Controller Fail]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]["+jwtAuthEnum.getCode()+"]", e.getCause());
+		log.error("[@ExceptionHandler][Controller Fail]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]["+jwtAuthEnum.getCode()+"]["+e.getCause()+"]");
 		log.error("[@ExceptionHandler]", e);
 		
 		RequestDispatcher dispatcher = forwardRequest.getRequestDispatcher("/exception/common/" + jwtAuthEnum.getCode());
 		request.setAttribute("exception", jwtAuthEnum.getCode());
+		if(jwtAuthEnum == JwtAuthEnum.UNKNOWN_ERROR) {
+			request.setAttribute("cause", e.getCause());
+		}
 		dispatcher.forward(forwardRequest, response);
 		
 	}

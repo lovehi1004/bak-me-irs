@@ -90,7 +90,7 @@ public interface FileMapper {
 	 * @param fileVo
 	 * @return
 	 */
-	FileGroupVo selectFileGrp(int fileGroupSn) throws Exception;
+	FileGroupVo selectFileGrp(String fileGroupMgno) throws Exception;
 	
 	/**
 	 * 차수 생성 전용 파일그룹정보 복제하기

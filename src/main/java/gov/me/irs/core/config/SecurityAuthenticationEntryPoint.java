@@ -47,7 +47,7 @@ public class SecurityAuthenticationEntryPoint implements AuthenticationEntryPoin
 			exception = String.valueOf(request.getAttribute("exception"));
 		}
 		
-		log.debug("[multipartResolver.isMultipart(request)][{}]", multipartResolver.isMultipart(request));
+		log.error("[multipartResolver.isMultipart(request)][{}]", multipartResolver.isMultipart(request));
 		
 		HttpServletRequest forwardRequest = null;
 		
@@ -57,7 +57,7 @@ public class SecurityAuthenticationEntryPoint implements AuthenticationEntryPoin
 			/* 선행된 exception이 존재하지 않으면 */
 			if(!hasException) {
 				/* mulltipart exception만 발생시 */
-				log.debug("[Multipart Parameter][{}]", JwtAuthEnum.MAX_UPLOAD_SIZE_EXCEEDED_EXCEPTION.getMessage());
+				log.error("[Multipart Parameter][{}]", JwtAuthEnum.MAX_UPLOAD_SIZE_EXCEEDED_EXCEPTION.getMessage());
 				exception = String.valueOf(JwtAuthEnum.MAX_UPLOAD_SIZE_EXCEEDED_EXCEPTION.getCode());
 			}
 			

@@ -57,7 +57,7 @@ public class MnmService {
 		
 		/* 상위메뉴ID 누락시 최상위 Default 메뉴ID 설정 */
 		if(ObjectUtils.isEmpty(requestMap.get("upMenuId"))) {
-			requestMap.put("upMenuId", Const.MENU.SCC0001_MENU_ID);
+			requestMap.put("upMenuId", Const.MENU.SCC0001_MENU_MGNO);
 		}
 		
 		/* 시스템구분코드 누락시 Default IRS시스템 구분값 설정 */
@@ -66,8 +66,8 @@ public class MnmService {
 		}
 
 		// 하위메뉴 생성 - 하위메뉴 생성시 상위메뉴의 메뉴구분정보를 변경 후 메뉴를 추가한다.
-		if(!Const.MENU.SCC0001_MENU_ID.equals(requestMap.get("upMenuId"))
-			&&!Const.MENU.SCC0002_MENU_ID.equals(requestMap.get("upMenuId"))
+		if(!Const.MENU.SCC0001_MENU_MGNO.equals(requestMap.get("upMenuId"))
+			&&!Const.MENU.SCC0002_MENU_MGNO.equals(requestMap.get("upMenuId"))
 			) {
 			
 			/* 상위메뉴 상세 조회 */

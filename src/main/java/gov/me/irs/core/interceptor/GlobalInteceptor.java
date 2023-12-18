@@ -53,14 +53,15 @@ public class GlobalInteceptor implements HandlerInterceptor {
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
-//		log.debug("[■■■■■■■■■■■■■■■■■■■■ GlobalInteceptor - invoked ■■■■■■■■■■■■■■■■■]");
+		log.debug("[postHandle] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ START");
+		log.debug("[postHandle] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ END");
 	}
 
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
 		
-//		log.debug("[■■■■■■■■■■■■■■■■■■■■ GlobalInteceptor.afterCompletion - invoked ■■■■■■■■■■■■■■■■■]");
+		log.debug("[afterCompletion] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ START");
 		if(ex != null) {
 			log.debug("[예외상황][{}]", ex);
 			if(ex instanceof AccessDeniedException) {			/* @PreAuthorize에 대한 예외처리 */
@@ -77,11 +78,13 @@ public class GlobalInteceptor implements HandlerInterceptor {
 				
 				RequestDispatcher dispatcher = request.getRequestDispatcher("/exception/common/" + jwtAuthEnum.getCode());
 				request.setAttribute("exception", jwtAuthEnum.getCode());
+				request.setAttribute("cause", ex.getCause());
 				dispatcher.forward(request, response);
 				
 			}
 		}
 		
+		log.debug("[afterCompletion] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■▶ END");		
 	}
 	
 }

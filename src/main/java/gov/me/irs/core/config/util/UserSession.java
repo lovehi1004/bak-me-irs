@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.user.entity.TableUser;
 import gov.me.irs.core.user.enumeration.RoleEnum;
 import gov.me.irs.core.user.enumeration.UserClCdEnum;
@@ -59,7 +60,7 @@ public final class UserSession {
 			for (UserClCdEnum userClCdEnum : UserClCdEnum.values()) {
 				if(userClCdEnum.getValue().equals(role)) {
 					result = true;
-					log.debug("[result]["+String.valueOf(result)+"]");
+					log.debug("[인증상태 체크][userClCdEnum.getValue()][{}]", userClCdEnum.getValue());
 				}
 			}
 			
@@ -77,6 +78,16 @@ public final class UserSession {
 	public final static TableUser getSession() {
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		return (TableUser) principal;
+	}
+	
+	/**
+	 * 인증사용자 사용자ID 조회
+	 * 
+	 * @return
+	 * @throws Exception 
+	 */
+	public final static String getUserId() throws Exception {
+		return UserSession.getSession().getUserId();
 	}
 	
 	/**
@@ -124,17 +135,96 @@ public final class UserSession {
 		return RoleEnum.of(jwtRoleNm).getCode();
 	}
 	
+	/**
+	 * 인증사용자 사용자구분코드 스프링시큐리티 권한정보 조회 - 역할정보 Enum
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static RoleEnum getRoleEnum() throws Exception {
+		
+		Collection<? extends GrantedAuthority> authorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+		
+		log.debug("[♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥ START]");
+		log.debug("[authorities][{}]", authorities);;
+		log.debug("[♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥ END]");
+		String jwtRoleNm = authorities.stream().findFirst().get().toString();
+		
+		return RoleEnum.of(jwtRoleNm);
+	}
 	
+	/**
+	 * 인증사용자 전체관리자 여부 - boolean
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static boolean isSuperUser() throws Exception {
+		if(RoleEnum.SUPER == UserSession.getRoleEnum()) {
+			return true;
+		}
+		return false;
+	}
 	
+	/**
+	 * 인증사용자 전체관리자 여부 - Y|N
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String isSuperUserYn() throws Exception {
+		if(RoleEnum.SUPER == UserSession.getRoleEnum()) {
+			return Const.CHARACTER.Y;
+		}
+		return Const.CHARACTER.N;
+	}
 	
+	/**
+	 * 인증사용자 관장기관 여부 - Y|N
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String isDirectorYn() throws Exception {
+		RoleEnum roleEnum = UserSession.getRoleEnum();
+		
+		/* 관장기관여부 확인 */
+		if(roleEnum == RoleEnum.DIRECTOR) {
+			return Const.CHARACTER.Y;
+		}
+		return Const.CHARACTER.N;
+	}
 	
+	/**
+	 * 인증사용자 위탁기관 여부 - Y|N
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String isOutsourcingYn() throws Exception {
+		RoleEnum roleEnum = UserSession.getRoleEnum();
+		
+		/* 위탁기관여부 확인 */
+		if(roleEnum == RoleEnum.OUTSOURCING) {
+			return Const.CHARACTER.Y;
+		}
+		return Const.CHARACTER.N;
+	}
 	
-	
-	
-	
-	
-	
-	
-	
+	/**
+	 * 인증사용자 사업수행자_계정관리인, 사업수행자_계정대표자 여부 - Y|N
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String isBizUserYn() throws Exception {
+		RoleEnum roleEnum = UserSession.getRoleEnum();
+		
+		/* 위탁기관여부 확인 */
+		if(roleEnum == RoleEnum.BIZADMIN || roleEnum == RoleEnum.BIZREPRESENT) {
+			return Const.CHARACTER.Y;
+		}
+		return Const.CHARACTER.N;
+	}
 	
 }

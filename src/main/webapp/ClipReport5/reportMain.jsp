@@ -10,6 +10,8 @@
 <%@page import="com.clipsoft.clipreport.oof.connection.param.OOFHTTPParam"%>
 <%@page import="java.util.Enumeration"%>
 
+<%! org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger("Clipreport"); %>
+
 <%
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 /* crf 위치 정보 : [/gov-me-irs/src/main/webapp/WEB-INF/clipreport5/crf/CLIP.crf] */
@@ -17,8 +19,8 @@
 String crfPath = request.getParameter("crfPath");					/* 리포트 crf파일의 위치 */
 String service = request.getParameter("service");				/* 리포트에 출력할 넥사크로 서비스 정보가 존재하는 URL */
 String memoData = (String) request.getAttribute("memoData");
-System.out.println("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][crfPath]["+crfPath+"]");
-System.out.println("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][service]["+service+"]");
+log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][crfPath]["+crfPath+"]");
+log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][service]["+service+"]");
 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. OOFDocument 생성 START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 OOFDocument oof = OOFDocument.newOOF();
 OOFFile file = oof.addFile("crf.root", "%root%" + crfPath);
@@ -50,13 +52,13 @@ String resultKey =  ReportUtil.createReport(request, oof, "false", "false", requ
 <title>Report</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/clipreport5.css">
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/UserConfig5.css">
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/sol/ClipReport5/css/font.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/thirdParty/ClipReport5/css/clipreport5.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/thirdParty/ClipReport5/css/UserConfig5.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/thirdParty/ClipReport5/css/font.css">
 
-<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/jquery-1.11.1.js'></script>
-<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/clipreport5.js'></script>
-<script type='text/javascript' src='${pageContext.request.contextPath}/sol/ClipReport5/js/UserConfig5.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/thirdParty/ClipReport5/js/jquery-1.11.1.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/thirdParty/ClipReport5/js/clipreport5.js'></script>
+<script type='text/javascript' src='${pageContext.request.contextPath}/thirdParty/ClipReport5/js/UserConfig5.js'></script>
 <script type='text/javascript'>
 	
 function html2xml(divPath){	

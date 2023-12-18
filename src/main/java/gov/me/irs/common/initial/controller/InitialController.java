@@ -87,10 +87,12 @@ public class InitialController {
 		
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
 		parameterMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
-		parameterMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_ID);
+		parameterMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_MGNO);
 		parameterMap.put("userId", tableUser.getUserId());
 		parameterMap.put("userClCd", UserSession.getUserClCd());
 		parameterMap.put("roleKey", UserSession.getRoleKey());
+		/* 로그인한 사용자가 전체관리자인가 확인하기 */
+		parameterMap.put("bizUserYn", UserSession.isBizUserYn());
 		
 		List<Map<String, Object>> list = initialService.selectMenuList(parameterMap);
 		nexacroResult.addDataSet("menuList", list);

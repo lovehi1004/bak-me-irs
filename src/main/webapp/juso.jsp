@@ -10,13 +10,16 @@
 	
 	
 </head>
-
 <body>
-	<table border="1">
+	<table border="1" style="border:1px solid red;">
 		<tbody>
 			<tr>
 				<td>[결과]</td>
-				<td>[${result}]</td>
+				<td>${responseJusoCommonVo}</td>
+			</tr>
+			<tr>
+				<td>[결과]</td>
+				<td>${ResponseJusoVoList}</td>
 			</tr>
 		</tbody>
 	</table>

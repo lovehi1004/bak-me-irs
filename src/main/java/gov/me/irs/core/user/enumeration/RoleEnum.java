@@ -58,7 +58,11 @@ public enum RoleEnum implements EnumType {
 	OUTSOURCINGBIZ(
 			RoleConst.ROLE_OUTSOURCINGBIZ_KEY,
 			RoleConst.ROLE_OUTSOURCINGBIZ
-	);											//역할 : 위탁기관 사업수행자
+	),											//역할 : 위탁기관 사업수행자
+	UNAPPROVEDOUTSOURCING(
+			RoleConst.ROLE_UNAPPROVEDOUTSOURCING_KEY,
+			RoleConst.ROLE_UNAPPROVEDOUTSOURCING
+	);											//역할 : 비승인위탁기관
 	
     private String code;
     private String value;

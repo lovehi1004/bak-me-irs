@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,6 +15,12 @@ import gov.me.irs.test.service.TestReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * ClipreportController - 클립소프트
+ * 
+ * @author Justin
+ *
+ */
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -34,7 +40,7 @@ public class ClipreportController {
 	 * @param requestMap
 	 * @return
 	 */
-	@GetMapping(value = "/common/report.irs")
+	@PostMapping(value = "/common/report.irs")
 	public ModelAndView reportMain(HttpServletRequest request, ModelMap model
 			, @RequestParam(required=true, value="crfPath", defaultValue="") String crfPath
 			, @RequestParam(required=true, value="service", defaultValue="") String service
@@ -42,8 +48,8 @@ public class ClipreportController {
 			) throws Exception {
 		
 		
-		log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][crfPath]["+crfPath+"]");
-		log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][service]["+service+"]");
+		log.info("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][crfPath]["+crfPath+"]");
+		log.info("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶▶][service]["+service+"]");
 
 		String memoData = StringUtils.EMPTY;
 		

@@ -51,9 +51,7 @@ public class SynapConverter {
 
 		outputPath = props.web.root + outputPath; /* WEB ROOT 를 지정한다. */
 		
-		log.debug("[SynapConverter.java] inputFile >>> " + inputFile);
-		log.debug("[SynapConverter.java] outputPath >>> " + outputPath);
-		log.debug("[SynapConverter.java] resultName >>> " + resultName);
+		log.debug("[inputFile][outputPath][resultName] >>> [{}][{}][{}]" + inputFile, outputPath, resultName);
 
 		File file = new File(outputPath);
 

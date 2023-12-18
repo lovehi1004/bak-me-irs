@@ -22,10 +22,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class FileVo {
-	private int fileGroupSn;						//파일그룹일련번호
-	private int fileDtlSn;							//파일상세일련번호  
+	private String fileGroupMgno;						//파일그룹일련번호
+	private String fileMgno;							//파일상세일련번호  
 	private String orgnlFileNm;						//원본파일명    
-	private String filePathNm;						//파일 경로    
+	private String filePath;						//파일 경로    
 	
 	private String fileNm;							//파일 명     
 	private long fileSz;							//파일 크기    
@@ -36,11 +36,13 @@ public class FileVo {
 	private String regDt;							//등록 일시    
 	private String mdfrId;							//변경 ID    
 	private String mdfcnDt;							//변경 일시
+	@Builder.Default
+	private String gridCmmCheck = "N";					//넥사크로N 그리드 체크박스전용
 	
-	private String menuId;        					//메뉴ID    
+	private String menuMgno;        					//메뉴ID    
 	private String fileTypeClCd;					//파일 유형
 	
-	private List<Integer> fileDtlSnArray;			//Multi 업로드 대상 파일상세정보
+	private List<String> fileMgnoArray;			//Multi 업로드 대상 파일상세정보
 	private List<String> newFileYnArray;			//Multi 업로드 파일상태 - 신규 등록건 여부
 	
 	private boolean error;							//업로드 에러여부
@@ -54,7 +56,7 @@ public class FileVo {
 	 * @return
 	 */
 	public String getFileFullPath() {
-		String fileFullPath = filePathNm+"/"+fileNm;
+		String fileFullPath = filePath+"/"+fileNm;
 		if(!ObjectUtils.isEmpty(fileExtnNm)) {
 			fileFullPath+="."+fileExtnNm;
 		}

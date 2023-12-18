@@ -61,36 +61,57 @@ public final class PagingVo {
 	 * @param map - {pageNo, listSize} key를 포함
 	 */
 	public PagingVo(Map<String, Object> map) {
-		
-		if(!ObjectUtils.isEmpty(map.get(KEY_PAGE_NO))) {
-			
-			Object o = map.get(KEY_PAGE_NO);
-			try {
-				int intValue = Integer.parseInt(String.valueOf(o));
-				if(intValue > 0) {
-					this.pageNo = intValue;
+		if(map != null) {
+			if(!ObjectUtils.isEmpty(map.get(KEY_PAGE_NO))) {
+				
+				Object o = map.get(KEY_PAGE_NO);
+				try {
+					int intValue = Integer.parseInt(String.valueOf(o));
+					if(intValue > 0) {
+						this.pageNo = intValue;
+					}
+				} catch (Throwable e) {
+					log.error("[invalid Map key - pageNo]", e);	
 				}
-			} catch (Throwable e) {
-				log.error("[invalid Map key - pageNo]", e);	
+			}
+			
+			if(!ObjectUtils.isEmpty(map.get(KEY_PAGE_SIZE))) {
+				
+				Object o = map.get(KEY_PAGE_SIZE);
+				try {
+					int intValue = Integer.parseInt(String.valueOf(o));
+					if(intValue > 0) {
+						this.listSize = intValue;
+					}
+				} catch (Throwable e) {
+					log.error("[invalid Map key - listSize]", e);	
+				}
 			}
 		}
-		
-		if(!ObjectUtils.isEmpty(map.get(KEY_PAGE_SIZE))) {
-			
-			Object o = map.get(KEY_PAGE_SIZE);
-			try {
-				int intValue = Integer.parseInt(String.valueOf(o));
-				if(intValue > 0) {
-					this.listSize = intValue;
-				}
-			} catch (Throwable e) {
-				log.error("[invalid Map key - listSize]", e);	
-			}
-		}
+	}
+	
+	/**
+	 * Mybatis SQL에 맵핑될 페이징정보를 Map에 추가한다.
+	 * 
+	 * @return
+	 */
+	public void setSqlMap(Map<String, Object> map) {
+		Map<String, Object> pagingMap = new HashMap<String, Object>();
 		
 		/* 페이징처리 map에 추가 */
-		map.put(KEY, getMap());
-		
+		pagingMap.put(KEY, getMap());
+		map.putAll(pagingMap);
+	}
+	
+	/**
+	 * Mybatis SQL에 맵핑될 페이징정보를 Map으로 읽어온다.
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getSqlMap() {
+		Map<String, Object> pagingMap = new HashMap<String, Object>();
+		pagingMap.put(KEY, getMap());
+		return pagingMap;
 	}
 	
 	/**

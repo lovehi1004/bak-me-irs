@@ -15,13 +15,14 @@ public class JwtProperties {
 	public final RefreshToken refreshToken;
 	
 	@Setter
-	public static class AccessToken {
+	public final static class AccessToken {
 		public String secretKey;
 		public long validTime;
+		public int sessionTime;
 	}
 	
 	@Setter
-	public static class RefreshToken {
+	public final static class RefreshToken {
 		public String secretKey;
 		public long validTime;
 	}

@@ -11,6 +11,7 @@
 			 , U.UP_INST_MGNO						/* 사용자기본 - 상위기관관리번호 */
 			 , U.INST_MGNO							/* 사용자기본 - 기관관리번호 */
 			 , U.USER_CL_CD							/* 사용자기본 - 사용자구분코드 */
+			 , irsuser.fn_get_codenm('USER_CL_CD', U.USER_CL_CD)              AS USER_CL_CD_NM					/* 사용자구분코드명 */
 			 , U.FLNM								/* 사용자기본 - 성명 */
 			 , U.DEPT_NM							/* 사용자기본 - 부서명 */
 			 , U.JBPS_NM							/* 사용자기본 - 직위명 */
@@ -37,8 +38,6 @@
 		   AND U.USER_ID = #{userId}
 		 WHERE U.DEL_YN = 'N'
 		   AND I.DEL_YN = 'N'
-		   AND U.ACNT_STTS_CL_CD = 'ASC0002'		/* 계정상태구분코드 : 승인 */
-		   AND I.ACNT_STTS_CL_CD = 'ASC0002'		/* 계정상태구분코드 : 승인 */
 	</select>
 	
 	
@@ -49,7 +48,10 @@
 		SELECT W.MENU_MGNO
 			 , W.UP_MENU_MGNO
 			 , W.MENU_CL_CD
-			 , W.MENU_NM
+			 <!-- [MN03010000] 방법론 현황, [MN03020000] 방법론 신청 메뉴는 메뉴명에 [메뉴명 + ' 관리']로 표시되어야 한다. -->
+			 , CASE WHEN #{bizUserYn} = 'N' AND W.MENU_MGNO IN ('MN03010000', 'MN03020000') THEN W.MENU_NM || ' 관리'
+			 		ELSE W.MENU_NM
+			   END AS MENU_NM
 			 , W.MENU_URL_ADDR
 			 , W.EXPSR_YN
 			 , W.POPUP_YN

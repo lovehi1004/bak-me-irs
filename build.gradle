@@ -62,13 +62,20 @@ dependencies {
     implementation 'javax.servlet:jstl'
 
     // Apache 라이브러리
-    implementation 'org.apache.commons:commons-text:1.10.0'
     implementation "org.apache.poi:poi:${poiVersion}"
     implementation "org.apache.poi:poi-ooxml:${poiVersion}"
     implementation 'org.apache.httpcomponents:httpclient:4.5.14'
-    implementation 'commons-io:commons-io:2.11.0'
     implementation 'commons-fileupload:commons-fileupload:1.4'
     implementation 'org.apache.commons:commons-compress:1.23.0'
+    
+    // 암호화 솔루션
+    implementation 'commons-io:commons-io:2.15.1'
+    implementation 'commons-net:commons-net:3.10.0'
+    implementation 'org.apache.commons:commons-text:1.11.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-ext:1.7.36'
+    implementation 'xerces:xercesImpl:2.12.2'
+    implementation 'xml-apis:xml-apis:1.4.01'
     
     //google gson
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -98,12 +105,13 @@ dependencies {
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 	
 	
-	implementation ('org.apache.logging.log4j:log4j-slf4j-impl:2.20.0') {
+	implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.17.1") {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
-	implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
-	implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
+	implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+	implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 	
 	/* postgresql */
 	implementation 'org.postgresql:postgresql:42.5.0'
@@ -138,9 +146,38 @@ dependencies {
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.7.21'
-
+    
     // external libraries 추가
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
+    
+    // 클립리포트
+    implementation fileTree(dir: 'libs/clipreport', include: ['*.jar'])
+    
+    // 라온K
+    implementation fileTree(dir: 'libs/raonk'     , include: ['*.jar'])
+    
+    // 암호화솔루션
+    implementation fileTree(dir: 'libs/safedb'    , include: ['*.jar'])
+    
+}
+
+
+if (project.hasProperty("spring.profiles.active") && project.properties["spring.profiles.active"].contains("local")) {
+    sourceSets {
+        main {
+            resources {
+                srcDirs = ['src/main/resources', 'local/config/safedb']
+            }
+        }
+    }
+} else {
+    sourceSets {
+        main {
+            resources {
+                srcDirs = ['src/main/resources']
+                exclude "local/**"
+            }
+        }
+    }
 }
 
 // 빌드 시 테스트 제외 추가

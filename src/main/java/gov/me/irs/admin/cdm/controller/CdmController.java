@@ -3,7 +3,6 @@ package gov.me.irs.admin.cdm.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
@@ -13,9 +12,7 @@ import org.springframework.stereotype.Controller;
 
 import gov.me.irs.admin.cdm.service.CdmService;
 import gov.me.irs.common.constants.Const;
-import gov.me.irs.common.enumeration.CustomResponseEnum;
 import gov.me.irs.common.vo.PagingVo;
-import gov.me.irs.core.config.util.CoreUtil;
 import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
@@ -111,7 +108,7 @@ public class CdmController {
 			nexacroResult.addDataSet("result", result);
 		} else {
 			/* 사용자정의 데이터 공통 응답정보 설정 */
-			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, CustomResponseEnum.REG_LIMIT_CNT));
+//			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, CustomResponseEnum.REG_LIMIT_CNT));
 		}
 		
 		return nexacroResult;

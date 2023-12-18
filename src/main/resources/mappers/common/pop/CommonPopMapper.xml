@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.common.pop.mapper.CommonPopMapper">
+
+	<select id="selectAgreeStiplListCnt" resultType="int" parameterType="map">
+		SELECT 
+			COUNT(*) AS CNT
+		from (	SELECT ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+					 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+					 , K.CNCLD_MGNO
+					 , K.CNCLD_DGR
+					 , CAST (K.CNCLD_DGR AS TEXT)
+					 , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+					 , K.NTN_CD
+					 , K.NTN_NM
+					 , K.CNCLD_CL_CD
+					 , K.CNCLD_CL_NM
+					 , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+					 , K.NEW_RVSN_TYPE_NM 
+					 , (CASE
+					        WHEN K.REG_TYPE_NM IS NULL THEN '-'
+					        ELSE K.REG_TYPE_NM
+							END) AS REG_TYPE_NM
+					 , K.CNCLD_ORGT_NM
+					 , K.CNCLD_KRN_NM
+					 , K.CNCLD_NO
+					 , K.SGNT_YMD
+					 , K.EFTVN_YMD
+					 , (CASE
+				        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+				        	ELSE K.EFTVN_YMD
+				   		 END) AS EFTVN_YMD
+					 , K.CNCLD_NO
+					 ,'선택' AS BTN_NM
+					FROM (SELECT A.CNCLD_MGNO
+							   , A.CNCLD_DGR
+							   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+							   , A.CNCLD_CL_CD
+							   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+							   , Z.NTN_CD
+							   , Z.NTN_NM
+							   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+							   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+							   , A.CNCLD_ORGT_NM
+							   , A.CNCLD_KRN_NM
+							   , A.CNCLD_NO
+							   , A.SGNT_YMD
+							   , A.EFTVN_YMD 
+							   , A.DEL_YN
+						  FROM irsuser.AGREE_STIPL_BSC A
+							INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+										  FROM irsuser.COM_NTN_CD_BSC C
+											INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+												FROM irsuser.AGREE_STIPL_BSC A 
+														INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+															ON A.CNCLD_MGNO = B.CNCLD_MGNO
+													WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+												 		ON C.IATA_NTN_CD  = D.NTN_CD
+																GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+								ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+								WHERE K.DGR_RN = 1 AND K.DEL_YN ='N' ) AS P
+		WHERE 1=1
+		<if test="srhCncldDgrCd eq 'NEW'">
+		AND K.CNCLD_DGR = 1
+		</if>
+		<if test="srhCncldDgrCd eq 'CHG'">
+		<![CDATA[
+		AND K.CNCLD_DGR > 1
+		 ]]>
+		</if>
+		<if test="srhCncldNm != null and !srhCncldNm.equals('')">
+		AND (K.CNCLD_ORGT_NM LIKE CONCAT('%', #{srhCncldNm}, '%') OR K.CNCLD_KRN_NM LIKE CONCAT ('%', #{srhCncldNm}, '%'))
+		</if>
+	</select>
+	
+	<select id="selectAgreeStiplList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		SELECT
+			   ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+			 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+			 , K.CNCLD_MGNO
+		     , CAST (K.CNCLD_DGR AS TEXT)
+		     , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+		     , K.NTN_CD
+		     , K.NTN_NM
+		     , K.CNCLD_CL_CD
+		     , K.CNCLD_CL_NM
+		     , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+			 , K.NEW_RVSN_TYPE_CD				
+		     , K.NEW_RVSN_TYPE_NM 
+		     , K.REG_TYPE_CD
+		     , (CASE
+		        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+		        	ELSE K.REG_TYPE_NM
+		   		 end) AS REG_TYPE_NM
+		     , K.CNCLD_ORGT_NM
+		     , K.CNCLD_KRN_NM
+		     , CAST (K.CNCLD_NO AS TEXT)
+		     , K.SGNT_YMD
+		     , (CASE
+		        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+		        	ELSE K.EFTVN_YMD
+		   		 end) AS EFTVN_YMD
+		     , K.CNCLD_NO
+		     , K.KRN_CNCLD_FLMNO
+		   	 , K.ETC_DATA_FLMNO
+		   	 , K.ORGT_CNCLD_FLMNO
+		     ,'선택' AS BTN_NM
+		FROM (SELECT A.CNCLD_MGNO
+				   , A.CNCLD_DGR
+				   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+				   , A.CNCLD_CL_CD
+				   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+				   , Z.NTN_CD
+				   , Z.NTN_NM
+				   , A.NEW_RVSN_TYPE_CD
+				   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+				   , A.REG_TYPE_CD
+				   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+				   , A.CNCLD_ORGT_NM
+				   , A.CNCLD_KRN_NM
+				   , A.CNCLD_NO
+				   , A.SGNT_YMD
+				   , A.EFTVN_YMD 
+				   , A.DEL_YN
+				   , A.KRN_CNCLD_FLMNO
+				   , A.ETC_DATA_FLMNO
+				   , A.ORGT_CNCLD_FLMNO
+			  FROM irsuser.AGREE_STIPL_BSC A
+				INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+							  FROM irsuser.COM_NTN_CD_BSC C
+								INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+									FROM irsuser.AGREE_STIPL_BSC A 
+											INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+										WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+									 		ON C.IATA_NTN_CD  = D.NTN_CD
+													GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+					ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+					WHERE K.DGR_RN = 1 AND K.DEL_YN ='N'
+					<if test="cncldClCd != null and !cncldClCd.equals('')">
+					AND K.CNCLD_CL_CD  = #{cncldClCd}
+					</if>
+					<if test="srhCncldDgrCd eq 'NEW'">
+					AND K.CNCLD_DGR = 1
+					</if>
+					<if test="srhCncldDgrCd eq 'CHG'">
+					<![CDATA[
+					AND K.CNCLD_DGR > 1
+					 ]]>
+					</if>
+					<if test="srhCncldNm != null and !srhCncldNm.equals('')">
+					AND (K.CNCLD_ORGT_NM LIKE CONCAT('%', #{srhCncldNm}, '%') OR K.CNCLD_KRN_NM LIKE CONCAT ('%', #{srhCncldNm}, '%'))
+					</if>
+					ORDER BY K.CNCLD_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<select id="selectAgreeStiplListCntCnsltngrp" resultType="int" parameterType="map">
+		SELECT 
+			COUNT(*) AS CNT
+		FROM ( SELECT ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+			 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+			 , K.CNCLD_MGNO
+		     , K.CNCLD_DGR
+		     , K.NTN_NM
+		     , K.CNCLD_CL_CD
+		     , K.CNCLD_CL_NM
+		     , K.NEW_RVSN_TYPE_CD
+		     , K.NEW_RVSN_TYPE_NM 
+		     , K.REG_TYPE_CD
+		     , (CASE
+		        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+		        	ELSE K.REG_TYPE_NM
+		   		 end) AS REG_TYPE_NM
+		     , K.CNCLD_ORGT_NM
+		     , K.CNCLD_KRN_NM
+		     , K.CNCLD_NO
+		     , K.CNCLD_YN
+		     , K.SGNT_YMD
+		     , (CASE
+		        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+		        	ELSE K.EFTVN_YMD
+		   		 end) AS EFTVN_YMD
+		     , K.CNCLD_NO
+		     ,'선택' AS BTN_NM
+		FROM (SELECT A.CNCLD_MGNO
+				   , A.CNCLD_DGR
+				   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+				   , A.CNCLD_CL_CD
+				   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM  
+				   , Z.NTN_NM
+				   , A.NEW_RVSN_TYPE_CD
+				   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+				   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM
+				   , A.REG_TYPE_CD
+				   , A.CNCLD_ORGT_NM
+				   , A.CNCLD_KRN_NM
+				   , A.CNCLD_YN
+				   , A.CNCLD_NO 
+				   , A.SGNT_YMD
+				   , A.EFTVN_YMD 
+				   , A.DEL_YN
+			  FROM irsuser.AGREE_STIPL_BSC A
+				INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM 
+							 FROM irsuser.COM_NTN_CD_BSC C
+							INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+										FROM irsuser.AGREE_STIPL_BSC A 
+										INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B ON A.CNCLD_MGNO = B.CNCLD_MGNO
+										WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+							ON C.IATA_NTN_CD  = D.NTN_CD
+							GROUP BY D.CNCLD_MGNO) AS Z
+				ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+		WHERE K.DGR_RN = 1 AND K.DEL_YN = 'N' AND K.CNCLD_YN ='N' 
+		ORDER BY K.CNCLD_MGNO DESC ) AS P
+		WHERE 1=1
+		<if test="srhCncldDgrCd eq 'NEW'">
+		AND K.CNCLD_DGR = 1
+		</if>
+		<if test="srhCncldDgrCd eq 'CHG'">
+		<![CDATA[
+		AND K.CNCLD_DGR > 1
+		 ]]>
+		</if>
+		<if test="srhCncldNm != null and !srhCncldNm.equals('')">
+		AND (K.CNCLD_ORGT_NM LIKE CONCAT('%', #{srhCncldNm}, '%') OR K.CNCLD_KRN_NM LIKE CONCAT ('%', #{srhCncldNm}, '%'))
+		</if>
+	</select>
+	
+	<select id="selectAgreeStiplListCnsltngrp" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* CommonPopMapper.selectAgreeStiplListCnsltngrp */
+		SELECT ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+			 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+			 , K.CNCLD_MGNO
+		     , CAST (K.CNCLD_DGR AS TEXT)
+		     , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+		     , K.NTN_CD
+		     , K.NTN_NM
+		     , K.CNCLD_CL_CD
+		     , K.CNCLD_CL_NM
+		     , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+			 , K.NEW_RVSN_TYPE_CD				
+		     , K.NEW_RVSN_TYPE_NM 
+		     , K.REG_TYPE_CD
+		     , (CASE
+		        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+		        	ELSE K.REG_TYPE_NM
+		   		 end) AS REG_TYPE_NM
+		     , K.CNCLD_ORGT_NM
+		     , K.CNCLD_KRN_NM
+		     , CAST (K.CNCLD_NO AS TEXT)
+		     , K.SGNT_YMD
+		     , (CASE
+		        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+		        	ELSE K.EFTVN_YMD
+		   		 end) AS EFTVN_YMD
+		     , K.CNCLD_NO
+		     , K.KRN_CNCLD_FLMNO
+		   	 , K.ETC_DATA_FLMNO
+		   	 , K.ORGT_CNCLD_FLMNO
+		   	 , K.CNCLD_YN
+		     ,'선택' AS BTN_NM
+		FROM (SELECT A.CNCLD_MGNO
+				   , A.CNCLD_DGR
+				   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+				   , A.CNCLD_CL_CD
+				   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+				   , Z.NTN_CD
+				   , Z.NTN_NM
+				   , A.NEW_RVSN_TYPE_CD
+				   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+				   , A.REG_TYPE_CD
+				   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+				   , A.CNCLD_ORGT_NM
+				   , A.CNCLD_KRN_NM
+				   , A.CNCLD_NO
+				   , A.SGNT_YMD
+				   , A.EFTVN_YMD 
+				   , A.DEL_YN
+				   , A.KRN_CNCLD_FLMNO
+				   , A.ETC_DATA_FLMNO
+				   , A.ORGT_CNCLD_FLMNO
+				   , A.CNCLD_YN
+			  FROM irsuser.AGREE_STIPL_BSC A
+				INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+							  FROM irsuser.COM_NTN_CD_BSC C
+								INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+									FROM irsuser.AGREE_STIPL_BSC A 
+											INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+										WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+									 		ON C.IATA_NTN_CD  = D.NTN_CD
+													GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+					ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+					WHERE K.DGR_RN = 1 AND K.DEL_YN ='N' AND K.CNCLD_YN = 'N'
+		<if test="cncldClCd != null and !cncldClCd.equals('')">
+		AND K.CNCLD_CL_CD  = #{cncldClCd}
+		</if>
+		<if test="srhCncldDgrCd eq 'NEW'">
+		AND K.CNCLD_DGR = 1
+		</if>
+		<if test="srhCncldDgrCd eq 'CHG'">
+		<![CDATA[
+		AND K.CNCLD_DGR > 1
+		 ]]>
+		</if>
+		<if test="srhCncldNm != null and !srhCncldNm.equals('')">
+		AND (K.CNCLD_ORGT_NM LIKE CONCAT('%', #{srhCncldNm}, '%') OR K.CNCLD_KRN_NM LIKE CONCAT ('%', #{srhCncldNm}, '%'))
+		</if>
+		ORDER BY K.CNCLD_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<select id="selectMhdlglListCnt" resultType="int" parameterType="map">
+		SELECT 
+			COUNT(*) AS CNT
+		FROM IRSUSER.MHDLG_BSC A
+		INNER JOIN IRSUSER.MHDLG_DTL B
+		ON A.MHDLG_MGNO = B.MHDLG_MGNO
+		AND A.VLD_MHDLG_DGR = B.MHDLG_DGR 
+		WHERE 1=1
+		<if test="srhMhdlgNm != null and !srhMhdlgNm.equals('')">
+		AND (B.MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%') OR B.MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%'))
+		</if>
+		<if test="srhMhdlgPrcndTypeCd != null and !srhMhdlgPrcndTypeCd.equals('')">
+		AND A.REG_RSN_CD = #{srhMhdlgPrcndTypeCd}
+		</if>
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+		AND EXISTS (
+			SELECT MHDLG_MGNO
+			FROM IRSUSER.MHDLG_FLD_DTL 
+			WHERE 1=1
+			AND MHDLG_MGNO = A.MHDLG_MGNO 
+			AND MHDLG_DGR = A.VLD_MHDLG_DGR 
+		<if test="srhBizFldCdMgno != null and !srhBizFldCdMgno.equals('')">
+			AND BIZ_FLD_CD_MGNO = CAST(CAST(#{srhBizFldCdMgno} AS INTEGER) AS TEXT)
+		</if>
+		<if test="srhBizFldDtlsCdMgno != null and !srhBizFldDtlsCdMgno.equals('')">
+			AND BIZ_FLD_DTLS_CD_MGNO = #{srhBizFldDtlsCdMgno}
+		</if>
+		)
+		<if test="srhAgreeMgno != null and !srhAgreeMgno.equals('')">
+		AND EXISTS (
+			SELECT 	
+				T2.MHDLG_MGNO
+			FROM (
+				SELECT 
+					 A.CNCLD_MGNO
+					,A.CNCLD_DGR
+				FROM IRSUSER.AGREE_STIPL_BSC A
+				WHERE 1=1
+				AND A.CNCLD_MGNO = #{srhAgreeMgno}
+				AND A.CNCLD_DGR = CAST(#{srhAgreeDgr} AS NUMERIC)
+				AND A.DEL_YN = 'N' 
+				UNION
+				SELECT 
+					  B.REL_CNCLD_MGNO AS CNCLD_MGNO
+					 ,(SELECT MAX(CNCLD_DGR) FROM IRSUSER.AGREE_STIPL_BSC WHERE CNCLD_MGNO = B.REL_CNCLD_MGNO) AS CNCLD_DGR
+				FROM IRSUSER.AGREE_STIPL_BSC A
+				INNER JOIN IRSUSER.AGREE_STIPL_REL B
+				ON A.CNCLD_MGNO = B.CNCLD_MGNO 
+				WHERE 1=1
+				AND A.CNCLD_MGNO = #{srhAgreeMgno}
+				AND A.CNCLD_DGR = CAST(#{srhAgreeDgr} AS NUMERIC)
+				AND A.DEL_YN = 'N'
+				AND B.DEL_YN = 'N'
+			) T1
+			INNER JOIN IRSUSER.AGREE_STIPL_MHDLG_REL T2
+			ON T1.CNCLD_MGNO = T2.CNCLD_MGNO 
+			AND T1.CNCLD_DGR = T2.CNCLD_DGR
+			AND T2.DEL_YN = 'N'
+		)
+		</if>
+	</select>
+	
+	<select id="selectMhdlglList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO	
+			,U.MHDLG_MGNO 										
+			,CAST(U.RVSN_DGR AS TEXT) AS RVSN_DGR 				
+			,CASE WHEN CAST(U.RVSN_DGR AS INTEGER) = 1 
+				THEN '제정' 
+				ELSE '개정' || CAST(U.RVSN_DGR AS TEXT) || '차'  
+			 END AS RVSN_DGR_NM									
+			,CAST(U.VLD_MHDLG_DGR AS TEXT) AS VLD_MHDLG_DGR 	
+			,U.MHDLG_UNQNO 										
+			,U.MHDLG_ORGT_NM									
+			,U.MHDLG_KRN_NM 									
+			,U.VLD_BGNG_YMD     								
+		 	,U.REG_RSN_CD										
+			,IRSUSER.FN_GET_CODENM('MHDLG_PRCND_TYPE_CD', U.REG_RSN_CD) AS REG_RSN_CD_NM 
+		 	,(
+		     	SELECT ARRAY_TO_STRING(ARRAY_AGG(X.MHDLG_FLD), ', ') AS NM  
+		       	FROM (
+		        	SELECT
+		        		CASE WHEN Z.MHDLG_FLD_TOTAL_CNT = 1 
+		        			THEN Z.MHDLG_FLD                        
+		                    ELSE '(' || MHDLG_FLD_ROWNUM || ') ' || Z.MHDLG_FLD                	    
+		                END AS MHDLG_FLD
+					FROM (
+						SELECT 
+							 B.BIZ_FLD_KORN_NM || ' - ' || C.BIZ_DTLS_FLD_KORN_NM AS MHDLG_FLD
+		                    ,ROW_NUMBER() OVER(PARTITION BY A.MHDLG_MGNO, A.MHDLG_DGR ORDER BY C.BIZ_FLD_DTLS_CD_MGNO) AS MHDLG_FLD_ROWNUM
+		                    ,COUNT(*) OVER() MHDLG_FLD_TOTAL_CNT
+		                FROM IRSUSER.MHDLG_FLD_DTL A                            				 
+		                INNER JOIN IRSUSER.COM_BIZ_FLD_BSC B
+		                ON B.BIZ_FLD_CD_MGNO = A.BIZ_FLD_CD_MGNO
+		                INNER JOIN IRSUSER.COM_BIZ_FLD_DTL C
+		                ON C.BIZ_FLD_DTLS_CD_MGNO = A.BIZ_FLD_DTLS_CD_MGNO
+		                WHERE 1=1
+		                AND A.MHDLG_MGNO = U.MHDLG_MGNO
+		                AND A.MHDLG_DGR = U.VLD_MHDLG_DGR
+		            ) Z
+		        ) X
+		    ) AS MHDLG_FLD_NM
+			,'선택' AS BTN_NM
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+				(
+				SELECT 
+					 A.MHDLG_MGNO 		
+					,A.RVSN_DGR 		
+					,A.VLD_MHDLG_DGR 	
+					,A.MHDLG_UNQNO 		
+					,B.MHDLG_ORGT_NM	
+					,B.MHDLG_KRN_NM 	
+					,B.VLD_BGNG_YMD     
+				 	,A.REG_RSN_CD		
+				FROM IRSUSER.MHDLG_BSC A
+				INNER JOIN IRSUSER.MHDLG_DTL B
+				ON A.MHDLG_MGNO = B.MHDLG_MGNO
+				AND A.VLD_MHDLG_DGR = B.MHDLG_DGR 
+				WHERE 1=1
+				<if test="srhMhdlgNm != null and !srhMhdlgNm.equals('')">
+				AND (B.MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%') OR B.MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%'))
+				</if>
+				<if test="srhMhdlgPrcndTypeCd != null and !srhMhdlgPrcndTypeCd.equals('')">
+				AND A.REG_RSN_CD = #{srhMhdlgPrcndTypeCd}
+				</if>
+				AND A.DEL_YN = 'N'
+				AND B.DEL_YN = 'N'
+				AND EXISTS (
+					SELECT MHDLG_MGNO
+					FROM IRSUSER.MHDLG_FLD_DTL 
+					WHERE 1=1
+					AND MHDLG_MGNO = A.MHDLG_MGNO 
+					AND MHDLG_DGR = A.VLD_MHDLG_DGR 
+					<if test="srhBizFldCdMgno != null and !srhBizFldCdMgno.equals('')">
+						AND BIZ_FLD_CD_MGNO = CAST(CAST(#{srhBizFldCdMgno} AS INTEGER) AS TEXT)
+					</if>
+					<if test="srhBizFldDtlsCdMgno != null and !srhBizFldDtlsCdMgno.equals('')">
+						AND BIZ_FLD_DTLS_CD_MGNO = #{srhBizFldDtlsCdMgno}
+					</if>
+					<if test="srhBizFldDtlsCdMgno eq '14-B'">
+						<if test="srhReddPlusYn != null and !srhReddPlusYn.equals('')">
+							AND REDD_PLUS_YN = #{srhReddPlusYn}
+						</if>	
+					</if>
+				)
+				<if test="srhAgreeMgno != null and !srhAgreeMgno.equals('')">
+				AND EXISTS (
+					SELECT 	
+						T2.MHDLG_MGNO
+					FROM (
+						SELECT 
+							 A.CNCLD_MGNO
+							,A.CNCLD_DGR
+						FROM IRSUSER.AGREE_STIPL_BSC A
+						WHERE 1=1
+						AND A.CNCLD_MGNO = #{srhAgreeMgno}
+						AND A.CNCLD_DGR = CAST(#{srhAgreeDgr} AS NUMERIC)
+						AND A.DEL_YN = 'N' 
+						UNION
+						SELECT 
+							  B.REL_CNCLD_MGNO AS CNCLD_MGNO
+							 ,(SELECT MAX(CNCLD_DGR) FROM IRSUSER.AGREE_STIPL_BSC WHERE CNCLD_MGNO = B.REL_CNCLD_MGNO) AS CNCLD_DGR
+						FROM IRSUSER.AGREE_STIPL_BSC A
+						INNER JOIN IRSUSER.AGREE_STIPL_REL B
+						ON A.CNCLD_MGNO = B.CNCLD_MGNO 
+						WHERE 1=1
+						AND A.CNCLD_MGNO = #{srhAgreeMgno}
+						AND A.CNCLD_DGR = CAST(#{srhAgreeDgr} AS NUMERIC)
+						AND A.DEL_YN = 'N'
+						AND B.DEL_YN = 'N'
+					) T1
+					INNER JOIN IRSUSER.AGREE_STIPL_MHDLG_REL T2
+					ON T1.CNCLD_MGNO = T2.CNCLD_MGNO 
+					AND T1.CNCLD_DGR = T2.CNCLD_DGR
+					AND T2.DEL_YN = 'N'
+				)
+				</if>
+				ORDER BY A.MHDLG_MGNO DESC			
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<select id="selectUserListCnt" resultType="int" parameterType="map">
+		SELECT 
+			 COUNT(*) AS CNT
+		FROM IRSUSER.INST_BSC A
+		WHERE 1=1
+		AND INST_CLSF_CD IN ('ICC0003', 'ICC0004', 'ICC0005')
+		AND DEL_YN = 'N'
+		AND ACNT_STTS_CL_CD = 'ASC0002'	
+	</select>
+	
+	<select id="selectUserList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO	
+			,U.INST_MGNO 	
+			,U.INST_CLSF_CD 
+			,U.BZENT_NM 
+			,U.BZENT_CL_CD 
+			,U.BRNO
+			,U.RPRSV_NM 
+			,IRSUSER.FN_GET_CODENM('INST_CLSF_CD', U.INST_CLSF_CD) AS INST_CLSF_CD_NM
+			,IRSUSER.FN_GET_CODENM('BZENT_CL_CD', U.BZENT_CL_CD) AS BZENT_CL_CD_NM
+			,'선택' AS BTN_NM
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+			(
+				SELECT 
+					 A.INST_MGNO 	
+					,A.INST_CLSF_CD 
+					,A.BZENT_NM 
+					,A.BZENT_CL_CD 
+					,A.BRNO
+					,A.RPRSV_NM 
+				FROM IRSUSER.INST_BSC A
+				WHERE 1=1
+				AND INST_CLSF_CD IN ('ICC0003', 'ICC0004', 'ICC0005')
+				AND DEL_YN = 'N'
+				AND ACNT_STTS_CL_CD = 'ASC0002'	
+				ORDER BY A.INST_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- 사업수행자 목록 총건수 조회 -->
+	<select id="selectInstListCnt" resultType="int" parameterType="map">
+		/* CommonPopMapper.selectInstListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.INST_BSC IB
+		  LEFT OUTER JOIN irsuser.INST_BSC UIB
+		    ON UIB.INST_MGNO = IB.UP_INST_MGNO
+		   AND UIB.DEL_YN = 'N'
+		 WHERE 1 = 1
+		   AND IB.DEL_YN = 'N'
+		   AND IB.ACNT_STTS_CL_CD = 'ASC0002'				/* 계정상태구분 - 승인 */
+		<if test="srhInstSearchType == 0"><!-- 0 : 전체 조회 -->
+		   AND IB.INST_CLSF_CD IN ('ICC0001', 'ICC0002', 'ICC0003', 'ICC0004')					/* 기관분류코드 - 일반사업체 제외 */
+		</if>
+		<if test="srhInstSearchType == 1"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD IN ('ICC0002', 'ICC0003', 'ICC0004')					/* 기관분류코드 - 그외 정부기관, 관장기관, 위탁기관 */
+		   AND IB.GOV_INST_YN = 'Y'							/* 정부기관여부 - 여 */
+		</if>
+		<if test="srhInstSearchType == 3"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD = 'ICC0003'					/* 기관분류코드 - 관장기관 */
+		   AND IB.GOV_INST_YN = 'Y'							/* 정부기관여부 - 여 */
+		</if>
+		<if test="srhInstSearchType == 2"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD = 'ICC0005'					/* 기관분류코드 - 일반사업체 */
+		   AND IB.GOV_INST_YN = 'N'							/* 정부기관여부 - 부 */
+		</if>
+		<if test="srhBzentClCd != null and !srhBzentClCd.equals('')">
+		   AND IB.BZENT_CL_CD = #{srhBzentClCd}								/* 사업체구분코드로 검색 */
+		</if>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')				/* 사업체명으로 검색 */
+		</if>
+	</select>
+
+	<!-- 사업수행자 목록 조회 -->
+	<select id="selectInstList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* CommonPopMapper.selectInstList */
+		SELECT IB.INST_MGNO						/* 기관관리번호 */
+			 , IB.INST_CLSF_CD					/* 기관분류코드 */
+			 , IB.INST_DTLS_CLSF_CD				/* 기관세부분류코드 */
+			 , IB.GOV_INST_YN					/* 정부기관여부 */
+			 , IB.ACNT_STTS_CL_CD				/* 계정상태구분코드 */
+			 , IB.BZENT_NM						/* 사업체명 */
+			 , IB.BZENT_CL_CD					/* 사업체구분코드 */
+			 , IB.CRNO							/* 법인등록번호 */
+			 , IB.BRNO							/* 사업자등록번호 */
+			 , IB.RPRSV_NM						/* 대표자명 */
+			 , IB.CORP_TEL_DDD					/* 법인전화지역번호 */
+			 , IB.CORP_TEL_TLPNO				/* 법인전화국번호 */
+			 , IB.CORP_TEL_PHINO				/* 법인전화개별번호 */
+			 , IB.RDNM_CD						/* 도로명코드 */
+			 , IB.ADDR							/* 주소 - 도로명주소 */
+			 , IB.DTL_ADDR						/* 상세주소 */
+			 , IB.UP_INST_MGNO					/* 상위기관관리번호 */
+			 , UIB.BZENT_NM AS UP_INST_NM		/* 상위기관명 */
+			 , IB.BRDOC_FLMNO					/* 사업자등록증파일번호 */
+			 , (
+			 	SELECT CASE WHEN IB.INST_CLSF_CD <![CDATA[<>]]> 'ICC0005' THEN ''
+			 				WHEN IB.INST_CLSF_CD = 'ICC0005' AND COUNT(*) > 1 THEN 'UCC0004'			/* 계정대표자가 존재하면 계정관리인으로 회원가입 신청가능 */
+			 				ELSE 'UCC0005' END AS TARGET_USER_CL_CD
+			 	  FROM irsuser.USER_BSC U
+			 	 WHERE U.INST_MGNO = IB.INST_MGNO
+			 	   AND U.ACNT_STTS_CL_CD <![CDATA[<>]]> 'ASC0001'
+			 	   AND U.USER_CL_CD = 'UCC0005'
+			 ) AS TARGET_USER_CL_CD															/* 가입가능사용자구분코드-사업체전용 */
+			 , IB.CMPTNC_INST_MGNO					/* 관할기관관리번호 */
+			 , CIB.BZENT_NM AS CMPTNC_INST_NM		/* 관할기관명 */
+		  FROM irsuser.INST_BSC IB
+		  LEFT OUTER JOIN irsuser.INST_BSC UIB
+		    ON UIB.INST_MGNO = IB.UP_INST_MGNO
+		   AND UIB.DEL_YN = 'N'
+		  LEFT OUTER JOIN irsuser.INST_BSC CIB
+		    ON CIB.INST_MGNO = IB.CMPTNC_INST_MGNO
+		   AND CIB.DEL_YN = 'N'
+		 WHERE 1 = 1
+		   AND IB.DEL_YN = 'N'
+		   AND IB.ACNT_STTS_CL_CD = 'ASC0002'				/* 계정상태구분 - 승인 */
+		<if test="srhInstSearchType == 0"><!-- 0 : 전체 조회 -->
+		   AND IB.INST_CLSF_CD IN ('ICC0001', 'ICC0002', 'ICC0003', 'ICC0004')					/* 기관분류코드 - 일반사업체 제외 */
+		</if>
+		<if test="srhInstSearchType == 1"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD IN ('ICC0002', 'ICC0003', 'ICC0004')					/* 기관분류코드 - 그외 정부기관, 관장기관, 위탁기관 */
+		   AND IB.GOV_INST_YN = 'Y'							/* 정부기관여부 - 여 */
+		</if>
+		<if test="srhInstSearchType == 3"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD = 'ICC0003'					/* 기관분류코드 - 관장기관 */
+		   AND IB.GOV_INST_YN = 'Y'							/* 정부기관여부 - 여 */
+		</if>
+		<if test="srhInstSearchType == 2"><!-- 1 : [그외 정부기관|관장기관|위탁기관] 정부기관 조회, 2: 일반사업체 조회, 3 : 관장기관만 조회 -->
+		   AND IB.INST_CLSF_CD = 'ICC0005'					/* 기관분류코드 - 일반사업체 */
+		   AND IB.GOV_INST_YN = 'N'							/* 정부기관여부 - 부 */
+		</if>
+		<if test="srhBzentClCd != null and !srhBzentClCd.equals('')">
+		   AND IB.BZENT_CL_CD = #{srhBzentClCd}								/* 사업체구분코드로 검색 */
+		</if>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')				/* 사업체명으로 검색 */
+		</if>
+		 ORDER BY IB.BZENT_NM
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	<insert id="insertUserPrvcPrslDsctn" parameterType="map">
+		<selectKey order="BEFORE" resultType="String" keyProperty="sn" >
+			SELECT NEXTVAL('IRSUSER.PRVC_PRSL_DSCTN_SN_SEQ')	
+		</selectKey>
+		INSERT
+		  INTO irsuser.USER_PRVC_PRSL_DSCTN
+		     ( SN
+		     , SYS_CL_CD
+			 , USER_ID
+			 , MENU_MGNO
+			 , PRSL_YMD
+			 , PRSL_HR
+			 , IP_ADDR
+			 , PRSL_RSN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+		VALUES 
+			 ( CAST( #{sn} AS NUMERIC)
+			 , 'SCC0001'
+			 , #{sUserId}
+			 , #{menuMgno}
+			 , TO_CHAR(CURRENT_TIMESTAMP,'yyyyMMdd')
+			 , TO_CHAR(CURRENT_TIMESTAMP,'HHmmss')
+			 , #{sIp}
+			 , #{prslRsn}
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+		     
+		  
+	</insert>
+</mapper>

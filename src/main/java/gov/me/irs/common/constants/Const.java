@@ -9,6 +9,16 @@ package gov.me.irs.common.constants;
 public final class Const {
 	
 	/**
+	 * 쿠키
+	 * 
+	 * @author Justin
+	 *
+	 */
+	public final static class SESSION {
+		public final static String KEY = "lgnId";
+	}
+	
+	/**
 	 * 서비스
 	 * 
 	 * @author Justin
@@ -64,8 +74,8 @@ public final class Const {
 	 *
 	 */
 	public final static class MENU {
-		public final static String SCC0001_MENU_ID = "MN00000000";		// IRS시스템 최상위메뉴 - Default
-		public final static String SCC0002_MENU_ID = "MX00000000";		// 대고객시스템 최상위메뉴 - 새로운 시스템 추가시, 임시코드 추가
+		public final static String SCC0001_MENU_MGNO = "MN00000000";		// IRS시스템 최상위메뉴 - Default
+		public final static String SCC0002_MENU_MGNO = "MX00000000";		// 대고객시스템 최상위메뉴 - 새로운 시스템 추가시, 임시코드 추가
 		
 		public final static String FOLDER = "MCC0001";		// 메뉴폴더
 		public final static String LINK = "MCC0002";			// 메뉴링크
@@ -80,7 +90,7 @@ public final class Const {
 	public final static class CORE {
 		/* 사용자 로그인 식별자 - 로그인ID or 이메일주소 */
 		public final static String KEY_USER_IDENTIFIER = "id";
-		public final static String KEY_USER_PASSWORD = "password";
+		public final static String KEY_USER_PASSWORD = "rsaPassword";
 		public final static String KEY_USER_ROLE = "role";
 	}
 	
@@ -137,6 +147,9 @@ public final class Const {
 	 */
 	public final static class CHARACTER {
 		
+		public final static String Y = "Y";			/* Y, 긍정 */
+		public final static String N = "N";			/* N, 부정 */
+		
 		/**
 		 * 결과YN - yn
 		 * 
@@ -144,8 +157,8 @@ public final class Const {
 		 *
 		 */
 		public final static class RESULT {
-			public final static String Y = "Y";			/* y, success */
-			public final static String N = "N";			/* n, fail */
+			public final static String Y = "Y";			/* Y, success */
+			public final static String N = "N";			/* N, fail */
 		}
 	}
 	

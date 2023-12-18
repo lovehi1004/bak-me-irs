@@ -5,12 +5,13 @@
 	
 	<!-- 페이징 목록 상단 선언부 -->
 	<sql id="pagingPreSql">
-		SELECT
-			U.*
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
 		FROM
 		(
 			SELECT
 				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
 				, V.*
 			FROM
 				(

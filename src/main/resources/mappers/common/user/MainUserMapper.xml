@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.common.user.mapper.MainUserMapper">
+	
+	<!-- 메인 > 사용자 > 회원가입 > 로그인 아이디 중복 검색 체크 -->
+	<select id="selectcheckLoginIdCnt" resultType="egovMap" parameterType="map">
+		/* MainUserMapper.selectcheckLoginIdCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{lgnId} as LGN_ID
+		  FROM irsuser.USER_BSC
+		 WHERE DEL_YN = 'N'
+		   AND LGN_ID = #{lgnId}
+	</select>
+	
+	<!-- 메인 > 사용자 > 회원가입 > 회원가입신청 - 사업체정보 생성 [INST_BSC] -->
+	<insert id="insertInst" parameterType="map">
+		<selectKey keyProperty="instMgno" resultType="string" order="BEFORE">
+			/* MainUserMapper.insertInst.selectKey */
+			SELECT CONCAT( (SELECT CASE WHEN #{instClsfCd} = 'ICC0001' OR #{instClsfCd} = 'ICC0002' OR #{instClsfCd} = 'ICC0003' OR #{instClsfCd} = 'ICC0004' THEN 'GV' ELSE 'CO' END)
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(INST_MGNO, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 10 - 2
+							   , '0'
+						   )
+				   )
+			FROM irsuser.INST_BSC
+		</selectKey>
+		/* MainUserMapper.insertInst */
+		INSERT
+		  INTO irsuser.INST_BSC
+			 ( INST_MGNO                   /* 기관관리번호 */
+			 , INST_CLSF_CD                /* 기관분류코드 */
+			 , INST_DTLS_CLSF_CD           /* 기관세부분류코드 */
+			 , GOV_INST_YN                 /* 정부기관여부 */
+			 , BZENT_NM                    /* 사업체명 */
+			 , BZENT_CL_CD                 /* 사업체구분코드 */
+			 , BRNO                        /* 사업자등록번호 */
+			 , CRNO                        /* 법인등록번호 */
+			 , RPRSV_NM                    /* 대표자명 */
+			 , RDNM_CD                     /* 도로명코드 */
+			 , ADDR                        /* 주소 */
+			 , DTL_ADDR                    /* 상세주소 */
+			 , CORP_TEL_DDD                /* 법인전화지역번호 */
+			 , CORP_TEL_TLPNO              /* 법인전화국번호 */
+			 , CORP_TEL_PHINO              /* 법인전화개별번호 */
+			 , ACNT_STTS_CL_CD             /* 계정상태구분코드 */
+			 , BRDOC_FLMNO                 /* 사업자등록증파일번호 */
+			 , DEL_YN                      /* 삭제여부 */
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 , UP_INST_MGNO                /* 상위기관관리번호 */
+			 , CMPTNC_INST_MGNO            /* 관할기관관리번호 */
+			 )
+		VALUES
+			 ( #{instMgno}
+			 , #{instClsfCd}
+			 , COALESCE(#{instDtlsClsfCd}, #{instClsfCd})
+			 , #{govInstYn}
+			 , #{bzentNm}
+			 , #{bzentClCd}
+			 , #{brno}
+			 , #{crno}
+			 , #{rprsvNm}
+			 , #{rdnmCd}
+			 , #{addr}
+			 , #{dtlAddr}
+			 , #{corpTelDdd}
+			 , #{corpTelTlpno}
+			 , #{corpTelPhino}
+			 , 'ASC0001'			/* 미승인 */
+			 , #{brdocFlmno}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+		<if test='sameInstMgnoYn.equals("Y")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{instMgno}
+		</if>
+		<if test='sameInstMgnoYn.equals("N")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{upInstMgno}
+		</if>
+			 , #{cmptncInstMgno}
+			 )
+	</insert>
+	
+	<!-- 메인 > 사용자 > 회원가입 > 회원가입신청 - 기관설정상세 정보 생성 [INST_BSC] -->
+	<insert id="insertInstStngDtl" parameterType="map">
+		/* MainUserMapper.insertInstStngDtl */
+		INSERT
+		  INTO irsuser.INST_STNG_DTL
+			 ( INST_MGNO                   /* 기관관리번호 */
+			 , INFO_MNG_INST_MGNO          /* 정보관리기관관리번호 */
+			 , MHDLG_INST_MGNO             /* 방법론기관관리번호 */
+			 , IRB_INST_MGNO               /* 국제감축사업기관관리번호 */
+			 , RTADTI_SCSN_INST_MGNO       /* 권리의무승계기관관리번호 */
+			 , IRP_INST_MGNO               /* 국제감축실적기관관리번호 */
+			 , BFR_INST_MGNO               /* 이전기관관리번호 */
+			 , DLNG_INST_MGNO              /* 거래기관관리번호 */
+			 , SWOV_INST_MGNO              /* 전환기관관리번호 */
+			 , RTRCN_INST_MGNO             /* 취소기관관리번호 */
+			 , DSPS_INST_MGNO              /* 처분기관관리번호 */
+			 , INFO_PRVT_INST_MGNO         /* 정보비공개기관관리번호 */
+			 , DEL_YN                      /* 삭제여부 */
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{instMgno}
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')		<!-- 없으면 환경부가 기본 -->
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , COALESCE(#{cmptncInstMgno}, 'GV00000002')
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- 메인 > 사용자 > 회원가입 > 회원가입신청 - 사용자신청기본정보 생성 [USER_APLY_BSC] -->
+	<insert id="insertUserAply" parameterType="map">
+		<selectKey keyProperty="aplyMgno" resultType="string" order="BEFORE">
+			/* MainUserMapper.insertUserAply.selectKey */
+			SELECT CONCAT( 'AM'
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(APLY_MGNO, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 10 - 2
+							   , '0'
+						   )
+				   )
+			FROM irsuser.USER_APLY_BSC
+		</selectKey>
+		/* MainUserMapper.insertUserAply */
+		INSERT
+		  INTO irsuser.USER_APLY_BSC
+			 ( APLY_MGNO                 /* 신청관리번호 */
+			 , INST_MGNO                 /* 기관관리번호 */
+			 , INST_CLSF_CD              /* 기관분류코드 */
+			 , INST_DTLS_CLSF_CD         /* 기관세부분류코드 */
+			 , GOV_INST_YN               /* 정부기관여부 */
+			 , INST_ACNT_STTS_CL_CD      /* 기관계정상태구분코드 */
+			 , BZENT_NM                  /* 사업체명 */
+			 , BZENT_CL_CD               /* 사업체구분코드 */
+			 , BRNO                      /* 사업자등록번호 */
+			 , CRNO                      /* 법인등록번호 */
+			 , RPRSV_NM                  /* 대표자명 */
+			 , RDNM_CD                   /* 도로명코드 */
+			 , ADDR                      /* 주소 */
+			 , DTL_ADDR                  /* 상세주소 */
+			 , CORP_TEL_DDD              /* 법인전화지역번호 */
+			 , CORP_TEL_TLPNO            /* 법인전화국번호 */
+			 , CORP_TEL_PHINO            /* 법인전화개별번호 */
+			 , BRDOC_FLMNO               /* 사업자등록증파일번호 */
+			 , UP_INST_MGNO              /* 상위기관관리번호 */
+			 , USER_ID                   /* 사용자ID */
+			 , USER_CL_CD                /* 사용자구분코드 */
+			 , LGN_ID                    /* 로그인ID */
+			 , PSWD                      /* 비밀번호 */
+			 , FLNM                      /* 성명 */
+			 , DEPT_NM                   /* 부서명 */
+			 , JBPS_NM                   /* 직위명 */
+			 , TEL_DDD                   /* 전화지역번호 */
+			 , TEL_TLPNO                 /* 전화국번호 */
+			 , TEL_PHINO                 /* 전화개별번호 */
+			 , HDPON_DDD                 /* 핸드폰지역번호 */
+			 , HDPON_TLPNO               /* 핸드폰국번호 */
+			 , HDPON_PHINO               /* 핸드폰개별번호 */
+			 , FAX_DDD                   /* 팩스지역번호 */
+			 , FAX_TLPNO                 /* 팩스국번호 */
+			 , FAX_PHINO                 /* 팩스개별번호 */
+			 , EML_ID                    /* 이메일ID */
+			 , EML_ADDR                  /* 이메일주소 */
+			 , SMS_NTI_YN                /* sms알림여부 */
+			 , ACNT_RPRSV_YN             /* 계정대표자여부 */
+			 , USER_ACNT_STTS_CL_CD      /* 사용자계정상태구분코드 */
+			 , MHDLG_NTI_YN              /* 방법론알림여부 */
+			 , IRB_NTI_YN                /* 국제감축사업알림여부 */
+			 , RTADTI_SCSN_NTI_YN        /* 권리의무승계알림여부 */
+			 , IRP_NTI_YN                /* 국제감축실적알림여부 */
+			 , BFR_NTI_YN                /* 이전알림여부 */
+			 , DLNG_NTI_YN               /* 거래알림여부 */
+			 , SWOV_NTI_YN               /* 전환알림여부 */
+			 , RTRCN_NTI_YN              /* 취소알림여부 */
+			 , DSPS_NTI_YN               /* 처분알림여부 */
+			 , INFO_PRVT_NTI_YN          /* 정보비공개알림여부 */
+			 , APLY_TYPE_CD              /* 신청유형코드 */
+			 , APLY_YMD                  /* 신청일자 */
+			 , APLY_PRCS_TYPE_CD              /* 처리유형코드 */
+			 , APLY_PRCS_YMD                  /* 처리일자 */
+			 , DEL_YN                    /* 삭제여부 */
+			 , RGTR_ID                   /* 등록자ID */
+			 , REG_DT                    /* 등록일시 */
+			 )
+		VALUES
+			 ( #{aplyMgno}
+			 , #{dsInstInfo.instMgno}
+			 , #{dsInstInfo.instClsfCd}
+			 , COALESCE(#{dsInstInfo.instDtlsClsfCd}, #{dsInstInfo.instClsfCd})
+			 , #{dsInstInfo.govInstYn}
+			 , 'ASC0001'			/* 미승인 */
+			 , #{dsInstInfo.bzentNm}
+			 , #{dsInstInfo.bzentClCd}
+			 , #{dsInstInfo.brno}
+			 , #{dsInstInfo.crno}
+			 , #{dsInstInfo.rprsvNm}
+			 , #{dsInstInfo.rdnmCd}
+			 , #{dsInstInfo.addr}
+			 , #{dsInstInfo.dtlAddr}
+			 , #{dsInstInfo.corpTelDdd}
+			 , #{dsInstInfo.corpTelTlpno}
+			 , #{dsInstInfo.corpTelPhino}
+			 , #{dsInstInfoFile.brdocFlmno}
+		<if test='dsInstInfo.sameInstMgnoYn.equals("Y")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{dsInstInfo.instMgno}
+		</if>
+		<if test='dsInstInfo.sameInstMgnoYn.equals("N")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
+			 , #{dsInstInfo.upInstMgno}
+		</if>
+			 , #{dsUserInfo.userId}
+			 , #{dsUserInfo.userClCd}
+			 , #{dsUserInfo.lgnId}
+			 , #{dsUserInfo.encptPswd}
+			 , #{dsUserInfo.flnm}
+			 , #{dsUserInfo.deptNm}
+			 , #{dsUserInfo.jbpsNm}
+			 , #{dsUserInfo.telDdd}
+			 , #{dsUserInfo.telTlpno}
+			 , #{dsUserInfo.telPhino}
+			 , #{dsUserInfo.hdponDdd}
+			 , #{dsUserInfo.hdponTlpno}
+			 , #{dsUserInfo.hdponPhino}
+			 , #{dsUserInfo.faxDdd}
+			 , #{dsUserInfo.faxTlpno}
+			 , #{dsUserInfo.faxPhino}
+			 , #{dsUserInfo.emlId}
+			 , #{dsUserInfo.emlAddr}
+			 , #{dsUserInfo.smsNtiYn}
+			 , #{dsUserInfo.acntRprsvYn}
+			 , 'ASC0001'			/* 미승인 */
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+			 , 'N'
+		<if test='dsInstInfo.instRegistType.equals("1")'><!-- 갱신신청 - 업체정보 검색 후 등록 -->
+			 , 'ATC0007'										/* 신청유형코드 : 갱신신청 */
+		</if>
+		<if test='dsInstInfo.instRegistType.equals("2")'><!-- 신규신청 - 업체정보 신규등록 -->
+			 , 'ATC0001'										/* 신청유형코드 : 신규신청 */
+		</if>
+			 , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')			/* 신청일자 : 신청일자 */
+			 , 'APC0001'										/* 처리유형코드 : 신청 */
+			 , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')			/* 처리일자 */
+			 , 'N'
+			 , #{dsUserInfo.userId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+</mapper>

@@ -1,5 +1,9 @@
 package gov.me.irs.core.config;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -14,7 +18,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+import gov.me.irs.core.config.property.CoreProperties;
 import gov.me.irs.core.interceptor.GlobalInteceptor;
+import gov.me.irs.core.raonk.servlet.RaonKHandlerServlet;
+import gov.me.irs.core.raonk.servlet.RaonKViewerServlet;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * WebMvcConfigurer 설정
@@ -22,10 +31,49 @@ import gov.me.irs.core.interceptor.GlobalInteceptor;
  * @author Justin
  *
  */
+@RequiredArgsConstructor
 @Configuration
 @EnableWebMvc
+@Slf4j
 public class WebMvcConfig implements WebMvcConfigurer {
 	
+	@PostConstruct
+	protected void init() throws Exception {
+//		String profiles = commonProperties.getProperty("spring.profiles.active", StringUtils.EMPTY);;
+		
+		String profiles = System.getProperty("spring.profiles.active");
+		log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ spring.profiles.active START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+		log.info("[spring.profiles.active][{}]", profiles);
+		log.info("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ spring.profiles.active END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+		
+		if(ObjectUtils.isEmpty(profiles)) {
+			log.error("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ [spring.profiles.active is required] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+			throw new Exception("[spring.profiles.active is required]");
+		}
+	}
+	
+	/* 라온K - 파일업로드/다운로드 서블릿 */
+	private final RaonKHandlerServlet raonKHandlerServlet;
+	
+	/* 라온K - 뷰어 서블릿 */
+	private final RaonKViewerServlet raonKViewerServlet;
+	
+	private final CoreProperties coreProperties;
+	
+	@Bean
+	public ServletRegistrationBean<RaonKHandlerServlet> getRaonKHandlerServletRegistrationBean() {
+		ServletRegistrationBean<RaonKHandlerServlet> registrationBean = new ServletRegistrationBean<>(raonKHandlerServlet);
+		registrationBean.addUrlMappings(coreProperties.raon.url.raonkhandler);
+		return registrationBean;
+	}
+	
+	@Bean
+	public ServletRegistrationBean<RaonKViewerServlet> getRaonKViewerServletRegistrationBean() {
+		ServletRegistrationBean<RaonKViewerServlet> registrationBean = new ServletRegistrationBean<>(raonKViewerServlet);
+		registrationBean.addUrlMappings(coreProperties.raon.url.raonkviewer);
+		return registrationBean;
+	}
+
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	 * local 전용설정 START
