@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="gov.me.irs.biz.inforls.mapper.BizBizPrvtMapper">
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 목록조회 총건수 조회 -->
+	<select id="selectBizPrvtListCnt" resultType="int" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPrvtListCnt */
+		SELECT COUNT(*) AS CNT
+		  FROM IRSUSER.INFO_PRVT_BSC A
+		 INNER JOIN IRSUSER.INFO_PRVT_DTL B
+		    ON A.PRVT_MGNO = B.PRVT_MGNO
+		   AND A.PRCS_DGR = B.PRVT_DGR
+		 INNER JOIN IRSUSER.IRB_BSC C
+		    ON B.BIZ_MNG_NO = C.BIZ_MNG_NO 
+		 INNER JOIN IRSUSER.IRB_DTL D
+			ON C.BIZ_MNG_NO = D.BIZ_MNG_NO 
+		   AND C.PRCS_DGR = D.BIZ_DGR
+		 WHERE 1=1
+		   AND A.DEL_YN = 'N'
+		   AND B.DEL_YN = 'N'
+		   AND C.DEL_YN = 'N'
+		   --AND D.PRCS_TYPE_CD != 'PTC0001'
+		   AND D.DEL_YN = 'N'
+		   AND B.USER_ID = #{auth.sUserId}
+		   <if test="srhBizGbn != null and !srhBizGbn.equals('')">
+		   AND D.DGR_REG_RSN_CD = #{srhBizGbn}
+		   </if>
+		   <if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+		   AND D.APLY_CL_CD = #{srhAplyClCd}
+		   </if>
+		   <if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+		   AND D.BIZ_FORM_CD = #{srhBizFormCd}
+		   </if>
+		   <if test="srhBizNm != null and !srhBizNm.equals('')">
+		   AND (D.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR D.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+		   </if>
+		   <if test="srhPrvtPrcsTypeCd != null and !srhPrvtPrcsTypeCd.equals('')">
+		   AND B.PRCS_TYPE_CD = #{srhPrvtPrcsTypeCd}
+		   </if>
+		   <if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+		   AND D.BIZ_FLD_CD = #{srhBizFldCd}
+		   </if>
+		   <if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+		   AND D.BIZ_DTLS_FLD_CD = #{srhBizDtlsFldCd}
+		   </if>
+		   <if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+		   AND D.BIZ_TYPE_CD = #{srhBizTypeCd}
+		   </if>
+		   <if test="srhBizScalCd != null and !srhBizScalCd.equals('')">
+		   AND D.BIZ_SCAL_CD = #{srhBizScalCd}
+		   </if>
+		   <if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+		   AND D.CMPTNC_INST_MNG_NO = #{srhInstMngNo}
+		   </if>
+		   <if test="srhAddDataYn != null and !srhAddDataYn.equals('')">
+		   AND COALESCE(D.ADD_DATA_TYPE_CD, '') != ''
+		   </if>
+		   AND EXISTS (
+					   	SELECT BIZ_MNG_NO 
+					   	  FROM IRSUSER.INFO_PRVT_DTL 
+					   	 WHERE 1=1
+						   AND BIZ_MNG_NO = D.BIZ_MNG_NO 
+						   AND BIZ_DGR = D.BIZ_DGR 
+						   AND INST_MGNO = #{auth.sInstMgno} 
+						   AND DEL_YN = 'N'
+		   )
+		   <if test="srhMhdlg != null and !srhMhdlg.equals('')">
+		   AND D.BIZ_MNG_NO IN (
+		   			SELECT DISTINCT BIZ_MNG_NO
+		   	          FROM IRSUSER.IRB_MHDLG_DTL
+		   	         WHERE 1=1
+		   	           AND MHDLG_MGNO IN (
+									   		SELECT MHDLG_MGNO 
+									   		  FROM IRSUSER.MHDLG_DTL 
+									   		 WHERE 1=1
+									   		   AND (MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlg}, '%') OR MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlg}, '%'))
+		   	                              )
+		   )
+		   </if>
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 목록조회 -->
+	<select id="selectBizPrvtList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPrvtList */
+		SELECT '' AS CHK
+		     , (COUNT(*) OVER()) - (U.RN-1) AS NO
+             , U.PRVT_MGNO
+             , U.PRVT_DGR
+             , U.BIZ_MNG_NO
+		     , IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM
+		     , CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+		            THEN '[' ||
+		                 (
+							SELECT T.BIZ_ORGT_NM FROM (
+								SELECT 
+									BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+								FROM IRSUSER.IRB_PRGRM_DTL 
+								WHERE 1=1
+								AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+							) T
+							WHERE T.RN = 1 
+						 ) || '] ' || U.BIZ_ORGT_NM 	
+					ELSE U.BIZ_ORGT_NM 	
+				END AS BIZ_ORGT_NM
+			 , CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+					THEN '[' || 
+						 (
+							SELECT T.BIZ_KRN_NM FROM (
+								SELECT 
+									BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+								FROM IRSUSER.IRB_PRGRM_DTL 
+								WHERE 1=1
+								AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+							) T
+							WHERE T.RN = 1 
+						 ) || '] ' || U.BIZ_KRN_NM
+					ELSE U.BIZ_KRN_NM 	
+				END AS BIZ_KRN_NM
+		     , IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', U.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+		     , CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+					THEN (
+							SELECT '단위사업 ' || CAST(COUNT(*) AS TEXT) || '건' AS CNT 
+							FROM IRSUSER.IRB_DTL A
+							INNER JOIN IRSUSER.IRB_BSC B
+							ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND A.BIZ_DGR = B.PRCS_DGR
+							WHERE A.PRGRM_MNG_NO = U.PRGRM_MNG_NO
+						 )
+					ELSE '-'
+				END AS BIZ_CNT
+			 , (
+					SELECT 
+						ARRAY_TO_STRING(ARRAY_AGG(T.NTN_CD_NM), ', ') AS NTN_CD_NM 
+					FROM (
+						SELECT 
+							(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = A.IATA_NTN_CD) AS NTN_CD_NM
+						FROM IRSUSER.IRB_NTN_DTL A
+						WHERE 1=1
+						AND A.BIZ_MNG_NO = U.BIZ_MNG_NO 
+						AND A.BIZ_DGR = U.BIZ_DGR	
+					) T
+				) AS NTN_CD_NM
+		     , IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', U.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM
+		     , IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', U.BIZ_FORM_CD) AS BIZ_FORM_CD_NM
+		     , IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', U.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM
+		     , U.CERT_VLD_BGNG_YMD
+		     , U.CERT_VLD_END_YMD
+		     , COALESCE(U.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY
+		     , U.APLY_YMD
+		     , U.PRCS_YMD
+		     , U.APLY_TYPE_CD /*사업비공개신청코드*/
+		     , IRSUSER.FN_GET_CODENM('PRVT_APLY_TYPE_CD', U.APLY_TYPE_CD) AS APLY_TYPE_CD_NM
+		     , U.PRCS_TYPE_CD /*사업비공개심의코드*/
+		     , IRSUSER.FN_GET_CODENM('PRVT_PRCS_TYPE_CD', U.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+		     , COALESCE((SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = U.CMPTNC_INST_MNG_NO), '-') AS BZENT_NM
+		     , '이력' AS HSTRY_NM
+		     , CASE WHEN U.APLY_TYPE_CD = 'PAC0001' AND U.PRCS_TYPE_CD = 'PPC0002' THEN 'redoc'
+		            WHEN U.APLY_TYPE_CD = 'PAC0002' AND U.PRCS_TYPE_CD = 'PPC0002' THEN 'search'
+		            WHEN U.PRCS_TYPE_CD = 'PPC0004' THEN 'aproved'
+		       ELSE 'search'
+		       END AS PRCS_GBN_CD
+		     , CASE WHEN U.APLY_TYPE_CD = 'PAC0001' AND U.PRCS_TYPE_CD = 'PPC0002' THEN '문서보완'
+		            WHEN U.APLY_TYPE_CD = 'PAC0002' AND U.PRCS_TYPE_CD = 'PPC0002' THEN '조회'
+		            WHEN U.PRCS_TYPE_CD = 'PPC0004' THEN '조회'
+		       ELSE '조회'
+		       END AS PRCS_GBN_NM
+		  FROM (
+				SELECT ROW_NUMBER() OVER() AS RN
+					 , V.*
+				  FROM (
+							SELECT B.PRVT_MGNO
+							     , B.PRVT_DGR
+							     , B.BIZ_MNG_NO
+							     , D.AGREE_CLAUS_CD
+							     , D.BIZ_ORGT_NM
+							     , D.BIZ_KRN_NM
+							     , D.BIZ_TYPE_CD
+							     , D.BIZ_SCAL_CD
+							     , D.BIZ_FORM_CD
+							     , D.PRGRM_MNG_NO
+							     , D.CERT_VLD_TYPE_CD
+							     , D.CERT_VLD_BGNG_YMD
+							     , D.CERT_VLD_END_YMD
+							     , D.ATCNVR_RDCQTY
+							     , D.CMPTNC_INST_MNG_NO
+							     , D.BIZ_DGR
+							     , B.APLY_YMD
+							     , B.PRCS_YMD
+							     , B.APLY_TYPE_CD
+							     , B.PRCS_TYPE_CD
+							  FROM IRSUSER.INFO_PRVT_BSC A
+							 INNER JOIN IRSUSER.INFO_PRVT_DTL B
+							    ON A.PRVT_MGNO = B.PRVT_MGNO
+							   AND A.PRCS_DGR = B.PRVT_DGR
+							 INNER JOIN IRSUSER.IRB_BSC C
+							    ON B.BIZ_MNG_NO = C.BIZ_MNG_NO 
+							 INNER JOIN IRSUSER.IRB_DTL D
+								ON C.BIZ_MNG_NO = D.BIZ_MNG_NO 
+							   AND C.PRCS_DGR = D.BIZ_DGR
+							 WHERE 1=1
+							   AND A.DEL_YN = 'N'
+							   AND B.DEL_YN = 'N'
+							   AND C.DEL_YN = 'N'
+							   AND D.DEL_YN = 'N'
+							   --AND D.PRCS_TYPE_CD != 'PTC0001'
+							   AND B.USER_ID = #{auth.sUserId}
+							   <if test="srhBizGbn != null and !srhBizGbn.equals('')">
+							   AND D.DGR_REG_RSN_CD = #{srhBizGbn}
+							   </if>
+							   <if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+							   AND D.APLY_CL_CD = #{srhAplyClCd}
+							   </if>
+							   <if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+							   AND D.BIZ_FORM_CD = #{srhBizFormCd}
+							   </if>
+							   <if test="srhBizNm != null and !srhBizNm.equals('')">
+							   AND (D.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR D.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+							   </if>
+							   <if test="srhPrvtPrcsTypeCd != null and !srhPrvtPrcsTypeCd.equals('')">
+							   AND B.PRCS_TYPE_CD = #{srhPrvtPrcsTypeCd}
+							   </if>
+							   <if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+							   AND D.BIZ_FLD_CD = #{srhBizFldCd}
+							   </if>
+							   <if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+							   AND D.BIZ_DTLS_FLD_CD = #{srhBizDtlsFldCd}
+							   </if>
+							   <if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+							   AND D.BIZ_TYPE_CD = #{srhBizTypeCd}
+							   </if>
+							   <if test="srhBizScalCd != null and !srhBizScalCd.equals('')">
+							   AND D.BIZ_SCAL_CD = #{srhBizScalCd}
+							   </if>
+							   <if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+							   AND D.CMPTNC_INST_MNG_NO = #{srhInstMngNo}
+							   </if>
+							   <if test="srhAddDataYn != null and !srhAddDataYn.equals('')">
+							   AND COALESCE(D.ADD_DATA_TYPE_CD, '') != ''
+							   </if>
+							   AND EXISTS (
+										   	SELECT BIZ_MNG_NO 
+										   	  FROM IRSUSER.INFO_PRVT_DTL 
+										   	 WHERE 1=1
+											   AND BIZ_MNG_NO = D.BIZ_MNG_NO 
+											   AND BIZ_DGR = D.BIZ_DGR 
+											   AND INST_MGNO = #{auth.sInstMgno} 
+											   AND DEL_YN = 'N'
+							   )
+							   <if test="srhMhdlg != null and !srhMhdlg.equals('')">
+							   AND D.BIZ_MNG_NO IN (
+							   			SELECT DISTINCT BIZ_MNG_NO
+							   	          FROM IRSUSER.IRB_MHDLG_DTL
+							   	         WHERE 1=1
+							   	           AND MHDLG_MGNO IN (
+														   		SELECT MHDLG_MGNO 
+														   		  FROM IRSUSER.MHDLG_DTL 
+														   		 WHERE 1=1
+														   		   AND (MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlg}, '%') OR MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlg}, '%'))
+							   	                              )
+							   )
+							   </if>
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 상세조회(문서제출이력) -->
+	<select id="selectDocSbmsnHstryList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectDocSbmsnHstryList */
+		SELECT ROW_NUMBER() OVER() AS NO
+		     , B.PRVT_MGNO
+		     , B.PRVT_DGR
+		     , B.BIZ_MNG_NO
+		     , B.APLY_TYPE_CD
+		     , IRSUSER.FN_GET_CODENM('PRVT_APLY_TYPE_CD', B.APLY_TYPE_CD) AS APLY_TYPE_CD_NM
+		     , B.USER_ID
+		     , (SELECT FLNM FROM IRSUSER.USER_BSC WHERE USER_ID = B.USER_ID) AS USER_NM
+		     , B.PRCS_TYPE_CD
+		     , IRSUSER.FN_GET_CODENM('PRVT_PRCS_TYPE_CD', B.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+		     , CAST(CAST(B.PRCS_YMD AS DATE) AS TEXT) AS PRCS_YMD
+		     , B.CMPTNC_INST_MNG_NO
+		     , (SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = B.CMPTNC_INST_MNG_NO) AS CMPTNC_INST_MNG_NM
+		     , CASE WHEN CAST(#{prvtDgr} AS NUMERIC) = B.PRVT_DGR THEN '현재문서' ELSE '상세보기' END AS BTN_CTL
+		  FROM IRSUSER.INFO_PRVT_BSC A
+		 INNER JOIN IRSUSER.INFO_PRVT_DTL B
+		    ON A.PRVT_MGNO = B.PRVT_MGNO
+		 WHERE 1=1
+		   AND A.DEL_YN = 'N'
+		   AND B.DEL_YN = 'N'
+		   AND A.PRVT_MGNO = #{prvtMgno}
+		 ORDER BY PRVT_DGR DESC
+	</select>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 상세조회(사업정보) -->
+	<select id="selectBizInfo" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizInfo */
+		SELECT B.BIZ_MNG_NO
+		     , B.APLY_CL_CD /*신청구분코드*/
+		     , IRSUSER.FN_GET_CODENM('APLY_CL_CD', B.APLY_CL_CD) AS APLY_CL_CD_NM /*신청구분명*/
+		     , (
+					SELECT CNCLD_KRN_NM 
+					FROM IRSUSER.AGREE_STIPL_BSC 
+					WHERE CNCLD_MGNO = B.AGREE_MGNO 
+					AND CNCLD_DGR = B.AGREE_DGR
+				) AS AGREE_MGNO_NM /*협정, 약정*/
+		     , B.AGREE_CLAUS_CD /*파리협정조항코드*/
+		     , IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM /*파리협정조항명*/
+		     , B.BIZ_FORM_CD /*사업형태코드*/
+		     , IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', B.BIZ_FORM_CD) AS BIZ_FORM_CD_NM /*사업형태명*/
+		     , B.BIZ_TYPE_CD /*사업유형코드*/
+		     , IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', B.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM /*사업유형*/
+		     , B.BIZ_SCAL_CD /*사업규모코드*/
+			 , IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', B.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM /*사업규모명*/
+		     , B.BIZ_ORGT_NM /*사업원문명*/
+		     , B.BIZ_KRN_NM /*사업국문명*/
+		     , B.KOFF_PRNMNT_YMD /*착수예정일자*/
+		     , CAST(CAST(B.KOFF_PRNMNT_YMD AS DATE) AS TEXT) AS KOFF_PRNMNT_YMD_NM /*착수예정일자*/
+		     , B.CERT_VLD_TYPE_CD /*인증유효유형코드*/
+		     , IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', B.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM /*인증유효유형명*/
+		     , B.CERT_VLD_BGNG_YMD /*인증유효시작일자*/
+		     , B.CERT_VLD_END_YMD /*인증유효종료일자*/
+		     , CAST(CAST(B.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(B.CERT_VLD_END_YMD AS DATE) AS TEXT) AS CERT_VLD_YMD /*인증유효기간*/
+		     , COALESCE(B.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY
+		     , COALESCE(B.ATCNVR_RDCQTY, 0) || ' ' || IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', 'RUC0001') AS ATCNVR_RDCQTY_NM /*환산후감축량*/
+		     , (
+					SELECT BIZ_FLD_KORN_NM 
+					  FROM IRSUSER.COM_BIZ_FLD_BSC 
+					 WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			   ) || ' > ' || 
+			   (
+					SELECT BIZ_DTLS_FLD_KORN_NM 
+				 	  FROM IRSUSER.COM_BIZ_FLD_DTL 
+					 WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+					   AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			   ) AS BIZ_FLD_CD_SNM
+			 , B.BPLC_NM /*사업장명*/
+			 , B.BIZ_ENFC_PLC_NM /*사업시행장소명*/
+			 , B.CMPTNC_INST_MNG_NO /*관할기관관리번호*/
+		  FROM IRSUSER.IRB_BSC A
+		 INNER JOIN IRSUSER.IRB_DTL B
+		    ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+		   AND A.PRCS_DGR = B.BIZ_DGR
+		  LEFT OUTER JOIN IRSUSER.IRB_PRGRM_DTL C
+            ON A.BIZ_MNG_NO = C.BIZ_MNG_NO
+		 WHERE 1=1
+		   AND A.BIZ_MNG_NO = #{bizMngNo}
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 상세조회(방법론) -->
+	<select id="selectPgmMhdlgList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectPgmMhdlgList */
+		SELECT A.BIZ_MNG_NO
+		     , A.PRCS_DGR
+		     , C.MHDLG_MGNO 
+			 , E.MHDLG_ORGT_NM 
+			 , E.MHDLG_KRN_NM 
+		  FROM IRSUSER.IRB_BSC A
+		 INNER JOIN IRSUSER.IRB_DTL B
+		    ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+		   AND A.PRCS_DGR = B.BIZ_DGR
+		 INNER JOIN IRSUSER.IRB_MHDLG_DTL C
+			ON B.BIZ_MNG_NO = C.BIZ_MNG_NO
+		   AND B.BIZ_DGR = C.BIZ_DGR
+		 INNER JOIN IRSUSER.MHDLG_BSC D
+			ON C.MHDLG_MGNO = D.MHDLG_MGNO 
+		 INNER JOIN IRSUSER.MHDLG_DTL E
+			ON D.MHDLG_MGNO = E.MHDLG_MGNO 
+		   AND D.VLD_MHDLG_DGR = E.MHDLG_DGR
+		 WHERE 1=1
+		   AND A.BIZ_MNG_NO = #{bizMngNo}
+		   AND A.DEL_YN = 'N'
+		   AND B.DEL_YN = 'N'
+		   AND C.DEL_YN = 'N'
+		   AND D.DEL_YN = 'N'
+		   AND E.DEL_YN = 'N'
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 상세조회(심의결과) -->
+	<select id="selectPrvtDlbrRslt" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectPrvtDlbrRslt */
+		SELECT A.PRVT_MGNO
+			 , A.PRVT_DGR
+			 , A.DLBR_TYPE_CD
+			 , IRSUSER.FN_GET_CODENM('PRVT_DLBR_TYPE_CD', A.DLBR_TYPE_CD) AS DLBR_TYPE_CD_NM
+			 , TO_CHAR(A.DLBR_DT, 'YYYY-MM-DD') AS DLBR_DT
+			 , A.DLBR_OPNN
+			 , A.DLBR_FLMNO
+		  FROM IRSUSER.INFO_PRVT_DLBR_DTL A
+		 WHERE PRVT_MGNO = #{prvtMgno}
+		   AND PRVT_DGR = CAST(#{prvtDgr} AS NUMERIC)
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 상세조회(사업 비공개 신청 정보) -->
+	<select id="selectPrvtAplyInfo" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectPrvtAplyInfo */
+		SELECT A.PRVT_MGNO
+		     , A.PRVT_DGR
+		     , A.PRVT_TRGT_CL_CD
+		     , IRSUSER.FN_GET_CODENM('PRVT_TRGT_CL_CD', A.PRVT_TRGT_CL_CD) AS PRVT_TRGT_CL_CD_NM
+		     , A.BIZ_PLND_PRVT_YN
+		     , A.PRVT_APLY_RSN
+		     , A.ETC_DATA_FLMNO
+		     , A.APLY_TYPE_CD
+		     , A.PRCS_TYPE_CD
+		  FROM IRSUSER.INFO_PRVT_DTL A
+		 WHERE PRVT_MGNO = #{prvtMgno}
+		   AND PRVT_DGR = CAST(#{prvtDgr} AS NUMERIC)
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 문서보완상세조회(사업 비공개 신청 정보) -->
+	<select id="selectInfoPrvtAplyDtl" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectInfoPrvtAplyDtl */
+		SELECT A.PRVT_MGNO
+		     , A.PRVT_DGR
+		     , '' AS INST_MGNO
+		     , A.PRVT_TRGT_CL_CD
+		     , '' AS BIZ_MNG_NO
+		     , A.BIZ_PLND_PRVT_YN
+		     , A.PRVT_APLY_RSN
+		     , '' AS CMPTNC_INST_MNG_NO
+		     , A.ETC_DATA_FLMNO
+		  FROM IRSUSER.INFO_PRVT_DTL A
+		 WHERE PRVT_MGNO = #{prvtMgno}
+		   AND PRVT_DGR = CAST(#{prvtDgr} AS NUMERIC)
+	</select>
+	
+	<select id="selectPrvtMgno" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectPrvtMgno */
+		SELECT 'IP'
+		       || SUBSTR(CAST(EXTRACT('YEAR' FROM CURRENT_TIMESTAMP) AS TEXT), 3, 2)
+		       || LPAD(CAST(COALESCE((CAST(SUBSTR(MAX(PRVT_MGNO), 5, 6) AS NUMERIC)+1),1) AS TEXT), 6, '0')
+		       AS PRVT_MGNO
+		  FROM IRSUSER.INFO_PRVT_BSC
+		 WHERE 1=1
+		   AND PRVT_MGNO LIKE CONCAT('IP', SUBSTR(CAST(EXTRACT('YEAR' FROM CURRENT_TIMESTAMP) AS TEXT), 3, 2), '%')
+	</select>
+	
+	<select id="selectInfoPrvtPrvtDgr" resultType="int" parameterType="map">
+		/* BizBizPrvtMapper.selectInfoPrvtPrvtDgr */
+		SELECT CAST(COALESCE(MAX(PRVT_DGR), 0) + 1 AS TEXT) AS PRVT_DGR
+		  FROM IRSUSER.INFO_PRVT_DTL
+		 WHERE 1=1
+		   AND PRVT_MGNO = #{prvtMgno}
+	</select>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 등록 -->
+	<insert id="insertBizPrvt" parameterType="map">
+		/* BizBizPrvtMapper.insertBizPrvt */
+		INSERT
+		  INTO IRSUSER.INFO_PRVT_BSC
+			 (
+			 	  PRVT_MGNO
+				, TYPE_CD
+				, DATA_DGR
+				, PRCS_DGR
+				, VLD_PRVT_DGR
+				, DEL_YN
+				, RGTR_ID
+				, REG_DT
+			 )
+		VALUES
+			 (    #{prvtMgno}
+				, ''
+				, 0
+				, #{prcsDgr}
+				, 0
+				, 'N'
+				, #{auth.sUserId}
+				, CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 등록(상세) -->
+	<insert id="insertBizPrvtDetail" parameterType="map">
+		/* BizBizPrvtMapper.insertBizPrvtDetail */
+		INSERT INTO IRSUSER.INFO_PRVT_DTL
+			 (
+			 	  PRVT_MGNO
+			 	, PRVT_DGR
+			 	, INST_MGNO
+			 	, USER_ID
+			 	, PRVT_TRGT_CL_CD
+			 	, BIZ_MNG_NO
+			 	, BIZ_PLND_PRVT_YN
+			 	, PRVT_APLY_RSN
+			 	, ETC_DATA_FLMNO
+			 	, CMPTNC_INST_MNG_NO
+			 	, APLY_TYPE_CD
+			 	, APLY_YMD
+			 	, PRCS_TYPE_CD
+			 	, PRCS_YMD
+			 	, SMS_TRSM_YN
+			 	, DEL_YN
+			 	, RGTR_ID
+			 	, REG_DT
+			 	, TYPE_CD
+			 	, DATA_DGR
+			 )
+		VALUES
+			 (    #{prvtMgno}
+				, #{prvtDgr}
+				, #{instMgno}
+				, #{auth.sUserId}
+				, #{prvtTrgtClCd}
+				, #{bizMngNo}
+				, #{bizPlndPrvtYn}
+				, #{prvtAplyRsn}
+				, #{etcDataFlmno}
+				, #{cmptncInstMngNo}
+				, 'PAC0001'
+				, TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+				, 'PPC0001'
+				, TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+				, 'Y'
+				, 'N'
+				, #{auth.sUserId}
+				, CURRENT_TIMESTAMP
+				, ''
+				, 0
+			 )
+	</insert>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 등록(상세) -->
+	<insert id="insertBizPrvtReDocDetail" parameterType="map">
+		/* BizBizPrvtMapper.insertBizPrvtReDocDetail */
+		INSERT INTO IRSUSER.INFO_PRVT_DTL
+			 (
+			 	  PRVT_MGNO
+			 	, PRVT_DGR
+			 	, INST_MGNO
+			 	, USER_ID
+			 	, PRVT_TRGT_CL_CD
+			 	, BIZ_MNG_NO
+			 	, BIZ_PLND_PRVT_YN
+			 	, PRVT_APLY_RSN
+			 	, ETC_DATA_FLMNO
+			 	, CMPTNC_INST_MNG_NO
+			 	, APLY_TYPE_CD
+			 	, APLY_YMD
+			 	, PRCS_TYPE_CD
+			 	, PRCS_YMD
+			 	, SMS_TRSM_YN
+			 	, DEL_YN
+			 	, RGTR_ID
+			 	, REG_DT
+			 	, TYPE_CD
+			 	, DATA_DGR
+			 )
+			 SELECT #{prvtMgno} AS PRVT_MGNO
+			      , CAST(#{prvtDgr} AS NUMERIC) AS PRVT_DGR
+			      , #{instMgno} AS INST_MGNO
+			      , #{auth.sUserId} AS USER_ID
+			      , #{prvtTrgtClCd} AS PRVT_TRGT_CL_CD
+			      , #{bizMngNo} AS BIZ_MNG_NO
+			      , #{bizPlndPrvtYn} AS BIZ_PLND_PRVT_YN
+			 	  , #{prvtAplyRsn} AS PRVT_APLY_RSN
+			 	  , #{etcDataFlmno} AS ETC_DATA_FLMNO
+			 	  , #{cmptncInstMngNo} AS CMPTNC_INST_MNG_NO
+			 	  , 'PAC0001' AS APLY_TYPE_CD
+			 	  , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd') AS APLY_YMD
+			 	  , 'PPC0001' AS PRCS_TYPE_CD
+			 	  , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd') AS PRCS_YMD
+			 	  , 'Y' AS SMS_TRSM_YN
+			 	  , 'N' AS DEL_YN
+			 	  , #{auth.sUserId} AS RGTR_ID
+			 	  , CURRENT_TIMESTAMP AS REG_DT
+			 	  , (SELECT TYPE_CD FROM IRSUSER.INFO_PRVT_BSC WHERE PRVT_MGNO = #{prvtMgno}) AS TYPE_CD
+			 	  , (SELECT DATA_DGR FROM IRSUSER.INFO_PRVT_BSC WHERE PRVT_MGNO = #{prvtMgno}) AS DATA_DGR
+			   FROM IRSUSER.INFO_PRVT_DTL
+			  WHERE 1=1
+				AND PRVT_MGNO = #{prvtMgno}
+				AND PRVT_DGR = CAST(#{bfPrvtDgr} AS NUMERIC)
+	</insert>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 수정 -->
+	<update id="updateBizPrvt" parameterType="map">
+		/* BizBizPrvtMapper.updateBizPrvt */
+		UPDATE IRSUSER.INFO_PRVT_BSC
+		   SET PRCS_DGR = #{prcsDgr}
+		     , MDFR_ID = #{auth.sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE PRVT_MGNO = #{prvtMgno}
+	</update>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 사업공통조회 -->
+	<select id="selectBizSrhList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 심의결과조회 -->
+	<select id="selectBizPrvtRvwRslt" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPrvtRvwRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 문서보완등록 -->
+	<insert id="insertBizPrvtDocSplmnt" parameterType="map">
+		/* BizBizPrvtMapper.insertBizPrvtDocSplmnt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 이력목록조회 -->
+	<select id="selectBizPrvtHistList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPrvtHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 - 보고서출력 -->
+	<select id="selectBizPrvtRpt" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPrvtRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 > 사업 불러오기 검색 팝업 - 총건수 조회 -->
+	<select id="selectBizPopListCnt" resultType="int" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPopListCnt */
+		SELECT COUNT(*) as CNT
+		  FROM IRSUSER.IRB_BSC A
+		 INNER JOIN IRSUSER.IRB_DTL B
+			ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+		   AND A.PRCS_DGR = B.BIZ_DGR
+	LEFT OUTER JOIN IRSUSER.IRB_EXCR_DTL C
+			ON B.BIZ_MNG_NO = C.BIZ_MNG_NO
+		   AND B.BIZ_DGR = C.BIZ_DGR
+		   AND B.INST_MGNO = C.INST_MGNO
+	LEFT OUTER JOIN IRSUSER.INST_BSC D
+			ON C.INST_MGNO = D.INST_MGNO
+		 WHERE 1=1
+		   AND A.BIZ_RLS_YN = 'N'
+		   AND A.DEL_YN = 'N'
+		   AND B.DEL_YN = 'N'
+		   <if test="srhAgreeClausCd != null and !srhAgreeClausCd.equals('')">
+		   AND B.AGREE_CLAUS_CD = #{srhAgreeClausCd}
+		   </if>
+		   <if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+		   AND B.BIZ_FORM_CD = #{srhBizFormCd}
+		   </if>
+		   <if test="srhBizNm != null and !srhBizNm.equals('')">
+		   AND (B.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR B.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+		   </if>
+		   <if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND D.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+		   </if>
+	</select>
+	
+	<!-- [사용자] 정보공개관리 > 사업비공개관리 > 사업 불러오기 검색 팝업 - 목록조회 -->
+	<select id="selectBizPopList" resultType="egovMap" parameterType="map">
+		/* BizBizPrvtMapper.selectBizPopList */
+		SELECT (COUNT(*) OVER()) - (U.RN-1) AS NO
+			 , U.BIZ_MNG_NO
+			 , IRSUSER.FN_GET_CODENM('APLY_CL_CD', U.APLY_CL_CD) AS APLY_CL_CD_NM
+			 , IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM
+			 , IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', U.BIZ_FORM_CD) AS BIZ_FORM_CD_NM
+			 , CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+			        THEN '[' ||
+			             (
+							SELECT T.BIZ_ORGT_NM FROM (
+								SELECT 
+									BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+								FROM IRSUSER.IRB_PRGRM_DTL 
+								WHERE 1=1
+								AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+							) T
+							WHERE T.RN = 1 
+						 ) || '] ' || U.BIZ_ORGT_NM 	
+					ELSE U.BIZ_ORGT_NM 	
+				END AS BIZ_ORGT_NM
+			 , CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+					THEN '[' || 
+						 (
+							SELECT T.BIZ_KRN_NM FROM (
+								SELECT 
+									BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+								FROM IRSUSER.IRB_PRGRM_DTL 
+								WHERE 1=1
+								AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+							) T
+							WHERE T.RN = 1 
+						 ) || '] ' || U.BIZ_KRN_NM
+					ELSE U.BIZ_KRN_NM 	
+				END AS BIZ_KRN_NM
+			  , IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', U.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			  , IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', U.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM
+			  , '선택' AS BTN_NM
+		   FROM (
+					SELECT ROW_NUMBER() OVER() AS RN
+						 , V.*
+					  FROM (
+							SELECT A.BIZ_MNG_NO
+							     , B.APLY_CL_CD
+							     , B.AGREE_CLAUS_CD
+							     , B.BIZ_FORM_CD
+							     , B.BIZ_ORGT_NM
+							     , B.BIZ_KRN_NM
+							     , B.BIZ_TYPE_CD
+							     , B.BIZ_SCAL_CD
+							     , B.PRGRM_MNG_NO
+							  FROM IRSUSER.IRB_BSC A
+							 INNER JOIN IRSUSER.IRB_DTL B
+								ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+							   AND A.PRCS_DGR = B.BIZ_DGR
+		 			    LEFT OUTER JOIN IRSUSER.IRB_EXCR_DTL C
+								ON B.BIZ_MNG_NO = C.BIZ_MNG_NO
+								AND B.BIZ_DGR = C.BIZ_DGR
+								AND B.INST_MGNO = C.INST_MGNO
+						LEFT OUTER JOIN IRSUSER.INST_BSC D
+								ON C.INST_MGNO = D.INST_MGNO
+							 WHERE 1=1
+							   AND A.BIZ_RLS_YN = 'N'
+							   AND A.DEL_YN = 'N'
+							   AND B.DEL_YN = 'N'
+							   AND NOT EXISTS (SELECT BIZ_MNG_NO
+							                     FROM IRSUSER.INFO_PRVT_DTL
+							                    WHERE 1=1
+							                      AND BIZ_MNG_NO = A.BIZ_MNG_NO
+							                    )
+							   <if test="srhAgreeClausCd != null and !srhAgreeClausCd.equals('')">
+							   AND B.AGREE_CLAUS_CD = #{srhAgreeClausCd}
+							   </if>
+							   <if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+							   AND B.BIZ_FORM_CD = #{srhBizFormCd}
+							   </if>
+							   <if test="srhBizNm != null and !srhBizNm.equals('')">
+							   AND (B.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR B.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+							   </if>
+							   <if test="srhBzentNm != null and !srhBzentNm.equals('')">
+							   AND D.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+							   </if>
+				<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<insert id="insertAdmInfoPrvtHstry" parameterType="map">
+		INSERT INTO IRSUSER.INFO_PRVT_HSTRY (
+			 PRVT_MGNO
+			,PRVT_DGR
+			,HSTRY_TYPE_CD
+			,HSTRY_RSLT_CD
+			,HSTRY_YMD
+			,HSTRY_DTL_RSN
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+		) VALUES (
+			 #{prvtMgno}
+			,CAST(#{prvtDgr} AS NUMERIC)
+			,#{hstryTypeCd}
+			,#{hstryRsltCd}
+			,TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,#{hstryDtlRsn}
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP
+		)
+	</insert>
+	
+</mapper>

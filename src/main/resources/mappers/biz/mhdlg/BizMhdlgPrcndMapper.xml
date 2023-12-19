@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.mhdlg.mapper.BizMhdlgPrcndMapper">
+	
+	<!-- [공통] 방법론관리 > 방법론 현황 관리 - 방법론목록조회 총건수 조회 -->
+	<select id="selectMhdlgPrcndListCnt" resultType="int" parameterType="map">
+		/* BizMhdlgPrcndMapper.selectMhdlgPrcndListCnt */
+		SELECT COUNT(*)
+		  FROM ( SELECT A.MHDLG_MGNO  
+					  , A.MHDLG_GROUP_MGNO
+					  , A.REG_RSN_CD
+					  , E.MHDLG_UNQNO
+					  , B.MHDLG_DGR
+					  , B.INST_MGNO
+					  , B.AGREE_CLAUS_CD
+					  , B.MHDLG_ORGT_NM
+					  , B.MHDLG_KRN_NM
+					  , B.VLD_BGNG_YMD
+					  , B.APLY_CL_CD
+					  , B.EXPLN_FLMNO
+					  , A.RVSN_DGR 
+					  , D.BZENT_NM
+				   FROM irsuser.MHDLG_BSC A
+				  INNER JOIN irsuser.MHDLG_DTL B
+					 ON A.MHDLG_MGNO  = A.MHDLG_MGNO
+				  INNER JOIN ( SELECT A.MHDLG_GROUP_MGNO
+						  		 	, MAX(A.RVSN_DGR) AS RVSN_DGR 
+							  	 FROM irsuser.MHDLG_BSC A
+							 	INNER JOIN irsuser.MHDLG_DTL B
+							   	   ON B.MHDLG_MGNO = A.MHDLG_MGNO
+							   	WHERE B.VLD_YN = 'Y'
+							 	GROUP BY A.MHDLG_GROUP_MGNO
+							 ) C  
+					 ON C.MHDLG_GROUP_MGNO = A.MHDLG_GROUP_MGNO
+				  INNER JOIN irsuser.INST_BSC D                    
+					 ON D.INST_MGNO = B.INST_MGNO
+				  INNER JOIN ( SELECT T1.MHDLG_MGNO
+				  			  	    , T1.MHDLG_DGR
+				  			  	    , T1.MHDLG_UNQNO
+				  			  	    , T2.BIZ_FLD_KORN_NM 
+				  			  	    , T3.BIZ_DTLS_FLD_KORN_NM 
+				  			  	    , T1.BIZ_FLD_CD_MGNO
+				  			  	    , T1.BIZ_FLD_DTLS_CD_MGNO
+				  				 FROM irsuser.MHDLG_FLD_DTL T1
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_BSC T2
+				  			       ON T2.BIZ_FLD_CD_MGNO =T1.BIZ_FLD_CD_MGNO
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_DTL T3
+				  			       ON T3.BIZ_FLD_DTLS_CD_MGNO = T1.BIZ_FLD_DTLS_CD_MGNO  
+				 			  ) AS E 
+				     ON E.mhdlg_mgno = B.mhdlg_mgno
+				    AND E.mhdlg_dgr  = B.mhdlg_dgr
+				  WHERE A.RVSN_DGR = C.RVSN_DGR
+					AND A.MHDLG_MGNO  = B.MHDLG_MGNO
+					AND A.PRCS_DGR = B.MHDLG_DGR
+  			<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+					AND B.APLY_CL_CD = #{srhAplyClCd}
+			</if>
+			<if test="srhMhdlgPrcndTypeCd != null and !srhMhdlgPrcndTypeCd.equals('')">
+					AND A.REG_RSN_CD = #{srhMhdlgPrcndTypeCd}
+			</if>
+			<if test="srhMhdlgNm != null and !srhMhdlgNm.equals('')">
+					AND B.MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%')		
+					 OR B.MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%')		
+			</if>												
+			<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+					AND E.BIZ_FLD_CD_MGNO = LTRIM(#{srhBizFldCd},'0')
+			</if>
+			<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+					AND E.BIZ_FLD_DTLS_CD_MGNO = LTRIM(#{srhBizDtlsFldCd},'0')
+			</if>
+			<if test="srhMhdlgUnqno != null and !srhMhdlgUnqno.equals('')">
+					AND A.MHDLG_UNQNO LIKE CONCAT('%', #{srhMhdlgUnqno}, '%') 
+			</if>
+		  ) V
+	</select>
+	
+	<!-- [공통] 방법론관리 > 방법론 현황 관리 - 방법론목록조회 -->
+	<select id="selectMhdlgPrcndList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgPrcndMapper.selectMhdlgPrcndList */
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		SELECT '' AS CHK
+			 , V.MHDLG_MGNO  
+			 , V.MHDLG_GROUP_MGNO
+			 , irsuser.FN_GET_CODENM('MHDLG_PRCND_TYPE_CD',V.REG_RSN_CD) AS REG_RSN_NM		/* 제정/개정 명 */
+			 , V.REG_RSN_CD
+			 , CAST( V.MHDLG_DGR AS TEXT) AS MHDLG_DGR
+			 , V.MHDLG_UNQNO
+			 , V.INST_MGNO
+			 , irsuser.FN_GET_CODENM('AGREE_CLAUS_CD', V.AGREE_CLAUS_CD) AS AGREE_CLAUS_NM	/* 협정조항명 */
+			 , V.AGREE_CLAUS_CD
+			 , irsuser.FN_GET_CODENM('MHDLG_APLY_CL_CD', V.APLY_CL_CD)	AS APLY_TYPE_NM		/* 신청구분명 */
+			 , V.APLY_CL_CD
+			 , V.MHDLG_ORGT_NM
+			 , V.MHDLG_KRN_NM
+			 , V.VLD_BGNG_YMD
+			 , V.EXPLN_FLMNO
+			 , v.RVSN_DGR
+			 , V.BZENT_NM
+			 , V.BIZ_FLD_KORN_NM || '-' || V.BIZ_DTLS_FLD_KORN_NM AS MHDLG_FLD_LIST_TEXT
+			 , CASE WHEN (SELECT COUNT(*) 
+					  				  FROM irsuser.com_file_group_bsc T1 
+					  				 INNER JOIN irsuser.com_file_dtl T2 
+					  				 	ON T2.file_group_mgno = T1.file_group_mgno 
+					  				 WHERE T2.file_group_mgno = V.EXPLN_FLMNO
+					  				   AND T2.del_yn = 'N') > 0 THEN 'Y'
+					  		 ELSE 'N'
+			   END AS IS_EXPLN_FLMNO_YN
+		  FROM ( SELECT A.MHDLG_MGNO  
+					  , A.MHDLG_GROUP_MGNO
+					  , A.REG_RSN_CD
+					  , E.MHDLG_UNQNO
+					  , B.MHDLG_DGR
+					  , B.INST_MGNO
+					  , B.AGREE_CLAUS_CD
+					  , B.MHDLG_ORGT_NM
+					  , B.MHDLG_KRN_NM
+					  , B.VLD_BGNG_YMD
+					  , B.APLY_CL_CD
+					  , B.EXPLN_FLMNO
+					  , A.RVSN_DGR 
+					  , D.BZENT_NM
+					  , E.BIZ_FLD_KORN_NM
+					  , E.BIZ_DTLS_FLD_KORN_NM
+				   FROM irsuser.MHDLG_BSC A
+				  INNER JOIN irsuser.MHDLG_DTL B
+					 ON A.MHDLG_MGNO  = A.MHDLG_MGNO
+				  INNER JOIN ( SELECT A.MHDLG_GROUP_MGNO
+						  		 	, MAX(A.RVSN_DGR) AS RVSN_DGR 
+							  	 FROM irsuser.MHDLG_BSC A
+							 	INNER JOIN irsuser.MHDLG_DTL B
+							   	   ON B.MHDLG_MGNO = A.MHDLG_MGNO
+							   	WHERE B.VLD_YN = 'Y'
+							 	GROUP BY A.MHDLG_GROUP_MGNO
+							 ) C  
+					 ON C.MHDLG_GROUP_MGNO = A.MHDLG_GROUP_MGNO
+				  INNER JOIN irsuser.INST_BSC D                    
+					 ON D.INST_MGNO = B.INST_MGNO
+				  INNER JOIN ( SELECT T1.MHDLG_MGNO
+				  			  	    , T1.MHDLG_DGR
+				  			  	    , T1.MHDLG_UNQNO
+				  			  	    , T2.BIZ_FLD_KORN_NM 
+				  			  	    , T3.BIZ_DTLS_FLD_KORN_NM 
+			  			  	        , T1.BIZ_FLD_CD_MGNO
+				  			  	    , T1.BIZ_FLD_DTLS_CD_MGNO
+				  				 FROM irsuser.MHDLG_FLD_DTL T1
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_BSC T2
+				  			       ON T2.BIZ_FLD_CD_MGNO =T1.BIZ_FLD_CD_MGNO
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_DTL T3
+				  			       ON T3.BIZ_FLD_DTLS_CD_MGNO = T1.BIZ_FLD_DTLS_CD_MGNO  
+				 			  )E 
+				     ON E.mhdlg_mgno = B.mhdlg_mgno
+				    AND E.mhdlg_dgr  = B.mhdlg_dgr
+				  WHERE A.RVSN_DGR = C.RVSN_DGR
+					AND A.MHDLG_MGNO  = B.MHDLG_MGNO
+					AND A.PRCS_DGR = B.MHDLG_DGR
+  			<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+					AND B.APLY_CL_CD = #{srhAplyClCd}
+			</if>
+			<if test="srhMhdlgPrcndTypeCd != null and !srhMhdlgPrcndTypeCd.equals('')">
+					AND A.REG_RSN_CD = #{srhMhdlgPrcndTypeCd}
+			</if>
+			<if test="srhMhdlgNm != null and !srhMhdlgNm.equals('')">
+					AND B.MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%')		
+					 OR B.MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%')		
+			</if>												
+			<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+					AND E.BIZ_FLD_CD_MGNO = LTRIM(#{srhBizFldCd},'0')
+			</if>
+			<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+					AND E.BIZ_FLD_DTLS_CD_MGNO = LTRIM(#{srhBizDtlsFldCd},'0')
+			</if>
+			<if test="srhMhdlgUnqno != null and !srhMhdlgUnqno.equals('')">
+					AND A.MHDLG_UNQNO LIKE CONCAT('%', #{srhMhdlgUnqno}, '%') 
+			</if>
+				  ORDER BY B.MDFCN_DT DESC
+		  ) V
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 방법론상세조회 -->
+	<select id="selectMhdlgPrcndDetail" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgPrcndDetail */
+		SELECT A.MHDLG_MGNO
+			 , A.MHDLG_GROUP_MGNO
+			 , CAST(A.RVSN_DGR AS TEXT) 
+			 , A.REG_RSN_CD
+			 , irsuser.FN_GET_CODENM('MHDLG_PRCND_TYPE_CD', A.REG_RSN_CD) AS REG_RSN_CD_NM
+			 , A.MHDLG_UNQNO
+			 , A.TYPE_CD
+		--	 , irsuser.FN_GET_CODENM('', A.TYPE_CD)
+			 , CAST(A.DATA_DGR AS TEXT)
+			 , CAST(A.PRCS_DGR AS TEXT)
+			 , CAST(A.VLD_MHDLG_DGR AS TEXT)
+			 , A.ADD_DATA_DMND_PSBLTY_YN
+			 , CAST(B.MHDLG_DGR AS TEXT)
+			 , B.DGR_REG_RSN_CD
+		--	 , irsuser.FN_GET_CODENM('', B.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+			 , B.VLD_YN
+			 , B.VLD_YMD
+			 , B.INST_MGNO
+			 , B.USER_ID
+			 , B.APLY_CL_CD
+			 , irsuser.FN_GET_CODENM('MHDLG_APLY_CL_CD', B.APLY_CL_CD) AS APLY_CL_CD_NM
+			 , B.AGREE_CLAUS_CD
+			 , irsuser.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM
+			 , B.MHDLG_ORGT_NM
+			 , B.MHDLG_KRN_NM
+			 , B.VLD_BGNG_YMD
+			 , B.PRPSD_FLMNO
+			 , B.BIZ_PLND_FLMNO
+			 , B.ETC_DATA_FLMNO
+			 , B.EXPLN_FLMNO
+			 , B.CMPTNC_INST_NO
+			 , B.APLY_TYPE_CD
+		--	 , irsuser.FN_GET_CODENM('', B.APLY_TYPE_CD) AS APLY_TYPE_CD_NM
+			 , B.APLY_YMD
+			 , B.PRCS_TYPE_CD
+			 , irsuser.FN_GET_CODENM('MHDLG_PRCS_TYPE_CD', B.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+			 , B.PRCS_YMD
+			 , B.ADD_DATA_TYPE_CD
+		--	 , irsuser.FN_GET_CODENM('',B.ADD_DATA_TYPE_CD) AS ADD_DATA_TYPE_CD_NM
+			 , B.ADD_DATA_PRCS_YMD 
+			 , CAST(B.RVW_SN AS TEXT)
+			 , CAST(B.DIC_DLBR_SN AS TEXT)
+			 , CAST(B.DLBR_SN AS TEXT)
+			 , B.REDD_PLUS_YN
+		  FROM irsuser.MHDLG_BSC A
+		 INNER JOIN irsuser.MHDLG_DTL B 
+			ON B.MHDLG_MGNO  = A.MHDLG_MGNO 
+		 WHERE 1=1
+		  AND B.MHDLG_MGNO  = #{mhdlgMgno}
+		  AND B.MHDLG_DGR  = CAST(#{mhdlgDgr} AS NUMERIC)
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 사업분야 목록 조회 -->
+	<select id="selectMhdlgFldList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectMhdlgFldList */
+		SELECT B.BIZ_FLD_CD_MGNO
+			 , B.BIZ_FLD_KORN_NM
+			 , C.BIZ_FLD_DTLS_CD_MGNO
+			 , C.BIZ_DTLS_FLD_KORN_NM
+			 , A.MHDLG_UNQNO
+			 , A.REDD_PLUS_YN
+			 , A.MHDLG_MGNO
+			 , CAST( A.MHDLG_DGR AS TEXT)
+			 , '' AS CHK
+		  FROM irsuser.MHDLG_FLD_DTL A
+		 INNER JOIN irsuser.COM_BIZ_FLD_BSC B
+		    ON B.BIZ_FLD_CD_MGNO = A.BIZ_FLD_CD_MGNO
+		 INNER JOIN irsuser.COM_BIZ_FLD_DTL C 
+		    ON C.BIZ_FLD_DTLS_CD_MGNO = A.BIZ_FLD_DTLS_CD_MGNO
+		   AND B.BIZ_FLD_CD_MGNO = C.BIZ_FLD_CD_MGNO
+		 WHERE A.MHDLG_MGNO = #{mhdlgMgno}
+	   	   AND A.MHDLG_DGR = CAST(#{mhdlgDgr} AS NUMERIC)
+	</select>
+	
+	<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 협정약정 목록 조회 -->
+	<select id="selectAgrStiplList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectAgrStiplList */
+		SELECT '' AS CHK
+			 , U.CNCLD_MGNO
+			 , CAST(U.CNCLD_DGR AS TEXT) AS CNCLD_DGR
+			 , U.CNCLD_ORGT_NM
+			 , U.CNCLD_KRN_NM
+			 , irsuser.FN_GET_CODENM('CNCLD_CL_CD', U.CNCLD_CL_CD) AS CNCLD_CL_CD_NM
+			 , CASE WHEN CAST(U.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+			 , U.SGNT_YMD
+			 , U.EFTVN_YMD
+			 , (
+				SELECT ARRAY_TO_STRING(ARRAY_AGG(T.NTN_NM), ', ') AS NM
+				  FROM (
+					    SELECT (
+					    		SELECT NTN_KORN_NM 
+					    		  FROM irsuser.COM_NTN_CD_BSC 
+					    		 WHERE IATA_NTN_CD = A.NTN_CD
+					    	    ) AS NTN_NM
+						  FROM irsuser.AGREE_STIPL_NTN_DTL A
+						 WHERE 1=1
+						   AND A.CNCLD_MGNO = U.CNCLD_MGNO
+						   AND A.CNCLD_DGR = U.CNCLD_DGR
+						   AND A.DEL_YN = 'N'
+						) T
+			  	) AS NTN_NM
+			 , U.MHDLG_MGNO
+			 , U.MHDLG_DGR
+		  FROM (
+				SELECT A.CNCLD_MGNO
+					 , A.CNCLD_DGR
+					 , A.CNCLD_ORGT_NM
+					 , A.CNCLD_KRN_NM
+					 , A.CNCLD_CL_CD
+					 , A.SGNT_YMD
+					 , A.EFTVN_YMD
+					 , B.MHDLG_MGNO 
+					 , B.MHDLG_DGR 
+				  FROM irsuser.AGREE_STIPL_BSC A
+				 INNER JOIN irsuser.AGREE_STIPL_MHDLG_REL B
+				    ON B.CNCLD_MGNO = A.CNCLD_MGNO
+				   AND B.CNCLD_DGR = A.CNCLD_DGR 
+				 WHERE 1=1
+				   AND A.DEL_YN = 'N'
+				   AND B.MHDLG_MGNO = #{mhdlgMgno}
+				   AND B.MHDLG_DGR = CAST(#{mhdlgDgr} AS NUMERIC)
+				   AND B.CNCLD_DGR = (SELECT MAX(CNCLD_DGR)
+				   						FROM irsuser.AGREE_STIPL_MHDLG_REL
+				   					   WHERE MHDLG_MGNO = #{mhdlgMgno}
+				   						 AND MHDLG_DGR = CAST(#{mhdlgDgr} AS NUMERIC)
+				   					)
+				 
+				) U
+	</select>
+	
+		<!-- [사용자] 방법론관리 > 방법론 신청 관리 - 문서재출이력 -->
+	<select id="selectRvsnHistoryList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgAplyMapper.selectRvsnHistoryList */
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+					SELECT CASE WHEN A.RVSN_DGR = 1 THEN '최초승인'
+								ELSE CAST(A.RVSN_DGR-1 AS TEXT) || '차 개정'
+						   END AS RVSN_DGR_NM
+						 , A.MHDLG_GROUP_MGNO
+						 , CAST( A.RVSN_DGR AS TEXT) AS RVSN_DGR
+						 , B.MHDLG_ORGT_NM 
+						 , B.MHDLG_KRN_NM
+						 , TO_CHAR(TO_DATE(B.VLD_BGNG_YMD,'yyyyMMdd'),'yyyy-MM-dd') as VLD_BGNG_YMD
+						 , B.MHDLG_MGNO
+						 , CAST( B.MHDLG_DGR AS TEXT) AS MHDLG_DGR 
+						 , CASE WHEN CAST(#{rvsnDgr} AS NUMERIC) = A.RVSN_DGR THEN '현재문서' 
+								ELSE '상세보기' END AS BTN_CTL
+					  FROM irsuser.MHDLG_BSC A
+					 INNER JOIN irsuser.MHDLG_DTL B
+						ON A.MHDLG_MGNO = B.MHDLG_MGNO 
+					 WHERE 1=1
+					   AND A.MHDLG_GROUP_MGNO = #{mhdlgGroupMgno}
+					   AND A.DEL_YN = 'N'
+					   AND B.DEL_YN = 'N'
+					   AND B.VLD_YN = 'Y'
+					 ORDER BY A.RVSN_DGR DESC
+			) V
+		) U
+	</select>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 사업분야 생성 -->
+	<update id="updateMhdlgDtl" parameterType="map">
+		UPDATE irsuser.MHDLG_DTL
+		   SET MHDLG_ORGT_NM = #{mhdlgOrgtNm}
+			 , MHDLG_KRN_NM = #{mhdlgKrnNm}
+			 , EXPLN_FLMNO = #{explnFlmno}
+			 , VLD_BGNG_YMD = #{vldBgngYmd}
+			 , REDD_PLUS_YN = #{reddPlusYn}
+			 , MDFR_ID = #{sUserId}
+			 , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE MHDLG_MGNO = #{mhdlgMgno}
+		   AND MHDLG_DGR = CAST( #{mhdlgDgr} AS NUMERIC)
+	</update>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 사업분야 삭제 -->
+	<delete id="deleteMhdlgFldDtl">
+		DELETE
+		  FROM irsuser.MHDLG_FLD_DTL
+		 WHERE MHDLG_MGNO = #{mhdlgMgno}
+		   AND MHDLG_DGR = CAST( #{mhdlgDgr} AS NUMERIC)
+		   AND BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+		   AND BIZ_FLD_DTLS_CD_MGNO = #{bizFldDtlsCdMgno}
+	</delete>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 사업분야 생성 -->
+	<insert id="insertMhdlgFldDtl" parameterType="map">
+		INSERT 
+		  INTO irsuser.MHDLG_FLD_DTL
+		     ( MHDLG_MGNO
+			 , MHDLG_DGR
+			 , BIZ_FLD_CD_MGNO
+			 , BIZ_FLD_DTLS_CD_MGNO
+			 , MHDLG_UNQNO
+			 , RGTR_ID
+			 , REG_DT
+			 , REDD_PLUS_YN
+			 )
+		VALUES
+			 ( #{mhdlgMgno}
+			 , CAST( #{mhdlgDgr} AS NUMERIC)
+			 , #{bizFldCdMgno}
+			 , #{bizFldDtlsCdMgno}
+			 , #{mhdlgUnqno}
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+		<choose>
+			<when test="reddPlusYn != null and !reddPlusYn.equals('')">
+			 , #{reddPlusYn}
+			</when>
+			<otherwise>
+			 , 'N'	
+			</otherwise>
+		</choose>
+			 )
+	</insert>
+	
+	<update id="updateMhdlgFldDtl">
+		UPDATE irsuser.MHDLG_FLD_DTL
+		   SET MDFR_ID = #{sUserId}
+			 , MDFCN_DT = CURRENT_TIMESTAMP
+			 , REDD_PLUS_YN = #{reddPlusYn}
+		 WHERE MHDLG_MGNO = #{mhdlgMgno}
+		   AND MHDLG_DGR = CAST ( #{mhdlgDgr} AS NUMERIC)
+		   AND BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+		   AND BIZ_FLD_DTLS_CD_MGNO = #{bizFldDtlsCdMgno}
+	</update>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 수정 - 방법론변경이력기본 생성 - [irsuser.MHLDG_CHG_HSTRY_BSC] -->
+	<insert id="insertMhdlgChgHstryBsc" parameterType="map">
+		<selectKey keyProperty="chgMgno" resultType="string" order="BEFORE">
+			/* BizMhdlgPrcndMapper.insertMhdlgChgHstryBsc.selectKey */
+			SELECT CONCAT( 'CM'
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(CHG_MGNO, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 10 - 2
+							   , '0'
+						   )
+				   )
+			  FROM irsuser.MHDLG_CHG_HSTRY_BSC
+			 WHERE MHDLG_MGNO = #{mhdlgMgno}
+			   AND MHDLG_DGR = CAST( #{mhdlgDgr} AS NUMERIC)
+		</selectKey>
+		/* BizMhdlgPrcndMapper.insertMhdlgChgHstryBsc */
+		INSERT
+		  INTO irsuser.MHDLG_CHG_HSTRY_BSC
+			 ( MHDLG_MGNO                  		/* 방법론관리번호 */
+			 , MHDLG_DGR                   		/* 방법론차수 */
+			 , CHG_MGNO                    		/* 변경관리번호 */
+			 , PRCS_USER_ID                		/* 처리사용자ID */
+			 , CHG_DT                      		/* 변경일시 */
+			 , DEL_YN                      		/* 삭제여부 */
+			 , CHG_PRCS_TYPE_CD            		/* 기관변경처리구분코드 */
+			 , RGTR_ID                     		/* 등록자ID */
+			 , REG_DT                      		/* 등록일시 */
+			 )
+		VALUES
+			 ( #{mhdlgMgno}               	 	/* 방법론관리번호 */
+			 , CAST( #{mhdlgDgr} AS NUMERIC)    /* 방법론차수 */
+			 , #{chgMgno}                  		/* 변경관리번호 */
+			 , #{sUserId}                  		/* 처리사용자ID */
+			 , CURRENT_TIMESTAMP           		/* 변경일시 */
+			 , 'N'                         		/* 삭제여부 */
+			 , #{chgPrcsTypeCd}            		/* 기관변경처리구분코드 */
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 수정 - 방법론변경이력상세 생성 - [irsuser.MHLDG_CHG_HSTRY_DTL] -->
+	<insert id="insertMhdlgChgHstryDtl" parameterType="map">
+		<selectKey keyProperty="chgArtclSn" resultType="int" order="BEFORE">
+			/* BizMhdlgPrcndMapper.insertMhdlgChgHstryDtl.selectKey */
+			SELECT COALESCE(MAX(CHG_ARTCL_SN), 0) + 1
+			  FROM irsuser.MHDLG_CHG_HSTRY_DTL
+		 	 WHERE MHDLG_MGNO = #{mhdlgMgno}
+		 	   AND MHDLG_DGR = CAST( #{mhdlgDgr} AS NUMERIC)
+		 	   AND CHG_MGNO = #{chgMgno}
+		</selectKey>
+		/* BizMhdlgPrcndMapper.insertMhdlgChgHstryDtl */
+		INSERT
+		  INTO irsuser.MHDLG_CHG_HSTRY_DTL
+			 ( MHDLG_MGNO                  /* 방법론관리번호 */
+			 , MHDLG_DGR                   /* 방법론관리번호 */
+			 , CHG_MGNO                    /* 변경관리번호 */
+			 , CHG_ARTCL_SN                /* 변경항목일련번호 */
+			 , CHG_ARTCL_NM                /* 변경항목명 */
+			 , BCHG_CN                     /* 변경전내용 */
+			 , ACHG_CN                     /* 변경후내용 */
+			 , DEL_YN                      /* 삭제여부 */
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{mhdlgMgno}
+			 , CAST ( #{mhdlgDgr} AS NUMERIC)
+			 , #{chgMgno}
+			 , #{chgArtclSn}
+			 , #{chgArtclNm}
+			 , #{bchgCn}
+			 , #{achgCn}
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론변경 전 상세 조회 -->
+	<select id="selectPreMhdlgDtl" resultType="egovMap" parameterType="map">
+		/* BizMhdlgPrcndMapper.selectPreMhdlgDtl */
+		SELECT MHDLG_ORGT_NM
+			 , MHDLG_KRN_NM
+			 , VLD_BGNG_YMD
+			 , EXPLN_FLMNO
+			 , REDD_PLUS_YN
+		  FROM irsuser.MHDLG_DTL
+		 WHERE MHDLG_MGNO = #{mhdlgMgno}
+		   AND MHDLG_DGR = CAST( #{mhdlgDgr} AS NUMERIC)
+	</select>
+
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 수정 이력 목록 총건수 조회 -->
+	<select id="selectMhdlgChgHstryListCnt" resultType="int" parameterType="map">
+		/* BizMhdlgPrcndMapper.selectMhdlgChgHstryListCnt */
+		SELECT COUNT(*)
+		  FROM (
+				SELECT 1
+				  FROM irsuser.MHDLG_CHG_HSTRY_BSC HB
+				 INNER JOIN irsuser.MHDLG_CHG_HSTRY_DTL HD
+				    ON HB.MHDLG_MGNO = HD.MHDLG_MGNO
+				   AND HB.MHDLG_DGR = HD.MHDLG_DGR
+				   AND HB.CHG_MGNO = HD.CHG_MGNO
+				 WHERE HB.MHDLG_MGNO = #{mhdlgMgno}
+				   AND HB.MHDLG_DGR = CAST ( #{mhdlgDgr} AS NUMERIC)
+				 GROUP BY HB.MHDLG_MGNO, HB.MHDLG_DGR, HB.CHG_MGNO, HB.CHG_PRCS_TYPE_CD, HB.CHG_DT
+		  ) U
+	</select>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 수정 이력 목록 조회 -->
+	<select id="selectMhdlgChgHstryList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* BizMhdlgPrcndMapper.selectInstChgHstryList */
+		SELECT HB.MHDLG_MGNO
+			 , HB.CHG_MGNO
+			 , irsuser.fn_get_codenm('CHG_PRCS_TYPE_CD', HB.CHG_PRCS_TYPE_CD) AS CHG_PRCS_TYPE_CD
+			 , ARRAY_TO_STRING(ARRAY_AGG(DISTINCT (HD.CHG_ARTCL_NM)),  ', ') AS CHG_ARTCL_NM -->
+			 , TO_CHAR(HB.CHG_DT, 'yyyyMMddHHmmss') AS CHG_DT
+		  FROM irsuser.MHDLG_CHG_HSTRY_BSC HB
+		 INNER JOIN irsuser.MHDLG_CHG_HSTRY_DTL HD
+		    ON HB.MHDLG_MGNO = HD.MHDLG_MGNO
+		   AND HB.MHDLG_DGR = HD.MHDLG_DGR
+		   AND HB.CHG_MGNO = HD.CHG_MGNO
+		 WHERE HB.MHDLG_MGNO = #{mhdlgMgno}
+		   AND HB.MHDLG_DGR = CAST ( #{mhdlgDgr} AS NUMERIC)
+		 GROUP BY HB.MHDLG_MGNO,HB.MHDLG_DGR, HB.CHG_MGNO, HB.CHG_PRCS_TYPE_CD, HB.CHG_DT
+		 ORDER BY HB.CHG_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [사용자] 방법론관리 > 방법론현황 > 방법론 수정 이력 상세 목록 조회 -->
+	<select id="selectMhdlgChgHstryDtlList" resultType="egovMap" parameterType="map">
+		/* BizMhdlgPrcndMapper.selectMhdlgChgHstryDtlList */
+		SELECT HD.CHG_ARTCL_NM
+			 , HD.BCHG_CN
+			 , HD.ACHG_CN
+			 , COALESCE(HD.FILE_TYPE_CL_CD, '') AS FILE_TYPE_CL_CD		/* 파일유형구분코드 */
+			 , HD.FILE_YN												/* 파일여부 */
+			 , ROW_NUMBER() OVER(ORDER BY HD.CHG_ARTCL_SN) AS NO
+		  FROM irsuser.MHDLG_CHG_HSTRY_DTL HD
+		 WHERE HD.MHDLG_MGNO = #{mhdlgMgno}
+		   AND HD.MHDLG_DGR = CAST(#{mhdlgDgr} AS NUMERIC)
+		   AND HD.CHG_MGNO = #{chgMgno}
+	</select>
+	
+	<select id="selectMhdlgPrcndExcel" resultType="egovMap" parameterType="map"> 
+	<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		SELECT V.MHDLG_ORGT_NM
+			 , V.MHDLG_KRN_NM
+			 , irsuser.FN_GET_CODENM('MHDLG_PRCND_TYPE_CD',V.REG_RSN_CD) AS REG_RSN_NM		/* 제정/개정 명 */
+			 , irsuser.FN_GET_CODENM('AGREE_CLAUS_CD', V.AGREE_CLAUS_CD) AS AGREE_CLAUS_NM	/* 협정조항명 */
+			 , V.BIZ_FLD_KORN_NM || '-' || V.BIZ_DTLS_FLD_KORN_NM AS MHDLG_FLD_LIST_TEXT
+			 , V.MHDLG_UNQNO
+			 , V.VLD_BGNG_YMD
+			 , irsuser.FN_GET_CODENM('MHDLG_APLY_CL_CD', V.APLY_CL_CD) AS APLY_CL_NM	/* 협정조항명 */
+			 , V.BZENT_NM AS GOV_BZENT_NM
+		  FROM ( SELECT A.REG_RSN_CD
+					  , E.MHDLG_UNQNO
+					  , B.AGREE_CLAUS_CD
+					  , B.MHDLG_ORGT_NM
+					  , B.MHDLG_KRN_NM
+					  , B.VLD_BGNG_YMD
+					  , B.APLY_CL_CD 
+					  , D.BZENT_NM
+					  , E.BIZ_FLD_KORN_NM
+					  , E.BIZ_DTLS_FLD_KORN_NM
+				   FROM irsuser.MHDLG_BSC A
+				  INNER JOIN irsuser.MHDLG_DTL B
+					 ON A.MHDLG_MGNO  = A.MHDLG_MGNO
+				  INNER JOIN ( SELECT A.MHDLG_GROUP_MGNO
+						  		 	, MAX(A.RVSN_DGR) AS RVSN_DGR 
+							  	 FROM irsuser.MHDLG_BSC A
+							 	INNER JOIN irsuser.MHDLG_DTL B
+							   	   ON B.MHDLG_MGNO = A.MHDLG_MGNO
+							   	WHERE B.VLD_YN = 'Y'
+							 	GROUP BY A.MHDLG_GROUP_MGNO
+							 ) C  
+					 ON C.MHDLG_GROUP_MGNO = A.MHDLG_GROUP_MGNO
+				  INNER JOIN irsuser.INST_BSC D                    
+					 ON D.INST_MGNO = B.CMPTNC_INST_NO
+				  INNER JOIN ( SELECT T1.MHDLG_MGNO
+				  			  	    , T1.MHDLG_DGR
+				  			  	    , T1.MHDLG_UNQNO
+				  			  	    , T2.BIZ_FLD_KORN_NM 
+				  			  	    , T3.BIZ_DTLS_FLD_KORN_NM 
+			  			  	        , T1.BIZ_FLD_CD_MGNO
+				  			  	    , T1.BIZ_FLD_DTLS_CD_MGNO
+				  				 FROM irsuser.MHDLG_FLD_DTL T1
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_BSC T2
+				  			       ON T2.BIZ_FLD_CD_MGNO =T1.BIZ_FLD_CD_MGNO
+				  			    INNER JOIN irsuser.COM_BIZ_FLD_DTL T3
+				  			       ON T3.BIZ_FLD_DTLS_CD_MGNO = T1.BIZ_FLD_DTLS_CD_MGNO  
+				 			  )E 
+				     ON E.mhdlg_mgno = B.mhdlg_mgno
+				    AND E.mhdlg_dgr  = B.mhdlg_dgr
+				  WHERE A.RVSN_DGR = C.RVSN_DGR
+					AND A.MHDLG_MGNO  = B.MHDLG_MGNO
+					AND A.PRCS_DGR = B.MHDLG_DGR
+  			<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+					AND B.APLY_CL_CD = #{srhAplyClCd}
+			</if>
+			<if test="srhMhdlgPrcndTypeCd != null and !srhMhdlgPrcndTypeCd.equals('')">
+					AND A.REG_RSN_CD = #{srhMhdlgPrcndTypeCd}
+			</if>
+			<if test="srhMhdlgNm != null and !srhMhdlgNm.equals('')">
+					AND B.MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%')		
+					 OR B.MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlgNm}, '%'))		
+			</if>												
+			<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+					AND E.BIZ_FLD_CD_MGNO = LTRIM(#{srhBizFldCd},'0')
+			</if>
+			<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+					AND E.BIZ_FLD_DTLS_CD_MGNO = LTRIM(#{srhBizDtlsFldCd},'0')
+			</if>
+			<if test="srhMhdlgUnqno != null and !srhMhdlgUnqno.equals('')">
+					AND A.MHDLG_UNQNO LIKE CONCAT('%', #{srhMhdlgUnqno}, '%')) 
+			</if>
+				  ORDER BY B.PRCS_YMD DESC
+		  ) V
+		  ) V
+		) U
+		LIMIT CAST( #{srhTo} AS NUMERIC)
+		OFFSET CAST ( #{srhFrom} AS NUMERIC) -1 
+	</select>
+</mapper>
+

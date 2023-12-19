@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmUserRegMapper">
+
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 사용자신청기본 정보 처리상태 UPDATE [irsuser.USER_APLY_BSC] -->
+	<update id="updateUserRegDetail" parameterType="map">
+		/* AdmUserRegMapper.updateUserRegDetail */
+		UPDATE irsuser.USER_APLY_BSC
+		   SET APLY_PRCS_TYPE_CD = #{aplyPrcsTypeCd}
+		<if test="userAcntSttsClCd != null and !userAcntSttsClCd.equals('')">
+		     , USER_ACNT_STTS_CL_CD = #{userAcntSttsClCd}
+		</if>
+		<if test="instAcntSttsClCd != null and !instAcntSttsClCd.equals('')">
+		     , INST_ACNT_STTS_CL_CD = #{instAcntSttsClCd}
+		</if>
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE APLY_MGNO = #{aplyMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 심의결과 저장 INSERT [irsuser.USER_APLY_DLBR_DTL] -->
+	<insert id="insertUserRegDlbrRslt" parameterType="map">
+		/* AdmUserRegMapper.insertUserRegDlbrRslt */
+		INSERT
+		  INTO irsuser.USER_APLY_DLBR_DTL
+			 ( APLY_MGNO
+			 , DLBR_DGR
+			 , DLBR_TYPE_CD
+			 , DLBR_DT
+			 , DLBR_OPNN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+		VALUES
+			 ( #{aplyMgno}
+			 , CAST(#{dlbrDgr} AS NUMERIC)
+			 , #{dlbrTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{dlbrOpnn}
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 심의결과 저장 > [사업수행자 && 비할당업체]만 심의승인처리시에 사업체정보 변경처리(덮어쓰기) [irsuser.INST_BSC] -->
+	<update id="updateInstBscByUserAplyBsc" parameterType="map">
+		/* AdmUserRegMapper.updateInstBscByUserAplyBsc */
+		UPDATE irsuser.INST_BSC AS IB
+		   SET GOV_INST_YN     = UA.GOV_INST_YN					/* 정부기관여부 */
+		     , BZENT_NM        = UA.BZENT_NM					/* 사업체명 */
+		     , BRNO            = UA.BRNO						/* 사업자등록번호 */
+		     , CRNO            = UA.CRNO						/* 법인등록번호 */
+		     , RPRSV_NM        = UA.RPRSV_NM					/* 대표자명 */
+		     , CORP_TEL_DDD    = UA.CORP_TEL_DDD				/* 법인전화지역번호 */
+		     , CORP_TEL_TLPNO  = UA.CORP_TEL_TLPNO				/* 법인전화국번호 */
+		     , CORP_TEL_PHINO  = UA.CORP_TEL_PHINO				/* 법인전화개별번호 */
+		     , RDNM_CD         = UA.RDNM_CD						/* 도로명코드 */
+		     , ADDR            = UA.ADDR						/* 주소 */
+		     , DTL_ADDR        = UA.DTL_ADDR					/* 상세주소 */
+		     , BRDOC_FLMNO     = UA.BRDOC_FLMNO					/* 사업자등록증파일번호 */
+		     , ACNT_STTS_CL_CD = UA.UPDATE_ACNT_STTS_CL_CD		/* 심의결과에 따른 계정상태정보 갱신처리 */
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		  FROM (
+					SELECT UAB.INST_MGNO
+						 , UAB.GOV_INST_YN
+						 , UAB.BZENT_NM
+						 , UAB.BRNO						/* 사업자등록번호 */         
+						 , UAB.CRNO						/* 법인등록번호 */          
+						 , UAB.RPRSV_NM					/* 대표자명 */            
+						 , UAB.CORP_TEL_DDD				/* 법인전화지역번호 */        
+						 , UAB.CORP_TEL_TLPNO				/* 법인전화국번호 */         
+						 , UAB.CORP_TEL_PHINO				/* 법인전화개별번호 */        
+						 , UAB.RDNM_CD						/* 도로명코드 */           
+						 , UAB.ADDR						/* 주소 */              
+						 , UAB.DTL_ADDR					/* 상세주소 */            
+						 , UAB.BRDOC_FLMNO					/* 사업자등록증파일번호 */      
+						 , CASE WHEN I.ACNT_STTS_CL_CD = 'ASC0002' THEN I.ACNT_STTS_CL_CD	/* 업체정보가 승인상태면 업체정보로 상태 유지 */ 
+						 		WHEN #{dlbrTypeCd} = 'DTC0001'     THEN 'ASC0001'			/* 심의반려 - 미승인 */
+						 		WHEN #{dlbrTypeCd} = 'DTC0002'     THEN 'ASC0002'			/* 심의승인 - 승인 */
+						 		ELSE I.ACNT_STTS_CL_CD END AS UPDATE_ACNT_STTS_CL_CD		/* 그외 - 업체정보로 상태 유지 */
+					  FROM irsuser.USER_APLY_BSC UAB
+					 INNER JOIN irsuser.INST_BSC I
+					    ON I.INST_MGNO = UAB.INST_MGNO
+					   AND I.DEL_YN = 'N'
+					 WHERE 1 = 1
+					   AND UAB.APLY_MGNO = #{aplyMgno}
+		  ) UA
+		 WHERE IB.INST_MGNO = UA.INST_MGNO
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 심의결과 저장 > 심의승인처리시에 사업체정보 계정상태구분코드 승인상태로 수정 [irsuser.INST_BSC] -->
+	<update id="updateInstAcntSttsClCd" parameterType="map">
+		/* AdmUserRegMapper.updateInstAcntSttsClCd */
+		UPDATE irsuser.INST_BSC
+		   SET ACNT_STTS_CL_CD = 'ASC0002'
+		     , APRV_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')			/* 승인일자 */
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE INST_MGNO = #{instMgno}
+		   AND ACNT_STTS_CL_CD = 'ASC0001'
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 심의결과 저장 > 신규신청시 신규업체정보인 경우 보유계정 발급 - UPDATE [irsuser.INST_BSC] -->
+	<update id="updateInstPsnAcnt" parameterType="map">
+		<selectKey keyProperty="psnAcntUnqNo" resultType="string" order="BEFORE">
+			/* AdmInstMngMapper.updateInstPsnAcnt.selectKey */
+			SELECT CONCAT( #{prefixPsnAcntUnqNo}
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(PSN_ACNT_UNQ_NO, (10 + 1), 20)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 20 - 10
+							   , '0'
+						   )
+				   )
+			FROM irsuser.INST_BSC
+			WHERE PSN_ACNT_UNQ_NO IS NULL OR LENGTH(PSN_ACNT_UNQ_NO) = 20
+		</selectKey>
+		/* AdmUserRegMapper.updateInstPsnAcnt */
+		UPDATE irsuser.INST_BSC
+		   SET PSN_ACNT_UNQ_NO = #{psnAcntUnqNo}
+		     , PSN_ACNT_STTS_CL_CD = #{psnAcntSttsClCd}
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE INST_MGNO = #{instMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 심의결과등록 - 심의결과 저장 > 심의승인처리시에 사용자정보 계정상태구분코드 승인상태로 수정 [irsuser.USER_BSC] -->
+	<update id="updateUserAcntSttsClCd" parameterType="map">
+		/* AdmUserRegMapper.updateUserAcntSttsClCd */
+		UPDATE irsuser.USER_BSC
+		   SET ACNT_STTS_CL_CD = 'ASC0002'
+		     , APRV_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')			/* 승인일자 */
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE USER_ID = #{userId}
+		   AND ACNT_STTS_CL_CD = 'ASC0001'
+	</update>
+	
+</mapper>
+

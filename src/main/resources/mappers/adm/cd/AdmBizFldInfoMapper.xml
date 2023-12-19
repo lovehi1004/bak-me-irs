@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmBizFldInfoMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야목록조회 총건수 조회 -->
+	<select id="selectBizFldInfoListCnt" resultType="int" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야목록조회 -->
+	<select id="selectBizFldInfoList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmBizFldInfoMapper.selectBizFldInfoList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야상세조회 -->
+	<select id="selectBizFldInfoDetail" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야등록 -->
+	<insert id="insertBizFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.insertBizFldInfo */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야수정 -->
+	<update id="updateBizFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.updateBizFldInfo */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야목록조회 총건수 조회 -->
+	<select id="selectBizSubFldInfoListCnt" resultType="int" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizSubFldInfoListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야목록조회 -->
+	<select id="selectBizSubFldInfoList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmBizFldInfoMapper.selectBizSubFldInfoList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야상세조회 -->
+	<select id="selectBizSubFldInfoDetail" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizSubFldInfoDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야등록 -->
+	<insert id="insertBizSubFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.insertBizSubFldInfo */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야수정 -->
+	<update id="updateBizSubFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.updateBizSubFldInfo */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+
+	
+</mapper>

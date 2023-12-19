@@ -5,8 +5,8 @@
 <mapper namespace="gov.me.irs.common.user.mapper.MainUserMapper">
 	
 	<!-- 메인 > 사용자 > 회원가입 > 로그인 아이디 중복 검색 체크 -->
-	<select id="selectcheckLoginIdCnt" resultType="egovMap" parameterType="map">
-		/* MainUserMapper.selectcheckLoginIdCnt */
+	<select id="selectLoginIdCnt" resultType="egovMap" parameterType="map">
+		/* MainUserMapper.selectLoginIdCnt */
 		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
 			 , #{lgnId} as LGN_ID
 		  FROM irsuser.USER_BSC

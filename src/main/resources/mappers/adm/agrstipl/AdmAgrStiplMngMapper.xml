@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.agrstipl.mapper.AdmAgrStiplMngMapper">
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정목록조회 총건수 조회 -->
+	<select id="selectAgrMngListCnt" resultType="int" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectAgrMngListCnt */
+		SELECT COUNT(*)
+		FROM (SELECT ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+			 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+			 , K.CNCLD_MGNO
+		     , CAST (K.CNCLD_DGR AS TEXT)
+		     , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+		     , K.NTN_CD
+		     , K.NTN_NM
+		     , K.CNCLD_CL_CD
+		     , K.CNCLD_CL_NM
+		     , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+		     , K.NEW_RVSN_TYPE_CD
+		     , K.NEW_RVSN_TYPE_NM
+		     , K.REG_TYPE_CD 
+		     , (CASE
+		        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+		        	ELSE K.REG_TYPE_NM
+		   		 end) AS REG_TYPE_NM
+		     , K.CNCLD_ORGT_NM
+		     , K.CNCLD_KRN_NM
+		     , K.CNCLD_NO
+		     , K.SGNT_YMD
+		     , K.EFTVN_YMD
+		     , (CASE
+		        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+		        	ELSE K.EFTVN_YMD
+		   		 end) AS EFTVN_YMD
+		     , K.CNCLD_NO
+		FROM (SELECT A.CNCLD_MGNO
+				   , A.CNCLD_DGR
+				   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+				   , A.CNCLD_CL_CD
+				   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+				   , Z.NTN_CD
+				   , Z.NTN_NM
+				   , A.NEW_RVSN_TYPE_CD
+				   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM
+				   , A.REG_TYPE_CD  
+				   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+				   , A.CNCLD_ORGT_NM
+				   , A.CNCLD_KRN_NM
+				   , A.CNCLD_NO
+				   , A.SGNT_YMD
+				   , A.EFTVN_YMD 
+				   , A.DEL_YN
+			  FROM irsuser.AGREE_STIPL_BSC A
+				INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+							  FROM irsuser.COM_NTN_CD_BSC C
+								INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+									FROM irsuser.AGREE_STIPL_BSC A 
+											INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+										WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+									 		ON C.IATA_NTN_CD  = D.NTN_CD
+													GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+					ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+					WHERE K.DGR_RN = 1 AND K.DEL_YN ='N' ) P
+		WHERE 1=1 
+		<if test="srhCncldCd != null and !srhCncldCd.equals('')">
+		AND P.CNCLD_CL_CD = #{srhCncldCd}			
+		</if>
+		<if test="srhRegTypeCd != null and !srhRegTypeCd.equals('')">
+		AND P.REG_TYPE_CD = #{srhRegTypeCd}			
+		</if>
+		<if test="srhNewRvsmTypeCd != null and !srhNewRvsmTypeCd.equals('')">
+		AND P.NEW_RVSN_TYPE_CD = #{srhNewRvsmTypeCd}			
+		</if>
+		<if test="srhNtnNm != null and !srhNtnNm.equals('')">
+		AND (P.NTN_NM LIKE CONCAT('%', #{srhNtnNm}, '%') )			
+		</if> 
+	</select>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정목록조회 -->
+	<select id="selectAgrMngList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmAgrStiplMngMapper.selectAgrMngList */
+		SELECT	'' AS CHK
+			 ,  ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+			 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+			 , K.CNCLD_MGNO
+		     , CAST (K.CNCLD_DGR AS TEXT)
+		     , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+		     , K.NTN_CD
+		     , K.NTN_NM
+		     , K.CNCLD_CL_CD
+		     , K.CNCLD_CL_NM
+		     , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+		     , K.NEW_RVSN_TYPE_CD
+		     , K.NEW_RVSN_TYPE_NM
+		     , K.REG_TYPE_CD 
+		     , (CASE
+		        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+		        	ELSE K.REG_TYPE_NM
+		   		 end) AS REG_TYPE_NM
+		     , K.CNCLD_ORGT_NM
+		     , K.CNCLD_KRN_NM
+		     , K.CNCLD_NO
+		     , K.SGNT_YMD
+		     , (CASE
+		        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+		        	ELSE K.EFTVN_YMD
+		   		 end) AS EFTVN_YMD
+		     , K.CNCLD_NO
+		     ,'선택' AS BTN_NM
+		FROM (SELECT A.CNCLD_MGNO
+				   , A.CNCLD_DGR
+				   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+				   , A.CNCLD_CL_CD
+				   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+				   , Z.NTN_CD
+				   , Z.NTN_NM
+				   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM
+				   , A.REG_TYPE_CD 
+				   , A.NEW_RVSN_TYPE_CD 
+				   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+				   , A.CNCLD_ORGT_NM
+				   , A.CNCLD_KRN_NM
+				   , A.CNCLD_NO
+				   , A.SGNT_YMD
+				   , A.EFTVN_YMD 
+				   , A.DEL_YN
+			  FROM irsuser.AGREE_STIPL_BSC A
+				INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+							  FROM irsuser.COM_NTN_CD_BSC C
+								INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+									FROM irsuser.AGREE_STIPL_BSC A 
+											INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+										WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+									 		ON C.IATA_NTN_CD  = D.NTN_CD
+													GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+					ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+					WHERE K.DGR_RN = 1 AND K.DEL_YN ='N'
+		<if test="srhCncldCd != null and !srhCncldCd.equals('')">
+		AND K.CNCLD_CL_CD = #{srhCncldCd}			
+		</if>
+		<if test="srhRegTypeCd != null and !srhRegTypeCd.equals('')">
+		AND K.REG_TYPE_CD = #{srhRegTypeCd}			
+		</if>
+		<if test="srhNewRvsmTypeCd != null and !srhNewRvsmTypeCd.equals('')">
+		AND K.NEW_RVSN_TYPE_CD = #{srhNewRvsmTypeCd}			
+		</if>
+		<if test="srhNtnNm != null and !srhNtnNm.equals('')">
+		AND (K.NTN_NM LIKE CONCAT('%', #{srhNtnNm}, '%') )			
+		</if>  
+		ORDER BY K.CNCLD_CL_CD ='CNC0003',  K.CNCLD_CL_CD ='CNC0002',  K.CNCLD_CL_CD ='CNC0001', K.CNCLD_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정상세조회 -->
+	<select id="selectAgrMngDetail" resultType="egovMap" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectAgrMngDetail */
+		SELECT A.CNCLD_MGNO
+			 , A.CNCLD_DGR
+			 , A.CNCLD_CL_CD
+			 , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM   
+			 , A.NEW_RVSN_TYPE_CD
+			 , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+			 , A.REG_TYPE_CD
+			 , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM 
+			 , A.CNCLD_YN
+			 , (CASE WHEN A.CNCLD_YN ='Y' THEN '유' ELSE '무' END) AS CNCLD_YN_NM
+			 , A.CNCLD_ORGT_NM
+			 , A.CNCLD_KRN_NM
+			 , A.SGNT_YMD
+			 , A.EFTVN_YMD
+			 , A.CNCLD_NO
+			 , A.ORGT_CNCLD_FLMNO
+			 , A.KRN_CNCLD_FLMNO
+			 , A.ETC_DATA_FLMNO
+			 , Z.NTN_NM
+		FROM irsuser.AGREE_STIPL_BSC A
+			INNER JOIN (SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM 
+						FROM irsuser.COM_NTN_CD_BSC C
+						INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+									FROM irsuser.AGREE_STIPL_BSC A 
+									INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B ON A.CNCLD_MGNO = B.CNCLD_MGNO
+									WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+						ON C.IATA_NTN_CD  = D.NTN_CD
+						GROUP BY D.CNCLD_MGNO) AS Z
+			ON A.CNCLD_MGNO = Z.CNCLD_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_CL_CD = #{cncldClCd} AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC) AND A.DEL_YN ='N' 
+		ORDER BY A.CNCLD_MGNO DESC
+	</select>
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정  - 약정 상세조회 -->
+	<select id="selectStiplMngDetail" resultType="egovMap" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectStiplMngDetail */
+		SELECT A.CNCLD_MGNO
+			 , A.CNCLD_DGR
+			 , A.CNCLD_CL_CD
+			 , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM   
+			 , A.NEW_RVSN_TYPE_CD
+			 , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+			 , A.REG_TYPE_CD
+			 , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM 
+			 , A.CNCLD_YN
+			 , (CASE WHEN A.CNCLD_YN ='Y' THEN '유' ELSE '무' END) AS CNCLD_YN_NM
+			 , A.CNCLD_ORGT_NM
+			 , A.CNCLD_KRN_NM
+			 , A.SGNT_YMD
+			 , A.EFTVN_YMD
+			 , A.CNCLD_NO
+			 , A.ORGT_CNCLD_FLMNO
+			 , A.KRN_CNCLD_FLMNO
+			 , A.ETC_DATA_FLMNO
+			 , Z.NTN_NM
+		FROM irsuser.AGREE_STIPL_BSC A
+			INNER JOIN (SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM 
+							FROM irsuser.COM_NTN_CD_BSC C
+							 INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+											FROM irsuser.AGREE_STIPL_BSC A 
+												INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+											WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+							 ON C.IATA_NTN_CD  = D.NTN_CD
+							GROUP BY D.CNCLD_MGNO) AS Z
+			ON A.CNCLD_MGNO = Z.CNCLD_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_CL_CD = 'CNC0002' AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC) AND A.DEL_YN ='N' 
+		ORDER BY A.CNCLD_MGNO DESC
+	</select>
+
+	<!-- [공통] 협정.약정관리 > 협정.약정  - MOU 상세조회 -->
+	<select id="selectMouMngDetail" resultType="egovMap" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectMouMngDetail */
+		SELECT A.CNCLD_MGNO
+			 , A.CNCLD_CL_CD
+			 , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM   
+			 , A.NEW_RVSN_TYPE_CD
+			 , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM  
+			 , A.CNCLD_ORGT_NM
+			 , A.CNCLD_KRN_NM
+			 , A.SGNT_YMD
+			 , A.CNCLD_NO
+			 , A.ORGT_CNCLD_FLMNO
+			 , A.KRN_CNCLD_FLMNO
+			 , A.ETC_DATA_FLMNO
+			 , Z.NTN_NM
+		FROM irsuser.AGREE_STIPL_BSC A
+			INNER JOIN (SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM 
+							FROM irsuser.COM_NTN_CD_BSC C
+							 INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+											FROM irsuser.AGREE_STIPL_BSC A 
+												INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+												ON A.CNCLD_MGNO = B.CNCLD_MGNO
+											WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD ) AS D
+							 ON C.IATA_NTN_CD  = D.NTN_CD
+							GROUP BY D.CNCLD_MGNO) AS Z
+			ON A.CNCLD_MGNO = Z.CNCLD_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_CL_CD = 'CNC0003' AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC) AND A.DEL_YN ='N' 
+		ORDER BY A.CNCLD_MGNO DESC
+	</select>
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정  - 체결 - MOU 상세 조회 -->
+	<select id="selectAgreeMouDetail" resultType="egovMap" parameterType="map">
+	/* AdmAgrStiplMngMapper.selectAgreeMouDetail */
+		SELECT A.CNCLD_MGNO
+			 , A.REL_CNCLD_MGNO
+			 , B.CNCLD_ORGT_NM AS MOU_ORGT_NM
+		FROM irsuser.AGREE_STIPL_REL AS A 
+		INNER JOIN irsuser.AGREE_STIPL_BSC B ON A.REL_CNCLD_MGNO = B.CNCLD_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND B.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC)
+	</select>
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정  - 협의체 상세 조회 -->
+	<select id="selectAgreeStiplCnslDetail" resultType="egovMap" parameterType="map">
+	/* AdmAgrStiplMngMapper.selectAgreeStiplCnslDetail */
+		SELECT A.CNSLTNGRP_MGNO
+			 , B.CNSLTNGRP_NM
+			 , B.CNSLTNGRP_CMPS_YMD
+		FROM irsuser.AGREE_STIPL_CNSLTNGRP AS A
+		INNER JOIN irsuser.CNSLTNGRP_BSC AS B ON A.CNSLTNGRP_MGNO = B.CNSLTNGRP_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC)
+	</select>
+	
+	<!-- [공통] 협정.약정관리 > 협정.약정  - 협의체 구성원 목록 조회 -->
+	<select id="selectCnslMemDetail" resultType="egovMap" parameterType="map">
+	/* AdmAgrStiplMngMapper.selectCnslMemDetail */
+		SELECT A.CNSLTNGRP_MGNO
+			 , B.CNSLTNGRP_NM
+			 , B.CNSLTNGRP_CMPS_YMD
+			 , C.NTN_CD
+			 , C.GMBR_ORGT_NM 
+			 , C.GMBR_KRN_NM 
+			 , C.INST_NM 
+			 , C.MAIL_ADDR 
+			 , C.OFC_TELNO 
+			 , C.CMPS_YMD 
+		FROM irsuser.AGREE_STIPL_CNSLTNGRP AS A
+		INNER JOIN irsuser.CNSLTNGRP_BSC AS B ON A.CNSLTNGRP_MGNO = B.CNSLTNGRP_MGNO
+		INNER JOIN irsuser.CNSLTNGRP_DTL AS C ON A.CNSLTNGRP_MGNO = C.CNSLTNGRP_MGNO
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC)
+	</select>
+
+
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정등록 -->
+	<insert id="insertAgrBsc" parameterType="map">
+		<selectKey keyProperty="cncldMgno" resultType="String" order="BEFORE">
+			/* BizAgrStiplPrcndMapper.insertAgrBsc.selectKey */
+			SELECT CONCAT( 'CL'
+				 , TO_CHAR(CURRENT_TIMESTAMP, 'yy')
+				 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(CNCLD_MGNO, (4 + 1), 10)), '0') AS NUMERIC) + 1 AS TEXT)
+					   , 10 - 4
+					   , '0'
+				   )
+		   )
+			  FROM irsuser.AGREE_STIPL_BSC
+		</selectKey>
+		/* BizAgrStiplPrcndMapper.insertAgrBsc */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , #{cncldClCd}
+			 , #{cncldYn}
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정개정 -->
+	<insert id="rvsnAgrBsc" parameterType="map">
+		/* BizAgrStiplPrcndMapper.rvsnAgrBsc */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , #{cncldClCd}
+			 , #{cncldYn}
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )	 
+	</insert>
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정약정 - MOU 관계 테이블 등록 -->
+	<insert id="insertAgrRel" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrRel */
+		INSERT INTO IRSUSER.AGREE_STIPL_REL
+			(  CNCLD_MGNO
+		 	 , REL_CNCLD_MGNO
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			)
+		VALUES
+			(  #{cncldMgno}
+			 , #{relCncldMgno}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정약정 - 협의체 관계 테이블 등록 -->
+	<insert id="insertAgrCnsltngrp" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrCnsltngrp */ 
+		INSERT INTO IRSUSER.AGREE_STIPL_CNSLTNGRP
+			(  CNCLD_MGNO
+		 	 , CNSLTNGRP_MGNO
+		 	 , CNCLD_DGR
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			)
+		VALUES
+			(  #{cncldMgno}
+			 , #{cnsltngrpMgno}
+			 ,	CAST( #{cncldDgr} AS NUMERIC)
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정 이력등록 -->
+	<insert id="insertAgrBscHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrBscHist */
+		INSERT INTO irsuser.AGREE_STIPL_HSTRY
+		  	 (HSTRY_TYPE_CD
+			 , HSTRY_YMD
+		  	 , CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{cncldMgno}
+			 , CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , #{cncldClCd}
+			 , #{cncldYn}
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )
+	</insert>
+
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 약정 이력등록 -->
+	<insert id="insertStiplBscHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertStiplBscHist */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_HSTRY
+		  	 (HSTRY_TYPE_CD
+			 , HSTRY_YMD
+		  	 , CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			  )
+		VALUES
+			 ( #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0002'
+			 , #{cncldYn}
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - MOU 이력등록 -->
+	<insert id="insertMouBscHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertMouBscHist */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_HSTRY
+		  	 (HSTRY_TYPE_CD
+			 , HSTRY_YMD
+		  	 , CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , NEW_RVSN_TYPE_CD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0003'
+			 , #{newRvsnTypeCd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정약정 - MOU 관계 테이블 이력 등록 -->
+	<insert id="insertAgrRelHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrRelHist */
+		INSERT INTO IRSUSER.AGREE_STIPL_REL_HSTRY
+			(  HSTRY_TYPE_CD
+			 , HSTRY_YMD
+			 , CNCLD_MGNO
+		 	 , REL_CNCLD_MGNO
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			)
+		VALUES
+			(  #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{cncldMgno}
+			 , #{relCncldMgno}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정약정수정 -->
+	<update id="updateAgrMng" parameterType="map">
+		/* AdmAgrStiplMngMapper.updateAgrMng */
+		UPDATE
+		  irsuser.AGREE_STIPL_BSC
+		SET CNCLD_ORGT_NM = #{cncldOrgtNm}
+		   ,CNCLD_KRN_NM = #{cncldKrnNm}
+		   ,CNCLD_NO = #{cncldNo}
+		   ,SGNT_YMD = #{sgntYmd}
+		   ,CNCLD_YN = #{cncldYn}
+		   ,REG_TYPE_CD = #{regTypeCd}
+		   ,EFTVN_YMD = #{eftvnYmd}
+		   ,MDFR_ID = #{mdfrId}
+		   ,MDFCN_DT = CURRENT_TIMESTAMP
+		   ,PDCT_CNCLD_DT = CAST (#{pdctCncldDt} AS TIMESTAMP)
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</update>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정약정 협의체여부 업데이트  --> 
+	<update id="updateAgrCnsltngrpYn" parameterType="map">
+		/* AdmAgrStiplMngMapper.updateAgrCnsltngrpYn */
+		UPDATE
+		  irsuser.AGREE_STIPL_BSC
+		SET CNSLTNGRP_YN = #{cnsltngrpYn}
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</update>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 국가등록 -->
+	<insert id="insertAgrBscNtn" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrBscNtn */
+		INSERT INTO irsuser.AGREE_STIPL_NTN_DTL
+				(  CNCLD_MGNO
+				 , CNCLD_DGR
+				 , NTN_CD
+				 , DEL_YN
+				 , RGTR_ID
+				 , REG_DT
+				 , MDFR_ID
+				 , MDFCN_DT
+				 )
+		VALUES(
+				  #{cncldMgno}
+				 ,CAST( #{cncldDgr} AS NUMERIC)
+				 , #{ntnCd}
+				 , 'N'
+				 , #{rgtrId}
+				 , CURRENT_TIMESTAMP
+				 , #{mdfrId}
+				 , CURRENT_TIMESTAMP
+				 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 국가 수정 -->
+	<update id="updateAgrBscNtn" parameterType="map">
+		/* BizAgrStiplPrcndMapper.rvsnAgrBscNtn */
+		UPDATE irsuser.AGREE_STIPL_NTN_DTL
+			SET	NTN_CD = #{ntnCd}
+			  , MDFR_ID = #{mdfrId}
+			  , MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</update>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 국가 삭제 ( 협정 수정때 사용) -->
+	<delete id="delUpdateAgrBscNtn" parameterType="map">
+		/* BizAgrStiplPrcndMapper.delUpdateAgrBscNtn */
+		DELETE FROM irsuser.AGREE_STIPL_NTN_DTL
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</delete>
+	
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 국가 이력등록 -->
+	<insert id="insertAgrBscNtnHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrBscNtnHist */
+		INSERT INTO irsuser.AGREE_STIPL_NTN_HSTRY
+				(  HSTRY_TYPE_CD
+				 , HSTRY_YMD 
+				 , CNCLD_MGNO
+				 , CNCLD_DGR
+				 , NTN_CD
+				 , DEL_YN
+				 , RGTR_ID
+				 , REG_DT
+				 , MDFR_ID
+				 , MDFCN_DT
+				 )
+		VALUES(    #{hstryTypeCd}
+				 , CURRENT_TIMESTAMP			
+				 , #{cncldMgno}
+				 , CAST( #{cncldDgr} AS NUMERIC)
+				 , #{ntnCd}
+				 , 'N'
+				 , #{rgtrId}
+				 , CURRENT_TIMESTAMP
+				 , #{mdfrId}
+				 , CURRENT_TIMESTAMP
+				 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 방법론 등록 -->
+	<insert id="insertAgrBscMhdlg" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrBscMhdlg */
+		INSERT INTO irsuser.AGREE_STIPL_MHDLG_REL
+			 ( CNCLD_MGNO
+			 , CNCLD_DGR
+			 , MHDLG_MGNO
+			 , MHDLG_DGR
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		VALUES(
+			  #{cncldMgno}
+			  , CAST( #{cncldDgr} AS NUMERIC)
+			  , #{mhdlgMgno}
+			  , CAST( #{mhdlgDgr} AS NUMERIC)
+			  , 'N'
+			  , #{rgtrId}
+			  , CURRENT_TIMESTAMP
+			  , #{mdfrId}
+			  , CURRENT_TIMESTAMP
+			  )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 방법론 개정 -->
+	<update id="rvsnAgrBscMhdlg" parameterType="map">
+		/* BizAgrStiplPrcndMapper.rvsnAgrBscMhdlg */
+		UPDATE irsuser.AGREE_STIPL_MHDLG_REL
+			SET	MDFR_ID = #{mdfrId}
+			  , MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</update>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 방법론 이력 등록 -->
+	<insert id="insertAgrBscMhdlgHist" parameterType="map">
+		/* BizAgrStiplPrcndMapper.insertAgrBscMhdlgHist */
+		INSERT INTO irsuser.AGREE_STIPL_MHDLG_REL_HSTRY
+			 ( HSTRY_TYPE_CD
+			 , HSTRY_YMD
+			 , CNCLD_MGNO
+			 , MHDLG_MGNO
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		VALUES( #{hstryTypeCd}
+			  , CURRENT_TIMESTAMP
+			  , #{cncldMgno}
+			  , #{mhdlgMgno}
+			  , 'N'
+			  , #{rgtrId}
+			  , CURRENT_TIMESTAMP
+			  , #{mdfrId}
+			  , CURRENT_TIMESTAMP
+			  )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 방법론 삭제 ( 협정 수정때 사용) -->
+	<delete id="delUpdateAgrBscMhdlg" parameterType="map">
+		/* BizAgrStiplPrcndMapper.delUpdateAgrBscMhdlg */
+		DELETE FROM irsuser.AGREE_STIPL_MHDLG_REL
+		WHERE CNCLD_MGNO = #{cncldMgno} AND CNCLD_DGR = CAST( #{cncldDgr} AS NUMERIC)
+	</delete>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정등록 개정할때 체결국가 조회 -->
+	<select id="selectAgrNtnList" resultType="egovMap" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectAgrNtnList */
+		SELECT '' AS CHK
+			 , A.CNCLD_MGNO
+			 , A.CNCLD_DGR
+			 , A.NTN_CD
+			 , B.NTN_KORN_NM
+			 , A.DEL_YN
+			 , A.RGTR_ID
+			 , A.REG_DT
+			 , A.MDFR_ID
+			 , A.MDFCN_DT
+		FROM irsuser.AGREE_STIPL_NTN_DTL A
+			INNER JOIN irsuser.COM_NTN_CD_BSC B
+			ON A.NTN_CD = B.IATA_NTN_CD 
+		WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC)
+	</select>
+		
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 약정등록 -->
+	<insert id="insertStiplMng" parameterType="map">
+		<selectKey keyProperty="cncldMgno" resultType="String" order="BEFORE">
+			/* BizAgrStiplPrcndMapper.insertStiplMng.selectKey */
+			SELECT CONCAT( 'CL'
+				 , TO_CHAR(CURRENT_TIMESTAMP, 'yy')
+				 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(CNCLD_MGNO, (4 + 1), 10)), '0') AS NUMERIC) + 1 AS TEXT)
+					   , 10 - 4
+					   , '0'
+				   )
+		   )
+			  FROM irsuser.AGREE_STIPL_BSC
+		</selectKey>
+		/* BizAgrStiplPrcndMapper.insertStiplMng */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0002'
+			 , 'N'
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 약정개정 -->
+	<insert id="rvsnStiplBsc" parameterType="map">
+		/* BizAgrStiplPrcndMapper.rvsnStiplBsc */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0002'
+			 , 'N'
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 )	 
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - MOU등록 -->
+	<insert id="insertMouMng" parameterType="map">
+		<selectKey keyProperty="cncldMgno" resultType="String" order="BEFORE">
+			/* BizAgrStiplPrcndMapper.insertMouMng.selectKey */
+			SELECT CONCAT( 'CL'
+				 , TO_CHAR(CURRENT_TIMESTAMP, 'yy')
+				 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(CNCLD_MGNO, (4 + 1), 10)), '0') AS NUMERIC) + 1 AS TEXT)
+					   , 10 - 4
+					   , '0'
+				   )
+		   )
+			  FROM irsuser.AGREE_STIPL_BSC
+		</selectKey>
+		/* BizAgrStiplPrcndMapper.insertMouMng */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , CNCLD_YN
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0003'
+			 , 'N'
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )
+	</insert>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - MOU개정 -->
+	<insert id="rvsnMouMng" parameterType="map">
+		/* BizAgrStiplPrcndMapper.rvsnMouMng */
+		INSERT
+		  INTO irsuser.AGREE_STIPL_BSC
+		  	 (CNCLD_MGNO
+			 , CNCLD_DGR
+			 , CNCLD_ORGT_NM
+			 , CNCLD_KRN_NM
+			 , CNCLD_NO
+			 , SGNT_YMD
+			 , CNCLD_CL_CD
+			 , NEW_RVSN_TYPE_CD
+			 , REG_TYPE_CD
+			 , EFTVN_YMD
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 , PDCT_CNCLD_DT
+			 , ORGT_CNCLD_FLMNO
+			 , KRN_CNCLD_FLMNO
+			 , ETC_DATA_FLMNO
+			  )
+		VALUES
+			 ( #{cncldMgno}
+			 ,CAST( #{cncldDgr} AS NUMERIC)
+			 , #{cncldOrgtNm}
+			 , #{cncldKrnNm}
+			 , #{cncldNo}
+			 , #{sgntYmd}
+			 , 'CNC0003'
+			 , #{newRvsnTypeCd}
+			 , #{regTypeCd}
+			 , #{eftvnYmd}
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 , CAST (#{pdctCncldDt} AS TIMESTAMP)
+			 , #{orgtCncldFlmno}
+			 , #{krnCncldFlmno}
+			 , #{etcDataFlmno}
+			 )	 
+	</insert>
+
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - MOU수정 -->
+	<update id="updateMouMng" parameterType="map">
+		/* AdmAgrStiplMngMapper.updateMouMng */
+		UPDATE
+		  irsuser.AGREE_STIPL_BSC
+		SET CNCLD_ORGT_NM = #{cncldOrgtNm}
+		   ,CNCLD_KRN_NM = #{cncldKrnNm}
+		   ,CNCLD_NO = #{cncldNo}
+		   ,SGNT_YMD = #{sgntYmd}
+		   ,REG_TYPE_CD = #{regTypeCd}
+		   ,EFTVN_YMD = #{eftvnYmd}
+		   ,MDFR_ID = #{mdfrId}
+		   ,MDFCN_DT = CURRENT_TIMESTAMP
+		   ,PDCT_CNCLD_DT = CAST (#{pdctCncldDt} AS TIMESTAMP)
+	</update>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리  - 협정 상세화면 이력목록 -->
+	<select id="selectAgrMngDocList" resultType="egovMap" parameterType="map">
+	/* AdmAgrStiplMngMapper.selectAgrMngDocList */
+	SELECT ROW_NUMBER() OVER(ORDER by CNCLD_MGNO ASC) AS NO
+		 , CNCLD_MGNO
+		 , CNCLD_DGR
+		 , CASE WHEN CAST(#{cncldDgr} AS INTEGER) = CNCLD_DGR THEN '현재문서' ELSE '상세보기' END AS BTN_CTL
+		 , MDFR_ID AS PRCS_USER_NM
+		 , MDFCN_DT AS RVSN_YMD
+	FROM irsuser.AGREE_STIPL_BSC
+	WHERE CNCLD_MGNO = #{cncldMgno} AND DEL_YN = 'N'
+	</select>
+
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리  - 협정 상세화면 관련 방법론 목록 -->
+	<select id="selectAgrMngMhdlgList" resultType="egovMap" parameterType="map">
+	/* AdmAgrStiplMngMapper.selectAgrMngMhdlgList */
+	SELECT DISTINCT '' AS CHK  
+		 , A.CNCLD_MGNO  
+		 , A.MHDLG_MGNO 
+		 , B.MHDLG_ORGT_NM
+		 , B.MHDLG_DGR
+		 , C.MHDLG_UNQNO
+		 ,(
+		     	SELECT ARRAY_TO_STRING(ARRAY_AGG(X.MHDLG_FLD), ', ') AS NM  
+		       	FROM (
+		        	SELECT
+		        		CASE WHEN Z.MHDLG_FLD_TOTAL_CNT = 1 
+		        			THEN Z.MHDLG_FLD                        
+		                    ELSE '(' || MHDLG_FLD_ROWNUM || ') ' || Z.MHDLG_FLD                	    
+		                END AS MHDLG_FLD
+					FROM (
+						SELECT 
+							 B.BIZ_FLD_KORN_NM || ' - ' || C.BIZ_DTLS_FLD_KORN_NM AS MHDLG_FLD
+		                    ,ROW_NUMBER() OVER(PARTITION BY A.MHDLG_MGNO, A.MHDLG_DGR ORDER BY C.BIZ_FLD_DTLS_CD_MGNO) AS MHDLG_FLD_ROWNUM
+		                    ,COUNT(*) OVER() MHDLG_FLD_TOTAL_CNT
+		                FROM IRSUSER.MHDLG_FLD_DTL D                            				 
+		                INNER JOIN IRSUSER.COM_BIZ_FLD_BSC B
+		                ON B.BIZ_FLD_CD_MGNO = D.BIZ_FLD_CD_MGNO
+		                INNER JOIN IRSUSER.COM_BIZ_FLD_DTL C
+		                ON C.BIZ_FLD_DTLS_CD_MGNO = D.BIZ_FLD_DTLS_CD_MGNO
+		                WHERE 1=1
+		                AND A.MHDLG_MGNO = D.MHDLG_MGNO
+		            ) Z
+		        ) X
+		    ) AS MHDLG_FLD_NM
+	FROM irsuser.AGREE_STIPL_MHDLG_REL A
+	INNER JOIN irsuser.MHDLG_DTL B ON A.MHDLG_MGNO = B.MHDLG_MGNO AND A.MHDLG_DGR = B.MHDLG_DGR 
+	INNER JOIN irsuser.MHDLG_BSC C ON A.MHDLG_MGNO = C.MHDLG_MGNO 
+	WHERE A.CNCLD_MGNO = #{cncldMgno} AND A.CNCLD_DGR = CAST(#{cncldDgr} AS NUMERIC) AND A.DEL_YN ='N'
+	</select>
+	
+	<!-- [관리자] 협정.약정관리 > 협정약정 관리 - 협정 목록조회 엑셀 -->
+	<select id="selectAgrMngListExcel" resultType="egovMap" parameterType="map">
+		/* AdmAgrStiplMngMapper.selectAgrMngListExcel */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+				 , U.*
+			FROM
+			(
+				SELECT
+					ROW_NUMBER() OVER() AS RN
+					, COUNT(*) OVER() AS TOTAL_CNT
+					, V.*
+				FROM
+					(
+			SELECT	'' AS CHK
+				 ,  ROW_NUMBER() OVER(partition by K.CNCLD_MGNO order by K.CNCLD_DGR DESC) as DGR_RN
+				 , ROW_NUMBER() OVER(ORDER by K.CNCLD_MGNO DESC ) AS NO	
+				 , K.CNCLD_MGNO
+			     , CAST (K.CNCLD_DGR AS TEXT)
+			     , CASE WHEN CAST(K.CNCLD_DGR AS INTEGER) = 1 THEN '신규' ELSE '개정' END AS CNCLD_DGR_NM
+			     , K.NTN_CD
+			     , K.NTN_NM
+			     , K.CNCLD_CL_CD
+			     , K.CNCLD_CL_NM
+			     , K.CNCLD_CL_NM AS CNCLD_CL_CD_NM
+			     , K.NEW_RVSN_TYPE_CD
+			     , K.NEW_RVSN_TYPE_NM
+			     , K.REG_TYPE_CD 
+			     , (CASE
+			        	WHEN K.REG_TYPE_NM IS NULL THEN '-'
+			        	ELSE K.REG_TYPE_NM
+			   		 end) AS REG_TYPE_NM
+			     , K.CNCLD_ORGT_NM
+			     , K.CNCLD_KRN_NM
+			     , K.CNCLD_NO
+			     , K.SGNT_YMD
+			     , K.EFTVN_YMD
+			     , (CASE
+			        	WHEN K.EFTVN_YMD IS NULL THEN '-'
+			        	ELSE K.EFTVN_YMD
+			   		 end) AS EFTVN_YMD
+			     , K.CNCLD_NO
+			     ,'선택' AS BTN_NM
+			FROM (SELECT A.CNCLD_MGNO
+					   , A.CNCLD_DGR
+					   , ROW_NUMBER() OVER(partition by A.CNCLD_MGNO order by A.CNCLD_DGR DESC) as DGR_RN
+					   , A.CNCLD_CL_CD
+					   , irsuser.fn_get_codenm('CNCLD_CL_CD', A.CNCLD_CL_CD) AS CNCLD_CL_NM
+					   , Z.NTN_CD
+					   , Z.NTN_NM
+					   , irsuser.fn_get_codenm('NEW_RVSN_TYPE_CD', A.NEW_RVSN_TYPE_CD) AS NEW_RVSN_TYPE_NM
+					   , A.REG_TYPE_CD 
+					   , A.NEW_RVSN_TYPE_CD 
+					   , irsuser.fn_get_codenm('REG_TYPE_CD', A.REG_TYPE_CD) AS REG_TYPE_NM  
+					   , A.CNCLD_ORGT_NM
+					   , A.CNCLD_KRN_NM
+					   , A.CNCLD_NO
+					   , A.SGNT_YMD
+					   , A.EFTVN_YMD 
+					   , A.DEL_YN
+				  FROM irsuser.AGREE_STIPL_BSC A
+					INNER JOIN ( SELECT D.CNCLD_MGNO, ARRAY_TO_STRING(ARRAY_AGG(C.NTN_KORN_NM),  ',')  AS NTN_NM , D.NTN_CD
+								  FROM irsuser.COM_NTN_CD_BSC C
+									INNER JOIN (SELECT B.CNCLD_MGNO,B.NTN_CD 
+										FROM irsuser.AGREE_STIPL_BSC A 
+												INNER JOIN irsuser.AGREE_STIPL_NTN_DTL B
+													ON A.CNCLD_MGNO = B.CNCLD_MGNO
+											WHERE A.DEL_YN = 'N' GROUP BY B.CNCLD_MGNO,B.NTN_CD) AS D
+										 		ON C.IATA_NTN_CD  = D.NTN_CD
+														GROUP BY D.CNCLD_MGNO,D.NTN_CD) AS Z
+						ON A.CNCLD_MGNO = Z.CNCLD_MGNO ) K
+						WHERE K.DGR_RN = 1 AND K.DEL_YN ='N'
+			<if test="srhCncldCd != null and !srhCncldCd.equals('')">
+			AND K.CNCLD_CL_CD = #{srhCncldCd}			
+			</if>
+			<if test="srhRegTypeCd != null and !srhRegTypeCd.equals('')">
+			AND K.REG_TYPE_CD = #{srhRegTypeCd}			
+			</if>
+			<if test="srhNewRvsmTypeCd != null and !srhNewRvsmTypeCd.equals('')">
+			AND K.NEW_RVSN_TYPE_CD = #{srhNewRvsmTypeCd}			
+			</if>
+			<if test="srhNtnNm != null and !srhNtnNm.equals('')">
+			AND (K.NTN_NM LIKE CONCAT('%', #{srhNtnNm}, '%') )			
+			</if>  
+			ORDER BY K.CNCLD_CL_CD ='CNC0003',  K.CNCLD_CL_CD ='CNC0002',  K.CNCLD_CL_CD ='CNC0001', K.CNCLD_MGNO DESC
+					) V
+			) U
+			LIMIT #{pageNavigation.listSize}
+			OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}
+	</select>
+	
+</mapper>

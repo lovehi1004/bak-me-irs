@@ -1,0 +1,2555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.aply.mapper.AdmAprvAplyMapper">
+	
+	<select id="selectAprvAplyUsrAplyDetail" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 C.BZENT_NM
+			,C.BRNO
+			,B.FLNM
+			,B.DEPT_NM
+			,B.JBPS_NM
+			,B.TEL_DDD || ' - ' || B.TEL_TLPNO || ' - ' || B.TEL_PHINO AS TEL
+			,B.EML_ID || '@' || B.EML_ADDR AS EML
+			,C.INST_MGNO
+			,B.USER_CL_CD
+			,C.INST_CLSF_CD
+			,B.UP_INST_MGNO AS USR_UP_INST_MGNO
+			,C.UP_INST_MGNO 
+		FROM IRSUSER.IRB_DTL A
+		INNER JOIN IRSUSER.USER_BSC B
+		ON A.USER_ID = B.USER_ID
+		INNER JOIN IRSUSER.INST_BSC C
+		ON A.INST_MGNO = C.INST_MGNO
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+	
+	<select id="selectAprvAplyUsrDetail" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 B.BZENT_NM
+			,B.BRNO
+			,A.FLNM
+			,A.DEPT_NM
+			,A.JBPS_NM
+			,A.TEL_DDD || ' - ' || A.TEL_TLPNO || ' - ' || A.TEL_PHINO AS TEL
+			,A.EML_ID || '@' || A.EML_ADDR AS EML
+			,B.INST_MGNO
+			,A.USER_CL_CD
+			,B.INST_CLSF_CD
+			,A.UP_INST_MGNO AS USR_UP_INST_MGNO
+			,B.UP_INST_MGNO 
+		FROM IRSUSER.USER_BSC A
+		INNER JOIN IRSUSER.INST_BSC B
+		ON A.INST_MGNO = B.INST_MGNO
+		WHERE 1=1
+	<choose>
+		<when test="sUserId != null and !sUserId.equals('')">
+		AND A.USER_ID = #{sUserId}
+		</when>
+		<otherwise>
+		AND A.USER_ID = #{auth.sUserId}
+		</otherwise>
+	</choose>
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+	</select>
+	
+	<!-- [관리자] 사업신청 > 전체 카운트조회 -->
+	<select id="selectAprvAplyListCnt" resultType="int" parameterType="map">
+		SELECT
+			COUNT(*) AS CNT
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		AND A.PRCS_DGR = B.BIZ_DGR 
+		WHERE 1=1		
+		<if test="srhBizGbn != null and !srhBizGbn.equals('')">
+		AND B.DGR_REG_RSN_CD = #{srhBizGbn}
+		</if>
+		<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+		AND B.APLY_CL_CD = #{srhAplyClCd}
+		</if>
+		<if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+		AND B.BIZ_FORM_CD = #{srhBizFormCd}
+		</if>
+		<if test="srhBizNm != null and !srhBizNm.equals('')">
+		AND (B.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR B.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+		</if>
+	<choose>		
+		<when test="srhPrcsTypeCd eq 'GPC0001'">AND B.PRCS_TYPE_CD = 'PTC0001'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0002'">AND B.PRCS_TYPE_CD = 'PTC0002'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0003'">AND B.PRCS_TYPE_CD = 'PTC0003'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0004'">AND B.PRCS_TYPE_CD IN ('PTC0004', 'PTC0005')</when>
+		<when test="srhPrcsTypeCd eq 'GPC0005'">AND B.PRCS_TYPE_CD IN ('PTC0006', 'PTC0007')</when>
+		<when test="srhPrcsTypeCd eq 'GPC0006'">AND B.PRCS_TYPE_CD = 'PTC0008'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0007'">AND B.PRCS_TYPE_CD = 'PTC0010'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0008'">AND B.PRCS_TYPE_CD = 'PTC0011'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0009'">AND B.PRCS_TYPE_CD = 'PTC0012'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0010'">AND B.PRCS_TYPE_CD = 'PTC0013'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0011'">AND B.PRCS_TYPE_CD = 'PTC0014'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0012'">AND B.PRCS_TYPE_CD = 'PTC0015'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0013'">AND B.PRCS_TYPE_CD = 'PTC0016'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0014'">AND B.PRCS_TYPE_CD = 'PTC0017'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0015'">AND B.PRCS_TYPE_CD = 'PTC0018'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0016'">AND B.PRCS_TYPE_CD IN ('PTC0019', 'PTC0020')</when>
+		<when test="srhPrcsTypeCd eq 'GPC0017'">AND B.PRCS_TYPE_CD IN ('PTC0021', 'PTC0022')</when>
+		<when test="srhPrcsTypeCd eq 'GPC0018'">AND B.PRCS_TYPE_CD = 'PTC0023'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0019'">AND B.PRCS_TYPE_CD = 'PTC0024'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0020'">AND B.PRCS_TYPE_CD = 'PTC0025'</when>
+		<when test="srhPrcsTypeCd eq 'GPC0021'">AND B.PRCS_TYPE_CD IN ('PTC0027', 'PTC0028', 'PTC0029', 'PTC0030', 'PTC0031', 'PTC0032')</when>
+		<when test="srhPrcsTypeCd eq 'GPC0022'">AND B.PRCS_TYPE_CD = 'PTC0026'</when>
+	</choose>
+		<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+		AND B.BIZ_FLD_CD = #{srhBizFldCd}
+		</if>
+		<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+		AND B.BIZ_DTLS_FLD_CD = #{srhBizDtlsFldCd}
+		</if>
+		<if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+		AND B.BIZ_TYPE_CD = #{srhBizTypeCd}
+		</if>
+		<if test="srhBizScalCd != null and !srhBizScalCd.equals('')">
+		AND B.BIZ_SCAL_CD = #{srhBizScalCd}
+		</if>
+		<if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+		AND B.CMPTNC_INST_MNG_NO = #{srhInstMngNo} 
+		</if>
+		<if test="srhAddDataYn != null and !srhAddDataYn.equals('')">
+		AND COALESCE(B.ADD_DATA_TYPE_CD, '') != ''
+		</if>
+		<if test="srhMhdlg != null and !srhMhdlg.equals('')">
+		AND B.BIZ_MNG_NO IN (
+					SELECT DISTINCT
+				BIZ_MNG_NO
+			FROM IRSUSER.IRB_MHDLG_DTL 
+			WHERE 1=1
+			AND MHDLG_MGNO IN (
+				SELECT MHDLG_MGNO 
+				FROM IRSUSER.MHDLG_DTL 
+				WHERE 1=1
+				AND (MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlg}, '%') OR MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlg}, '%'))
+			)
+		)
+		</if>
+		AND A.DEL_YN = 'N'
+		AND B.PRCS_TYPE_CD != 'PTC0001'
+		AND B.DEL_YN = 'N'  
+	</select>
+	
+	<!-- [관리자] 사업신청 > 목록조회 -->
+	<select id="selectAprvAplyList" resultType="egovMap" parameterType="map">
+		SELECT
+			'' AS CHK	
+			,(COUNT(*) OVER()) - (U.RN-1) AS NO																					
+			,U.BIZ_MNG_NO 																					
+			,U.BIZ_DGR		
+			,U.BIZ_TYPE_CD
+			,U.DGR_REG_RSN_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', U.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+			,IRSUSER.FN_GET_CODENM('APLY_CL_CD', U.APLY_CL_CD) AS APLY_CL_CD_NM	
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_ORGT_NM FROM (
+							SELECT 
+								BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_ORGT_NM 	
+				ELSE U.BIZ_ORGT_NM 	
+			END AS BIZ_ORGT_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_KRN_NM FROM (
+							SELECT 
+								BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_KRN_NM
+				ELSE U.BIZ_KRN_NM 	
+			END AS BIZ_KRN_NM
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', U.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN (
+					SELECT '단위사업 ' || CAST(COUNT(*) AS TEXT) || '건' AS CNT 
+					FROM IRSUSER.IRB_DTL A
+					INNER JOIN IRSUSER.IRB_BSC B
+					ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+					AND A.BIZ_DGR = B.PRCS_DGR
+					WHERE A.PRGRM_MNG_NO = U.PRGRM_MNG_NO
+				)
+				ELSE '-'
+			END AS BIZ_CNT
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '1' 	
+				ELSE '0'
+			END AS BIZ_STS
+			,(
+				SELECT 
+					ARRAY_TO_STRING(ARRAY_AGG(T.NTN_CD_NM), ', ') AS NTN_CD_NM 
+				FROM (
+					SELECT 
+						(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = A.IATA_NTN_CD) AS NTN_CD_NM
+					FROM IRSUSER.IRB_NTN_DTL A
+					WHERE 1=1
+					AND A.BIZ_MNG_NO = U.BIZ_MNG_NO 
+					AND A.BIZ_DGR = U.BIZ_DGR	
+				) T
+			) AS NTN_CD_NM 
+			,IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', U.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM						
+			,IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', U.BIZ_FORM_CD) AS BIZ_FORM_CD_NM						
+			,IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', U.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM		
+			,U.CERT_VLD_BGNG_YMD 
+			,U.CERT_VLD_END_YMD  							
+			,COALESCE(U.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY												
+			,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', U.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM			
+			,'1' AS BZENT_STS		
+			,COALESCE((SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = U.CMPTNC_INST_MNG_NO), '-') AS BZENT_NM																				
+			,'1' AS HSTRY_STS																			
+			,'이력' AS HSTRY_NM																			
+			,'1' AS PRCS_GBN_STS	
+		<choose>
+			<when test="auth.sInstClsfCd eq 'ICC0001'">
+			,CASE WHEN U.PRCS_TYPE_CD = 'PTC0001' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0002' THEN '참여자확인'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0003' THEN '평가'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0004' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0005' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0006' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0007' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0008' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0010' THEN '사전심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0011' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0013' THEN '사전심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0014' THEN '심의대기'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0015' THEN '심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0016' THEN '심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0012' THEN '심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0019' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0020' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0025' THEN '심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0021' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0022' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0017' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0023' THEN '심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0018' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0027' THEN '착수지연'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0030' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0029' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0029' THEN '착수지연심의'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0031' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0032' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0026' THEN '조회'
+			 	  WHEN U.PRCS_TYPE_CD = 'PTC0024' THEN '참여자확인'
+				  ELSE '-'
+			END AS PRCS_GBN_NM
+			</when>
+			<when test="auth.sInstClsfCd eq 'ICC0003' or auth.sInstClsfCd eq 'ICC0004'">
+			,CASE WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0001' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0002' THEN '참여자확인'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0003' THEN '평가'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0004' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0005' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0006' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0007' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0008' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0010' THEN '사전심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0011' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0013' THEN '사전심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0014' THEN '심의대기'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0015' THEN '심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0016' THEN '심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0012' THEN '심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0019' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0020' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0025' THEN '심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0021' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0022' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0017' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0023' THEN '심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0018' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0027' THEN '착수지연'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0030' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0029' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0028' THEN '착수지연심의'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0031' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0032' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0026' THEN '조회'
+			 	  WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.PRCS_TYPE_CD = 'PTC0024' THEN '참여자확인'
+				  ELSE '-'
+			END AS PRCS_GBN_NM
+			</when>
+			<otherwise>
+			, '조회' AS PRCS_GBN_NM
+			</otherwise>
+		</choose>			
+			,'0' AS CHG_STS
+			,CASE WHEN U.DGR_REG_RSN_CD = 'BGC0002' AND U.CHG_TYPE_CD = 'BGC0002' THEN '변경' || U.CHG_DATA_DGR || '차'	
+				  WHEN U.DGR_REG_RSN_CD = 'BGC0003' AND U.UPDT_TYPE_CD = 'BGC0003' THEN '갱신' || U.UPDT_DATA_DGR || '차'
+				  WHEN U.DGR_REG_RSN_CD = 'BGC0004' AND U.YMD_TYPE_CD = 'BGC0004' THEN '시작일' || U.YMD_DATA_DGR || '차'
+				  WHEN U.DGR_REG_RSN_CD = 'BGC0005' AND U.SCSN_TYPE_CD = 'BGC0005' THEN '승계' || U.SCSN_DATA_DGR || '차'
+				  ELSE '-' END	
+			AS CHG_NM	
+		<choose>
+			<when test="auth.sInstClsfCd eq 'ICC0001'">
+			,CASE WHEN U.ADD_DATA_DMND_PSBLTY_YN = 'Y' THEN '1' 
+				  ELSE '0' 
+			END AS ADD_DATA_STS
+			,CASE WHEN U.ADD_DATA_DMND_PSBLTY_YN = 'Y'
+				  THEN 
+				  	  CASE WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = '' THEN '자료요청'
+				  	       WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0001' THEN '자료요청'  
+				  	       WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0002' THEN '자료제출'
+				  	       WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0003' THEN '자료확인(반려)'
+				  	       WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0004' THEN '자료확인(승인)'
+				  	  ELSE IRSUSER.FN_GET_CODENM('ADD_DATA_TYPE_CD', U.ADD_DATA_TYPE_CD) END 
+			      ELSE '-'
+			END AS ADD_DATA_NM  
+			</when>
+			<when test="auth.sInstClsfCd eq 'ICC0003' or auth.sInstClsfCd eq 'ICC0004'">
+			,CASE WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.ADD_DATA_DMND_PSBLTY_YN = 'Y' THEN '1' 
+				  ELSE '0' 
+			END AS ADD_DATA_STS
+			,CASE WHEN U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} AND U.ADD_DATA_DMND_PSBLTY_YN = 'Y' 
+				  THEN 
+				  	  CASE WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = '' THEN '자료요청'
+				  	  	   WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0001' THEN '자료요청'
+				  	  	   WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0002' THEN '자료제출'
+				  	  	   WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0003' THEN '자료확인(반려)'
+				  	  	   WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0004' THEN '자료확인(승인)'
+				  	  ELSE IRSUSER.FN_GET_CODENM('ADD_DATA_TYPE_CD', U.ADD_DATA_TYPE_CD) END 
+			      ELSE '-'
+			END AS ADD_DATA_NM  
+			</when>
+			<otherwise>
+			,CASE WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') != '' THEN '1' 
+				  ELSE '0' 
+			END AS ADD_DATA_STS
+			,CASE WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') != '' THEN IRSUSER.FN_GET_CODENM('ADD_DATA_TYPE_CD', U.ADD_DATA_TYPE_CD)																	
+			      ELSE '-'
+			END AS ADD_DATA_NM 
+			</otherwise>
+		</choose>		
+			,COALESCE((SELECT MAX(ADD_DATA_DGR) FROM IRSUSER.IRB_ADD_DATA_DTL WHERE BIZ_MNG_NO = U.BIZ_MNG_NO), 0) AS ADD_DATA_DGR
+			,U.PRGRM_MNG_NO
+			,CASE WHEN COALESCE(U.TYPE_CD, '') = 'DTC0001' THEN '보완' || U.DATA_DGR || '차'
+				  WHEN COALESCE(U.TYPE_CD, '') = 'DTC0002' THEN '보완(심의)' || U.DATA_DGR || '차'
+			 	  ELSE '-' 
+			END AS TYPE_CD_NM 
+			,U.BIZ_CHG_PSBLTY_YN
+			,U.CERT_PRD_UPDT_PSBLTY_YN
+			,U.CERT_BGNG_YMD_CHG_PSBLTY_YN
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+				(
+					SELECT 
+						 A.BIZ_MNG_NO 
+						,A.BIZ_UNQNO 
+						,A.BIZ_CHG_PSBLTY_YN 
+						,A.CERT_PRD_UPDT_PSBLTY_YN 
+						,A.CERT_BGNG_YMD_CHG_PSBLTY_YN 
+						,A.ADD_DATA_DMND_PSBLTY_YN 
+						,A.DLAY_DCLR_DMND_PSBLTY_YN 
+						,A.BIZ_RTRCN_DMND_PSBLTY_YN 
+						,A.KOFF_DCLR_PSBLTY_YN 
+						,A.BIZ_RLS_YN 
+						,B.BIZ_DGR 
+						,B.DGR_REG_RSN_CD
+						,B.AGREE_MGNO
+						,B.AGREE_DGR
+						,B.INST_MGNO 
+						,B.USER_ID 
+						,B.PRGRM_MNG_NO
+						,B.IATA_NTN_CD 
+						,B.APLY_CL_CD 
+						,B.AGREE_CLAUS_CD 
+						,B.BIZ_FORM_CD 
+						,B.BIZ_TYPE_CD 
+						,B.BIZ_SCAL_CD 
+						,B.BIZ_ORGT_NM 
+						,B.BIZ_KRN_NM 
+						,B.CERT_VLD_TYPE_CD 
+						,B.CERT_VLD_BGNG_YMD 
+						,B.CERT_VLD_END_YMD
+						,B.ATCNVR_RDCQTY 
+						,B.BIZ_FLD_CD 
+						,B.BIZ_DTLS_FLD_CD 
+						,B.CMPTNC_INST_MNG_NO 
+						,B.APLY_TYPE_CD 
+						,B.APLY_YMD 
+						,B.PRCS_TYPE_CD 
+						,B.PRCS_YMD 
+						,B.ADD_DATA_TYPE_CD 
+						,B.ADD_DATA_PRCS_YMD 
+						,A.TYPE_CD
+						,A.DATA_DGR
+						,A.CHG_TYPE_CD
+						,A.CHG_DATA_DGR
+						,A.UPDT_TYPE_CD
+						,A.UPDT_DATA_DGR
+						,A.YMD_TYPE_CD
+						,A.YMD_DATA_DGR
+						,A.SCSN_TYPE_CD
+						,A.SCSN_DATA_DGR
+					FROM IRSUSER.IRB_BSC A
+					INNER JOIN IRSUSER.IRB_DTL B
+					ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+					AND A.PRCS_DGR = B.BIZ_DGR 
+					WHERE 1=1		
+					<if test="srhBizGbn != null and !srhBizGbn.equals('')">
+					AND B.DGR_REG_RSN_CD = #{srhBizGbn}
+					</if>
+					<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+					AND B.APLY_CL_CD = #{srhAplyClCd}
+					</if>
+					<if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+					AND B.BIZ_FORM_CD = #{srhBizFormCd}
+					</if>
+					<if test="srhBizNm != null and !srhBizNm.equals('')">
+					AND (B.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR B.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+					</if>
+				<choose>		
+					<when test="srhPrcsTypeCd eq 'GPC0001'">AND B.PRCS_TYPE_CD = 'PTC0001'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0002'">AND B.PRCS_TYPE_CD = 'PTC0002'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0003'">AND B.PRCS_TYPE_CD = 'PTC0003'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0004'">AND B.PRCS_TYPE_CD IN ('PTC0004', 'PTC0005')</when>
+					<when test="srhPrcsTypeCd eq 'GPC0005'">AND B.PRCS_TYPE_CD IN ('PTC0006', 'PTC0007')</when>
+					<when test="srhPrcsTypeCd eq 'GPC0006'">AND B.PRCS_TYPE_CD = 'PTC0008'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0007'">AND B.PRCS_TYPE_CD = 'PTC0010'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0008'">AND B.PRCS_TYPE_CD = 'PTC0011'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0009'">AND B.PRCS_TYPE_CD = 'PTC0012'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0010'">AND B.PRCS_TYPE_CD = 'PTC0013'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0011'">AND B.PRCS_TYPE_CD = 'PTC0014'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0012'">AND B.PRCS_TYPE_CD = 'PTC0015'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0013'">AND B.PRCS_TYPE_CD = 'PTC0016'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0014'">AND B.PRCS_TYPE_CD = 'PTC0017'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0015'">AND B.PRCS_TYPE_CD = 'PTC0018'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0016'">AND B.PRCS_TYPE_CD IN ('PTC0019', 'PTC0020')</when>
+					<when test="srhPrcsTypeCd eq 'GPC0017'">AND B.PRCS_TYPE_CD IN ('PTC0021', 'PTC0022')</when>
+					<when test="srhPrcsTypeCd eq 'GPC0018'">AND B.PRCS_TYPE_CD = 'PTC0023'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0019'">AND B.PRCS_TYPE_CD = 'PTC0024'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0020'">AND B.PRCS_TYPE_CD = 'PTC0025'</when>
+					<when test="srhPrcsTypeCd eq 'GPC0021'">AND B.PRCS_TYPE_CD IN ('PTC0027', 'PTC0028', 'PTC0029', 'PTC0030', 'PTC0031', 'PTC0032')</when>
+					<when test="srhPrcsTypeCd eq 'GPC0022'">AND B.PRCS_TYPE_CD = 'PTC0026'</when>
+				</choose>
+					<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+					AND B.BIZ_FLD_CD = #{srhBizFldCd}
+					</if>
+					<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+					AND B.BIZ_DTLS_FLD_CD = #{srhBizDtlsFldCd}
+					</if>
+					<if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+					AND B.BIZ_TYPE_CD = #{srhBizTypeCd}
+					</if>
+					<if test="srhBizScalCd != null and !srhBizScalCd.equals('')">
+					AND B.BIZ_SCAL_CD = #{srhBizScalCd}
+					</if>
+					<if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+					AND B.CMPTNC_INST_MNG_NO = #{srhInstMngNo} 
+					</if>
+					<if test="srhAddDataYn != null and !srhAddDataYn.equals('')">
+					AND COALESCE(B.ADD_DATA_TYPE_CD, '') != ''
+					</if>
+					<if test="srhMhdlg != null and !srhMhdlg.equals('')">
+					AND B.BIZ_MNG_NO IN (
+								SELECT DISTINCT
+							BIZ_MNG_NO
+						FROM IRSUSER.IRB_MHDLG_DTL 
+						WHERE 1=1
+						AND MHDLG_MGNO IN (
+							SELECT MHDLG_MGNO 
+							FROM IRSUSER.MHDLG_DTL 
+							WHERE 1=1
+							AND (MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlg}, '%') OR MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlg}, '%'))
+						)
+					)
+					</if>
+					AND A.DEL_YN = 'N'
+					AND B.PRCS_TYPE_CD != 'PTC0001'
+					AND B.DEL_YN = 'N'
+					ORDER BY A.MDFCN_DT DESC					
+			) V
+		) U
+		LIMIT #{pageNavigation.listSize}
+		OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}
+	</select>
+	
+	<select id="selectAprvAplyExcelList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO	
+			,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', U.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+			,IRSUSER.FN_GET_CODENM('APLY_CL_CD', U.APLY_CL_CD) AS APLY_CL_CD_NM	
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_ORGT_NM FROM (
+							SELECT 
+								BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_ORGT_NM 	
+				ELSE U.BIZ_ORGT_NM 	
+			END AS BIZ_ORGT_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_KRN_NM FROM (
+							SELECT 
+								BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_KRN_NM
+				ELSE U.BIZ_KRN_NM 	
+			END AS BIZ_KRN_NM
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', U.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN (
+					SELECT '단위사업 ' || CAST(COUNT(*) AS TEXT) || '건' AS CNT 
+					FROM IRSUSER.IRB_DTL A
+					INNER JOIN IRSUSER.IRB_BSC B
+					ON A.BIZ_MNG_NO = B.BIZ_MNG_NO
+					AND A.BIZ_DGR = B.PRCS_DGR
+					WHERE A.PRGRM_MNG_NO = U.PRGRM_MNG_NO
+				)
+				ELSE '-'
+			END AS BIZ_CNT			
+			,(
+				SELECT 
+					ARRAY_TO_STRING(ARRAY_AGG(T.NTN_CD_NM), ', ') AS NTN_CD_NM 
+				FROM (
+					SELECT 
+						(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = A.IATA_NTN_CD) AS NTN_CD_NM
+					FROM IRSUSER.IRB_NTN_DTL A
+					WHERE 1=1
+					AND A.BIZ_MNG_NO = U.BIZ_MNG_NO 
+					AND A.BIZ_DGR = U.BIZ_DGR	
+				) T
+			) AS NTN_CD_NM 
+			,IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', U.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM						
+			,IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', U.BIZ_FORM_CD) AS BIZ_FORM_CD_NM						
+			,IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', U.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM		
+			,U.CERT_VLD_BGNG_YMD 
+			,U.CERT_VLD_END_YMD  							
+			,COALESCE(U.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY												
+			,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', U.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+			,CASE WHEN COALESCE(U.TYPE_CD, '') = 'DTC0001' THEN '보완' || U.DATA_DGR || '차'
+				  WHEN COALESCE(U.TYPE_CD, '') = 'DTC0002' THEN '보완(심의)' || U.DATA_DGR || '차'
+			 	  ELSE '-' 
+			END AS TYPE_CD_NM 
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+				(
+					SELECT 
+						 A.BIZ_MNG_NO 
+						,A.BIZ_UNQNO 
+						,A.BIZ_CHG_PSBLTY_YN 
+						,A.CERT_PRD_UPDT_PSBLTY_YN 
+						,A.CERT_BGNG_YMD_CHG_PSBLTY_YN 
+						,A.ADD_DATA_DMND_PSBLTY_YN 
+						,A.DLAY_DCLR_DMND_PSBLTY_YN 
+						,A.BIZ_RTRCN_DMND_PSBLTY_YN 
+						,A.KOFF_DCLR_PSBLTY_YN 
+						,A.BIZ_RLS_YN 
+						,B.BIZ_DGR 
+						,B.DGR_REG_RSN_CD
+						,B.AGREE_MGNO
+						,B.AGREE_DGR
+						,B.INST_MGNO 
+						,B.USER_ID 
+						,B.PRGRM_MNG_NO
+						,B.IATA_NTN_CD 
+						,B.APLY_CL_CD 
+						,B.AGREE_CLAUS_CD 
+						,B.BIZ_FORM_CD 
+						,B.BIZ_TYPE_CD 
+						,B.BIZ_SCAL_CD 
+						,B.BIZ_ORGT_NM 
+						,B.BIZ_KRN_NM 
+						,B.CERT_VLD_TYPE_CD 
+						,B.CERT_VLD_BGNG_YMD 
+						,B.CERT_VLD_END_YMD
+						,B.ATCNVR_RDCQTY 
+						,B.BIZ_FLD_CD 
+						,B.BIZ_DTLS_FLD_CD 
+						,B.CMPTNC_INST_MNG_NO 
+						,B.APLY_TYPE_CD 
+						,B.APLY_YMD 
+						,B.PRCS_TYPE_CD 
+						,B.PRCS_YMD 
+						,B.ADD_DATA_TYPE_CD 
+						,B.ADD_DATA_PRCS_YMD 
+						,A.TYPE_CD
+						,A.DATA_DGR
+					FROM IRSUSER.IRB_BSC A
+					INNER JOIN IRSUSER.IRB_DTL B
+					ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+					AND A.PRCS_DGR = B.BIZ_DGR 
+					WHERE 1=1		
+					<if test="srhBizGbn != null and !srhBizGbn.equals('')">
+					AND B.DGR_REG_RSN_CD = #{srhBizGbn}
+					</if>
+					<if test="srhAplyClCd != null and !srhAplyClCd.equals('')">
+					AND B.APLY_CL_CD = #{srhAplyClCd}
+					</if>
+					<if test="srhBizFormCd != null and !srhBizFormCd.equals('')">
+					AND B.BIZ_FORM_CD = #{srhBizFormCd}
+					</if>
+					<if test="srhBizNm != null and !srhBizNm.equals('')">
+					AND (B.BIZ_ORGT_NM LIKE CONCAT('%', #{srhBizNm}, '%') OR B.BIZ_KRN_NM LIKE CONCAT('%', #{srhBizNm}, '%'))
+					</if>
+					<if test="srhPrcsTypeCd != null and !srhPrcsTypeCd.equals('')">
+					AND B.PRCS_TYPE_CD = #{srhPrcsTypeCd}
+					</if>
+					<if test="srhBizFldCd != null and !srhBizFldCd.equals('')">
+					AND B.BIZ_FLD_CD = #{srhBizFldCd}
+					</if>
+					<if test="srhBizDtlsFldCd != null and !srhBizDtlsFldCd.equals('')">
+					AND B.BIZ_DTLS_FLD_CD = #{srhBizDtlsFldCd}
+					</if>
+					<if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+					AND B.BIZ_TYPE_CD = #{srhBizTypeCd}
+					</if>
+					<if test="srhBizScalCd != null and !srhBizScalCd.equals('')">
+					AND B.BIZ_SCAL_CD = #{srhBizScalCd}
+					</if>
+					<if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+					AND B.CMPTNC_INST_MNG_NO = #{srhInstMngNo} 
+					</if>
+					<if test="srhAddDataYn != null and !srhAddDataYn.equals('')">
+					AND COALESCE(B.ADD_DATA_TYPE_CD, '') != ''
+					</if>
+					<if test="srhMhdlg != null and !srhMhdlg.equals('')">
+					AND B.BIZ_MNG_NO IN (
+								SELECT DISTINCT
+							BIZ_MNG_NO
+						FROM IRSUSER.IRB_MHDLG_DTL 
+						WHERE 1=1
+						AND MHDLG_MGNO IN (
+							SELECT MHDLG_MGNO 
+							FROM IRSUSER.MHDLG_DTL 
+							WHERE 1=1
+							AND (MHDLG_ORGT_NM LIKE CONCAT('%', #{srhMhdlg}, '%') OR MHDLG_KRN_NM LIKE CONCAT('%', #{srhMhdlg}, '%'))
+						)
+					)
+					</if>
+					AND A.DEL_YN = 'N'
+					AND B.PRCS_TYPE_CD != 'PTC0001'
+					AND B.DEL_YN = 'N'
+					ORDER BY B.APLY_YMD DESC, B.BIZ_MNG_NO DESC					
+			) V
+		) U
+		LIMIT #{pageNavigation.listSize}
+		OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}
+	</select>
+	
+	<select id="selectAprvAplyDocList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+				SELECT
+					 B.BIZ_MNG_NO
+					,B.BIZ_DGR
+					,B.BIZ_TYPE_CD
+					,B.DGR_REG_RSN_CD
+					,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', B.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+					,TO_CHAR(B.APLY_YMD, 'YYYY-MM-DD HH24:MI:SS') as APLY_YMD
+					,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', B.DGR_REG_RSN_CD) || ' ' || IRSUSER.FN_GET_CODENM('APLY_TYPE_CD', B.APLY_TYPE_CD) AS APLY_TYPE_CD_NM
+					,TO_CHAR(B.PRCS_YMD, 'YYYY-MM-DD HH24:MI:SS') as PRCS_YMD  
+					,B.PRCS_TYPE_CD
+					,CASE WHEN B.PRCS_TYPE_CD = 'PTC0004' OR B.PRCS_TYPE_CD = 'PTC0005' OR B.PRCS_TYPE_CD = 'PTC0006' 
+							OR B.PRCS_TYPE_CD = 'PTC0007' OR B.PRCS_TYPE_CD = 'PTC0008' OR B.PRCS_TYPE_CD = 'PTC0010' THEN (
+							SELECT 
+								T3.BZENT_NM  || '(' || T4.FLNM || ')'
+							FROM IRSUSER.IRB_DTL T1
+							INNER JOIN IRSUSER.IRB_EVL_DTL T2
+							ON T1.EVL_SN = T2.EVL_SN 
+							INNER JOIN IRSUSER.INST_BSC T3
+							ON T2.EVL_INST_CD = T3.INST_MGNO 
+							INNER JOIN IRSUSER.USER_BSC T4
+							ON T2.EVALR_ID = T4.USER_ID 
+							WHERE 1=1
+							AND T1.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND T1.BIZ_DGR = B.BIZ_DGR
+						 )
+						 WHEN B.PRCS_TYPE_CD = 'PTC0011' OR B.PRCS_TYPE_CD = 'PTC0012' OR B.PRCS_TYPE_CD = 'PTC0013' OR B.PRCS_TYPE_CD = 'PTC0014' THEN (
+							SELECT 
+								T3.BZENT_NM  || '(' || T4.FLNM || ')'  
+							FROM IRSUSER.IRB_DTL T1
+							INNER JOIN IRSUSER.IRB_DIC_DLBR_DTL T2
+							ON T1.DIC_DLBR_SN = T2.DIC_DLBR_SN 
+							AND T2.DIC_DLBR_DGR = (SELECT MAX(DIC_DLBR_DGR) FROM IRSUSER.IRB_DIC_DLBR_DTL WHERE DIC_DLBR_SN = T2.DIC_DLBR_SN)
+							INNER JOIN IRSUSER.INST_BSC T3
+							ON T2.DIC_DLBR_INST_CD = T3.INST_MGNO 
+							INNER JOIN IRSUSER.USER_BSC T4
+							ON T2.DIC_DLBRR_ID = T4.USER_ID 
+							WHERE 1=1
+							AND T1.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND T1.BIZ_DGR = B.BIZ_DGR
+						 )
+						 WHEN B.PRCS_TYPE_CD = 'PTC0019' OR B.PRCS_TYPE_CD = 'PTC0020' OR B.PRCS_TYPE_CD = 'PTC0021' OR B.PRCS_TYPE_CD = 'PTC0022' 
+						 	OR B.PRCS_TYPE_CD = 'PTC0017' OR B.PRCS_TYPE_CD = 'PTC0023' OR B.PRCS_TYPE_CD = 'PTC0018' 
+						 THEN (
+							SELECT 
+								T3.BZENT_NM  || '(' || T4.FLNM || ')'    
+							FROM IRSUSER.IRB_DTL T1
+							INNER JOIN IRSUSER.IRB_DLBR_DTL T2
+							ON T1.DLBR_SN = T2.DLBR_SN 
+							AND T2.DLBR_DGR = (SELECT MAX(DLBR_DGR) FROM IRSUSER.IRB_DLBR_DTL WHERE DLBR_SN = T2.DLBR_SN)
+							INNER JOIN IRSUSER.INST_BSC T3
+							ON T2.DLBR_RSLT_REG_INST_CD = T3.INST_MGNO 
+							INNER JOIN IRSUSER.USER_BSC T4
+							ON T2.DLBR_RSLT_RGTR_ID = T4.USER_ID 
+							WHERE 1=1
+							AND T1.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND T1.BIZ_DGR = B.BIZ_DGR
+						 )
+						 WHEN B.PRCS_TYPE_CD = 'PTC0030' OR B.PRCS_TYPE_CD = 'PTC0029' OR B.PRCS_TYPE_CD = 'PTC0028' THEN (
+							SELECT 
+								T3.BZENT_NM  || '(' || T4.FLNM || ')' 
+							FROM IRSUSER.IRB_DTL T1
+							INNER JOIN IRSUSER.IRB_DLAY_DTL T2
+							ON T1.DLAY_SN = T2.DLAY_SN 
+							AND T2.DLAY_PRCS_DGR = (SELECT MAX(DLAY_PRCS_DGR) FROM IRSUSER.IRB_DLAY_DTL WHERE DLAY_SN = T2.DLAY_SN)
+							INNER JOIN IRSUSER.INST_BSC T3
+							ON T2.DLAY_IDNTY_INST_MGNO = T3.INST_MGNO 
+							INNER JOIN IRSUSER.USER_BSC T4
+							ON T2.DLAY_IDNTY_ID = T4.USER_ID 
+							WHERE 1=1
+							AND T1.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND T1.BIZ_DGR = B.BIZ_DGR
+						 )
+						 WHEN B.PRCS_TYPE_CD = 'PTC0031' OR B.PRCS_TYPE_CD = 'PTC0032' THEN (
+							SELECT 
+								T3.BZENT_NM  || '(' || T4.FLNM || ')' 
+							FROM IRSUSER.IRB_DTL T1
+							INNER JOIN IRSUSER.IRB_DLAY_DTL T2
+							ON T1.DLAY_SN = T2.DLAY_SN 
+							AND T2.DLAY_PRCS_DGR = (SELECT MAX(DLAY_PRCS_DGR) FROM IRSUSER.IRB_DLAY_DTL WHERE DLAY_SN = T2.DLAY_SN)
+							INNER JOIN IRSUSER.INST_BSC T3
+							ON T2.DLAY_DLBR_INST_MGNO = T3.INST_MGNO 
+							INNER JOIN IRSUSER.USER_BSC T4
+							ON T2.DLAY_DLBR_ID = T4.USER_ID 
+							WHERE 1=1
+							AND T1.BIZ_MNG_NO = B.BIZ_MNG_NO
+							AND T1.BIZ_DGR = B.BIZ_DGR
+						 )
+						 WHEN B.PRCS_TYPE_CD = 'PTC0026' THEN (
+						 	SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = B.INST_MGNO
+						 )
+						 ELSE '-'
+					END AS PRCS_USER_NM
+					,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', B.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+					,CASE WHEN CAST(#{bizDgr} AS NUMERIC) = B.BIZ_DGR THEN '현재문서' ELSE '상세보기' END AS BTN_CTL
+				FROM IRSUSER.IRB_BSC A
+				INNER JOIN IRSUSER.IRB_DTL B
+				ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.DEL_YN = 'N'
+				AND B.DEL_YN = 'N'
+				ORDER BY B.BIZ_DGR DESC
+			) V
+		) U
+	</select>
+
+	<select id="selectAprvAplyCmmDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 B.BIZ_ORGT_NM 
+			,B.BIZ_KRN_NM 
+			,B.BIZ_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', B.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', B.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+			,B.PRCS_TYPE_CD
+			,A.PRCS_DGR
+			,B.BIZ_DGR
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		WHERE 1=1
+		AND B.BIZ_MNG_NO = #{bizMngNo}			
+		AND B.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)		
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+	</select>
+	
+	<select id="selectAprvAplyPrgmDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 B.BIZ_MNG_NO
+			,B.BIZ_DGR
+			,B.AGREE_MGNO
+			,B.AGREE_DGR
+			,(
+				SELECT CNCLD_KRN_NM 
+				FROM IRSUSER.AGREE_STIPL_BSC 
+				WHERE CNCLD_MGNO = B.AGREE_MGNO 
+				AND CNCLD_DGR = B.AGREE_DGR
+			) AS AGREE_MGNO_NM
+			,B.AGREE_CLAUS_CD
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,B.BPLC_NM
+			,B.BIZ_ORGT_NM
+			,B.BIZ_KRN_NM
+			,B.CERT_VLD_BGNG_YMD
+			,B.CERT_VLD_END_YMD
+			,CAST(CAST(B.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(B.CERT_VLD_END_YMD AS DATE) AS TEXT) AS CERT_VLD_YMD
+			,B.BIZ_FLD_CD
+			,B.BIZ_DTLS_FLD_CD
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) AS BIZ_FLD_CD_NM
+			,(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_NM	
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) || ' > ' || 
+			(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_SNM	
+			,B.BIZ_PLND_FLMNO
+			,B.ETC_DATA_FLMNO
+			,B.CNVR_BASS_DATA_FLMNO
+			,B.REDD_PLUS_YN
+			,(
+				SELECT
+					'(변경전 : ' || CAST(CAST(T2.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(T2.CERT_VLD_END_YMD AS DATE) AS TEXT) || ' )'
+				FROM IRSUSER.IRB_BSC T1
+				INNER JOIN IRSUSER.IRB_PRGRM_DTL T2
+				ON T1.BIZ_MNG_NO = T2.BIZ_MNG_NO
+				AND T2.BIZ_DGR = (
+									SELECT MAX(D1.BIZ_DGR) 
+									FROM IRSUSER.IRB_PRGRM_DTL D1
+									INNER JOIN IRSUSER.IRB_DTL D2
+									ON D1.BIZ_MNG_NO = D2.BIZ_MNG_NO
+									AND D1.BIZ_DGR = D2.BIZ_DGR
+									WHERE 1=1
+									AND D1.BIZ_MNG_NO = #{bizMngNo} 
+									AND D1.BIZ_DGR <![CDATA[<]]> CAST(#{bizDgr} AS NUMERIC)	
+									AND D2.PRCS_TYPE_CD IN ('PTC0018', 'PTC0029', 'PTC0031', 'PTC0032', 'PTC0026')	
+								)
+				WHERE 1=1
+				AND T1.BIZ_MNG_NO = #{bizMngNo}
+			) AS OLD_CERT_VLD_YMD
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_PRGRM_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND B.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+	
+	<select id="selectAprvAplyPrgmEmptyDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 '' AS BIZ_MNG_NO
+			,'' AS BIZ_DGR
+			,'' AS AGREE_MGNO
+			,'' AS AGREE_DGR
+			,'' AS AGREE_MGNO_NM
+			,'' AS AGREE_CLAUS_CD
+			,'' AS AGREE_CLAUS_CD_NM	
+			,'' AS BPLC_NM
+			,'' AS BIZ_ORGT_NM
+			,'' AS BIZ_KRN_NM
+			,'' AS CERT_VLD_BGNG_YMD
+			,'' AS CERT_VLD_END_YMD
+			,'' AS CERT_VLD_YMD
+			,'' AS BIZ_FLD_CD
+			,'' AS BIZ_DTLS_FLD_CD
+			,'' AS BIZ_FLD_CD_NM
+			,'' AS BIZ_FLD_CD_NM	
+			,'' AS BIZ_FLD_CD_SNM	
+			,'' AS BIZ_PLND_FLMNO
+			,'' AS ETC_DATA_FLMNO
+			,'' AS CNVR_BASS_DATA_FLMNO
+			,'N' AS REDD_PLUS_YN
+			,'' AS OLD_CERT_VLD_YMD
+		FROM IRSUSER.IRB_BSC A 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+	</select>
+
+	<select id="selectAprvAplyPgmNtnList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 T1.CNCLD_MGNO
+			,T1.CNCLD_DGR
+			,T2.NTN_CD
+			,(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = T2.NTN_CD) AS NTN_CD_NM
+			,COALESCE(T3.INST_NM, '') AS INST_NM
+			,COALESCE(T3.DEPT_NM, '') AS DEPT_NM
+			,CASE WHEN COALESCE(T3.IATA_NTN_CD, '') = '' THEN 'N' ELSE 'Y' END AS NTN_CHK
+		FROM (
+			SELECT 
+				 A.CNCLD_MGNO
+				,A.CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N' 
+			UNION
+			SELECT 
+				  B.REL_CNCLD_MGNO AS CNCLD_MGNO
+				 ,(SELECT MAX(CNCLD_DGR) FROM IRSUSER.AGREE_STIPL_BSC WHERE CNCLD_MGNO = B.REL_CNCLD_MGNO) AS CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			INNER JOIN IRSUSER.AGREE_STIPL_REL B
+			ON A.CNCLD_MGNO = B.CNCLD_MGNO 
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N'
+			AND B.DEL_YN = 'N'
+		) T1
+		INNER JOIN IRSUSER.AGREE_STIPL_NTN_DTL T2
+		ON T1.CNCLD_MGNO = T2.CNCLD_MGNO 
+		AND T1.CNCLD_DGR = T2.CNCLD_DGR
+		LEFT OUTER JOIN IRSUSER.IRB_PRGRM_NTN_DTL T3
+		ON T2.NTN_CD = T3.IATA_NTN_CD
+		AND T3.BIZ_MNG_NO = #{bizMngNo}
+		AND T3.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+
+	<select id="selectAprvAplyPgmMhdlgList" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 A.MHDLG_MGNO 
+			,C.MHDLG_ORGT_NM 
+			,C.MHDLG_KRN_NM 
+		FROM IRSUSER.IRB_PRGRM_MHDLG_DTL A
+		INNER JOIN IRSUSER.MHDLG_BSC B
+		ON A.MHDLG_MGNO = B.MHDLG_MGNO 
+		INNER JOIN IRSUSER.MHDLG_DTL C
+		ON B.MHDLG_MGNO = C.MHDLG_MGNO 
+		AND B.VLD_MHDLG_DGR = C.MHDLG_DGR
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+		AND C.DEL_YN = 'N'
+	</select>
+
+	<select id="selectAprvAplyUnitDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 B.BIZ_MNG_NO
+			,B.BIZ_DGR
+			,B.DGR_REG_RSN_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', B.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+			,B.AGREE_MGNO
+			,(
+				SELECT CNCLD_KRN_NM 
+				FROM IRSUSER.AGREE_STIPL_BSC 
+				WHERE CNCLD_MGNO = B.AGREE_MGNO 
+				AND CNCLD_DGR = B.AGREE_DGR
+			) AS AGREE_MGNO_NM
+			,B.AGREE_DGR
+			,B.INST_MGNO
+			,B.USER_ID
+			,B.PRGRM_MNG_NO
+			,B.BPLC_NM
+			,B.BIZ_ENFC_PLC_NM
+			,B.IATA_NTN_CD
+			,(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = B.IATA_NTN_CD) AS IATA_NTN_CD_NM 	
+			,B.APLY_CL_CD
+			,IRSUSER.FN_GET_CODENM('APLY_CL_CD', B.APLY_CL_CD) AS APLY_CL_CD_NM	
+			,B.AGREE_CLAUS_CD
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,B.BIZ_FORM_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', B.BIZ_FORM_CD) AS BIZ_FORM_CD_NM		
+			,B.BIZ_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', B.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,B.BIZ_SCAL_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', B.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM	
+			,B.BIZ_ORGT_NM
+			,B.BIZ_KRN_NM
+			,B.KOFF_PRNMNT_YMD 
+			,CAST(CAST(B.KOFF_PRNMNT_YMD AS DATE) AS TEXT) AS KOFF_PRNMNT_YMD_NM
+			,B.CERT_VLD_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', B.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM	
+			,B.CERT_VLD_BGNG_YMD
+			,B.CERT_VLD_END_YMD
+			,CAST(CAST(B.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(B.CERT_VLD_END_YMD AS DATE) AS TEXT) AS CERT_VLD_YMD
+			,COALESCE(B.BFCNVR_RDCQTY, 0) AS BFCNVR_RDCQTY
+			,B.RDC_UNIT_CD
+			,IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', B.RDC_UNIT_CD) AS BFCNVR_RDCQTY_NM	
+			,B.CNVR_COEF_CN
+			,B.CNVR_BASS_CN
+			,COALESCE(B.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY
+			,IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', 'RUC0001') AS ATCNVR_RDCQTY_NM
+			,B.BIZ_FLD_CD
+			,B.BIZ_DTLS_FLD_CD
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) AS BIZ_FLD_CD_NM
+			,(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_NM	
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) || ' > ' || 
+			(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_SNM			
+			,COALESCE(B.SOP_RDCQTY, 0) AS SOP_RDCQTY
+			,B.SOP_UNIT_CD
+			,IRSUSER.FN_GET_CODENM('SOP_UNIT_CD', B.SOP_UNIT_CD) AS SOP_UNIT_CD_NM
+			,COALESCE(B.OMGE_RDCQTY, 0) AS OMGE_RDCQTY
+			,B.OMGE_UNIT_CD
+			,IRSUSER.FN_GET_CODENM('OMGE_UNIT_CD', B.OMGE_UNIT_CD) AS OMGE_UNIT_CD_NM
+			,B.BIZ_PLND_FLMNO
+			,B.ETC_DATA_FLMNO
+			,B.CNVR_BASS_DATA_FLMNO
+			,B.TRSM_YN
+			,CASE WHEN B.TRSM_YN = 'Y' THEN '동의' ELSE '미동의' END AS TRSM_YN_NM
+			,B.CMPTNC_INST_MNG_NO
+			,B.APLY_TYPE_CD
+			,B.APLY_YMD
+			,B.PRCS_TYPE_CD
+			,B.PRCS_YMD
+			,B.ADD_DATA_TYPE_CD
+			,B.ADD_DATA_PRCS_YMD
+			,B.EVL_SN
+			,B.DIC_DLBR_SN
+			,B.DLBR_SN
+			,B.DLAY_SN
+			,B.RTRCN_SN
+			,B.DEL_YN
+			,A.BIZ_UNQNO
+			,B.TYPE_CD
+			,B.DATA_DGR
+			,A.BIZ_CHG_PSBLTY_YN
+			,A.CERT_PRD_UPDT_PSBLTY_YN
+			,A.CERT_BGNG_YMD_CHG_PSBLTY_YN
+			,A.RTADTI_SCSN_PSBLTY_YN
+			,A.ADD_DATA_DMND_PSBLTY_YN
+			,A.DLAY_DCLR_DMND_PSBLTY_YN
+			,A.BIZ_RTRCN_DMND_PSBLTY_YN
+			,A.KOFF_DCLR_PSBLTY_YN
+			,A.BIZ_KOFF_DGR
+			,B.REDD_PLUS_YN
+			,B.CHG_CN
+			,(
+				SELECT
+					'(변경전 : ' || CAST(CAST(T2.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(T2.CERT_VLD_END_YMD AS DATE) AS TEXT) || ' )'
+				FROM IRSUSER.IRB_BSC T1
+				INNER JOIN IRSUSER.IRB_DTL T2
+				ON T1.BIZ_MNG_NO = T2.BIZ_MNG_NO
+				AND T2.BIZ_DGR = (
+									SELECT MAX(BIZ_DGR) 
+									FROM IRSUSER.IRB_DTL 
+									WHERE BIZ_MNG_NO = #{bizMngNo} 
+									AND BIZ_DGR <![CDATA[<]]> CAST(#{bizDgr} AS NUMERIC)	
+									AND PRCS_TYPE_CD IN ('PTC0018', 'PTC0029', 'PTC0031', 'PTC0032', 'PTC0026')	
+								)
+				WHERE 1=1
+				AND T1.BIZ_MNG_NO = #{bizMngNo}
+			) AS OLD_CERT_VLD_YMD
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND B.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+	
+	<select id="selectAprvAplyUniNtnList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 T1.CNCLD_MGNO
+			,T1.CNCLD_DGR
+			,T2.NTN_CD
+			,(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = T2.NTN_CD) AS NTN_CD_NM
+			,COALESCE(T3.INST_NM, '') AS INST_NM
+			,COALESCE(T3.DEPT_NM, '') AS DEPT_NM
+			,CASE WHEN COALESCE(T3.IATA_NTN_CD, '') = '' THEN 'N' ELSE 'Y' END AS NTN_CHK
+		FROM (
+			SELECT 
+				 A.CNCLD_MGNO
+				,A.CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N' 
+			UNION
+			SELECT 
+				  B.REL_CNCLD_MGNO AS CNCLD_MGNO
+				 ,(SELECT MAX(CNCLD_DGR) FROM IRSUSER.AGREE_STIPL_BSC WHERE CNCLD_MGNO = B.REL_CNCLD_MGNO) AS CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			INNER JOIN IRSUSER.AGREE_STIPL_REL B
+			ON A.CNCLD_MGNO = B.CNCLD_MGNO 
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N'
+			AND B.DEL_YN = 'N'
+		) T1
+		INNER JOIN IRSUSER.AGREE_STIPL_NTN_DTL T2
+		ON T1.CNCLD_MGNO = T2.CNCLD_MGNO 
+		AND T1.CNCLD_DGR = T2.CNCLD_DGR
+		LEFT OUTER JOIN IRSUSER.IRB_NTN_DTL T3
+		ON T2.NTN_CD = T3.IATA_NTN_CD
+		AND T3.BIZ_MNG_NO = #{bizMngNo}
+		AND T3.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+
+	<select id="selectAprvAplyUniMhdlgList" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 A.MHDLG_MGNO 
+			,C.MHDLG_ORGT_NM 
+			,C.MHDLG_KRN_NM 
+		FROM IRSUSER.IRB_MHDLG_DTL A
+		INNER JOIN IRSUSER.MHDLG_BSC B
+		ON A.MHDLG_MGNO = B.MHDLG_MGNO 
+		INNER JOIN IRSUSER.MHDLG_DTL C
+		ON B.MHDLG_MGNO = C.MHDLG_MGNO 
+		AND B.VLD_MHDLG_DGR = C.MHDLG_DGR
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+		AND C.DEL_YN = 'N'
+	</select>
+
+	<select id="selectAprvAplyExcrList" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 '' AS CHK
+			,CASE WHEN B.INST_MGNO = C.INST_MGNO THEN 'Y' ELSE 'N' END AS MASTER_YN
+			,A.BIZ_MNG_NO AS BIZ_MNG_NO
+			,A.BIZ_DGR  AS BIZ_DGR
+			,A.SN AS SN
+			,A.INST_MGNO
+			,A.DMST_CL_CD
+			,IRSUSER.FN_GET_CODENM('DMST_CL_CD', A.DMST_CL_CD) AS DMST_CL_CD_NM
+			,CASE WHEN A.DMST_CL_CD = 'DCC0001' THEN B.BZENT_NM ELSE B.BZENT_NM END AS BZENT_NM
+			,B.BRNO 
+			,A.BFCNVR_RDCQTY   
+			,A.RDC_UNIT_CD 
+			,IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', A.RDC_UNIT_CD) AS BFCNVR_RDCQTY_NM	
+			,A.CNVR_COEF_CN 
+			,A.CNVR_BASS_CN 
+			,A.ATCNVR_RDCQTY 
+			,IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', 'RUC0001') AS ATCNVR_RDCQTY_NM
+			,CASE WHEN A.AGRE_YN = 'Y' THEN '0' else '1' END AS AGRE_STS 
+			,CASE WHEN A.AGRE_YN = 'Y' THEN 'true' else 'false' END AS AGRE_YN 
+			,A.AGRE_YMD
+			,CASE WHEN A.INST_AGRE_YN = 'Y' THEN 'true' else 'false' END AS INST_AGRE_YN
+			,A.INST_AGRE_YMD
+			,CASE WHEN A.DMST_CL_CD = 'DCC0001' THEN 'Y' ELSE 'Y' END AS POPUP_YN
+			,CASE WHEN A.AGRE_YN = 'Y' OR A.INST_AGRE_YN = 'Y' THEN '동의' ELSE '미동의' END AS LST_AGRE_YN_NM
+			,CASE WHEN A.AGRE_YN = 'Y' OR A.INST_AGRE_YN = 'Y' THEN 'true' ELSE 'false' END AS LST_AGRE_YN
+		FROM IRSUSER.IRB_EXCR_DTL A
+		LEFT OUTER JOIN IRSUSER.INST_BSC B
+		ON A.INST_MGNO = B.INST_MGNO 
+		INNER JOIN IRSUSER.IRB_DTL C
+		ON A.BIZ_MNG_NO = C.BIZ_MNG_NO 
+		AND A.BIZ_DGR = C.BIZ_DGR 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+		ORDER BY A.SN ASC
+	</select>
+
+	<select id="selectAprvAplyEvlRstInfo" resultType="egovMap" parameterType="map">
+		SELECT 
+			 B.EVL_SN 
+			,B.BIZ_MNG_NO 
+			,B.EVL_DGR
+			,B.EVL_INST_CD
+			,(SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = B.EVL_INST_CD) AS EVL_INST_CD_NM
+			,B.EVALR_ID
+			,(SELECT FLNM FROM IRSUSER.USER_BSC WHERE USER_ID = B.EVALR_ID) AS EVALR_ID_NM
+			,B.EVL_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('EVL_TYPE_CD', B.EVL_TYPE_CD) AS EVL_TYPE_CD_NM
+			,TO_CHAR(B.EVL_DT, 'YYYY-MM-DD HH24:MI:SS') AS EVL_DT
+			,B.EVL_OPNN
+			,B.EVL_FLMNO
+		FROM IRSUSER.IRB_DTL A
+		INNER JOIN IRSUSER.IRB_EVL_DTL B
+		ON A.EVL_SN = B.EVL_SN 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+
+	<select id="selectAprvAplyEvlRegInfo" resultType="egovMap" parameterType="map">
+		SELECT 
+			 '' AS EVL_SN 
+			,'' AS BIZ_MNG_NO 
+			,'' AS EVL_DGR
+			,'' AS EVL_INST_CD
+			,'' AS EVL_INST_CD_NM
+			,'' AS EVALR_ID
+			,'' AS EVALR_ID_NM
+			,'' AS EVL_TYPE_CD
+			,'' AS EVL_TYPE_CD_NM
+			,'' AS EVL_DT
+			,'' AS EVL_OPNN
+			,'' AS EVL_FLMNO
+		FROM IRSUSER.IRB_DTL A
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+
+	<select id="selectAprvAplyEvlSn" resultType="int" parameterType="map">
+		SELECT NEXTVAL('IRSUSER.IRB_EVL_SN_SEQ')
+	</select>
+	
+	<insert id="insertAprvAplyEvl" parameterType="map">
+		INSERT INTO IRSUSER.IRB_EVL_DTL (
+			 EVL_SN
+			,BIZ_MNG_NO
+			,EVL_DGR			
+			,EVL_INST_CD		
+			,EVALR_ID		
+			,EVL_TYPE_CD		
+			,EVL_DT			
+			,EVL_OPNN		
+			,EVL_FLMNO
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+		) VALUES (
+			 #{evlSn}
+			,#{bizMngNo}
+			,1		
+			,#{auth.sInstMgno}		
+			,#{auth.sUserId}		
+			,#{evlTypeCd}		
+			,CURRENT_TIMESTAMP			
+			,#{evlOpnn}		
+			,#{evlFlmno}	
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP
+		)
+	</insert>
+
+	<update id="updateAprvAplyIrbDtlEvlSn" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 EVL_SN = #{evlSn}
+			,PRCS_YMD = CURRENT_TIMESTAMP
+			,PRCS_TYPE_CD = #{prcsTypeCd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyIrbBscRegRe" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 TYPE_CD = 'DTC0001'
+			,DATA_DGR = COALESCE(DATA_DGR, 0) + 1
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateAprvAplyIrbBscDocRe" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 TYPE_CD = 'DTC0001'
+			,DATA_DGR = DATA_DGR
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateAprvAplyIrbBscRegReDlbr" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 TYPE_CD = 'DTC0002'
+			,DATA_DGR = CASE WHEN TYPE_CD = 'DTC0002' THEN COALESCE(DATA_DGR, 0) + 1 ELSE 1 END
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateAprvAplyIrbBscDocReDlbr" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 TYPE_CD = 'DTC0002'
+			,DATA_DGR = CASE WHEN TYPE_CD = 'DTC0002' THEN DATA_DGR ELSE 1 END   
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<insert id="insertAprvAplyIrbHstry" parameterType="map">
+		INSERT INTO IRSUSER.IRB_HSTRY (
+			 BIZ_MNG_NO
+			,BIZ_DGR
+			,HSTRY_TYPE_CD
+			,HSTRY_RSLT_CD
+			,HSTRY_YMD
+			,HSTRY_DTL_RSN
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT			
+		) VALUES (
+			 #{bizMngNo}
+			,CAST(#{bizDgr} AS NUMERIC)
+			,#{hstryTypeCd}
+			,#{hstryRsltCd}
+			,TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,#{hstryDtlRsn}
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP	
+		)
+	</insert>
+	
+	<select id="selectAprvAplyDicDlbrRstList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+				SELECT 
+					 B.DIC_DLBR_SN
+					,B.DIC_DLBR_DGR
+					,B.DIC_DLBR_DGR || '차' AS DIC_DLBR_DGR_NM
+					,B.BIZ_MNG_NO
+					,B.DIC_DLBR_INST_CD
+					,(SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = B.DIC_DLBR_INST_CD) AS DIC_DLBR_INST_CD_NM
+					,B.DIC_DLBRR_ID
+					,(SELECT FLNM FROM IRSUSER.USER_BSC WHERE USER_ID = B.DIC_DLBRR_ID) AS DIC_DLBRR_ID_NM
+					,B.DIC_DLBR_TYPE_CD
+					,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', B.DIC_DLBR_TYPE_CD) AS DIC_DLBR_TYPE_CD_NM
+					,TO_CHAR(B.DIC_DLBR_DT, 'YYYY-MM-DD') AS DIC_DLBR_DT
+					,B.DIC_DLBR_OPNN
+					,B.DIC_DLBR_FLMNO
+					,B.OBJC_APLY_OPNN
+					,B.OBJC_APLY_FLMNO
+					,B.OBJC_APLY_YMD
+					,B.DEL_YN
+					,B.RGTR_ID
+					,TO_CHAR(B.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+					,B.MDFR_ID
+					,TO_CHAR(B.MDFCN_DT, 'YYYY-MM-DD HH24:MI:SS') AS MDFCN_DT
+				FROM IRSUSER.IRB_DTL A
+				INNER JOIN IRSUSER.IRB_DIC_DLBR_DTL B
+				ON A.DIC_DLBR_SN = B.DIC_DLBR_SN 
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+				ORDER BY B.DIC_DLBR_DGR DESC
+			) V
+		) U		
+	</select>
+	
+	<select id="selectAprvAplyDicDlbrRegInfo" resultType="egovMap" parameterType="map">
+		SELECT 
+			 CAST(COALESCE(MAX(B.DIC_DLBR_SN), 0) AS TEXT) AS DIC_DLBR_SN
+			,COALESCE(MAX(B.DIC_DLBR_DGR), 0)+1 AS DIC_DLBR_DGR
+			,COALESCE(MAX(B.DIC_DLBR_DGR), 0)+1 || '차' AS DIC_DLBR_DGR_NM
+			,'' AS BIZ_MNG_NO
+			,'' AS DIC_DLBR_INST_CD
+			,'' AS DIC_DLBR_INST_CD_NM
+			,'' AS DIC_DLBRR_ID
+			,'' AS DIC_DLBRR_ID_NM
+			,'' AS DIC_DLBR_TYPE_CD
+			,'' AS DIC_DLBR_TYPE_CD_NM
+			,'' AS DIC_DLBR_DT
+			,'' AS DIC_DLBR_OPNN
+			,'' AS DIC_DLBR_FLMNO
+			,'' AS OBJC_APLY_OPNN
+			,'' AS OBJC_APLY_FLMNO
+			,'' AS OBJC_APLY_YMD
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+		FROM IRSUSER.IRB_DTL A
+		LEFT OUTER JOIN IRSUSER.IRB_DIC_DLBR_DTL B
+		ON A.DIC_DLBR_SN = B.DIC_DLBR_SN 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+	
+	<select id="selectAprvAplyDicDlbrSn" resultType="int" parameterType="map">
+		SELECT NEXTVAL('IRSUSER.IRB_DIC_DLBR_SN_SEQ')
+	</select>
+	
+	<insert id="insertAprvAplyDicDlbr" parameterType="map">
+		INSERT INTO IRSUSER.IRB_DIC_DLBR_DTL (
+			 DIC_DLBR_SN
+			,DIC_DLBR_DGR
+			,BIZ_MNG_NO
+			,DIC_DLBR_INST_CD		
+			,DIC_DLBRR_ID		
+			,DIC_DLBR_TYPE_CD		
+			,DIC_DLBR_DT			
+			,DIC_DLBR_OPNN		
+			,DIC_DLBR_FLMNO
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+		) VALUES (
+			 #{dicDlbrSn}
+			,(SELECT COALESCE(MAX(DIC_DLBR_DGR), 0)+1 FROM IRSUSER.IRB_DIC_DLBR_DTL WHERE DIC_DLBR_SN = #{dicDlbrSn})
+			,#{bizMngNo}
+			,#{auth.sInstMgno}		
+			,#{auth.sUserId}		
+			,#{dicDlbrTypeCd}		
+			,CAST(#{dicDlbrDt} AS TIMESTAMP)			
+			,#{dicDlbrOpnn}		
+			,#{dicDlbrFlmno}	
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP
+		)
+	</insert>
+
+	<update id="updateAprvAplyIrbDtlDicDlbrSn" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 DIC_DLBR_SN = #{dicDlbrSn}
+			,PRCS_YMD = CURRENT_TIMESTAMP
+			,PRCS_TYPE_CD = #{prcsTypeCd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+
+	<select id="selectAprvAplyDlbrRstList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+				SELECT 
+					 B.DLBR_SN
+					,B.DLBR_DGR
+					,B.DLBR_DGR || '차' AS DLBR_DGR_NM
+					,B.BIZ_MNG_NO
+					,B.DLBR_RSLT_REG_INST_CD
+					,(SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = B.DLBR_RSLT_REG_INST_CD) AS DLBR_RSLT_REG_INST_CD_NM
+					,B.DLBR_RSLT_RGTR_ID
+					,(SELECT FLNM FROM IRSUSER.USER_BSC WHERE USER_ID = B.DLBR_RSLT_RGTR_ID) AS DLBR_RSLT_RGTR_ID_NM
+					,B.DLBR_TYPE_CD
+					,IRSUSER.FN_GET_CODENM('DLBR_TYPE_CD', B.DLBR_TYPE_CD) AS DLBR_TYPE_CD_NM
+					,TO_CHAR(B.DLBR_DT, 'YYYY-MM-DD') AS DLBR_DT
+					,B.DLBR_OPNN
+					,B.DLBR_FLMNO
+					,B.OBJC_APLY_OPNN
+					,B.OBJC_APLY_FLMNO
+					,B.OBJC_APLY_YMD
+					,B.DEL_YN
+					,B.RGTR_ID
+					,TO_CHAR(B.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+					,B.MDFR_ID
+					,TO_CHAR(B.MDFCN_DT, 'YYYY-MM-DD HH24:MI:SS') AS MDFCN_DT
+					,B.BIZ_UNQNO
+				FROM IRSUSER.IRB_DTL A
+				INNER JOIN IRSUSER.IRB_DLBR_DTL B
+				ON A.DLBR_SN = B.DLBR_SN 
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+				ORDER BY B.DLBR_DGR DESC
+			) V
+		) U			
+	</select>
+	
+	<select id="selectAprvAplyDlbrRegInfo" resultType="egovMap" parameterType="map">
+		SELECT 			
+			 CAST(COALESCE(MAX(B.DLBR_SN), 0) AS TEXT) AS DLBR_SN
+			,COALESCE(MAX(B.DLBR_DGR), 0)+1 AS DLBR_DGR
+			,COALESCE(MAX(B.DLBR_DGR), 0)+1 || '차' AS DLBR_DGR_NM
+			,'' AS BIZ_MNG_NO
+			,'' AS DLBR_RSLT_REG_INST_CD
+			,'' AS DLBR_RSLT_REG_INST_CD_NM
+			,'' AS DLBR_RSLT_RGTR_ID
+			,'' AS DLBR_RSLT_RGTR_ID_NM
+			,'' AS DLBR_TYPE_CD
+			,'' AS DLBR_TYPE_CD_NM
+			,'' AS DLBR_DT
+			,'' AS DLBR_OPNN
+			,'' AS DLBR_FLMNO
+			,'' AS OBJC_APLY_OPNN
+			,'' AS OBJC_APLY_FLMNO
+			,'' AS OBJC_APLY_YMD
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT			
+			,'' AS BIZ_UNQNO		
+		FROM IRSUSER.IRB_DTL A
+		LEFT OUTER JOIN IRSUSER.IRB_DLBR_DTL B
+		ON A.DLBR_SN = B.DLBR_SN 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+	
+	<select id="selectAprvAplyDlbrSn" resultType="int" parameterType="map">
+		SELECT NEXTVAL('IRSUSER.IRB_DLBR_SN_SEQ')
+	</select>
+	
+	<insert id="insertAprvAplyDlbr" parameterType="map">
+		INSERT INTO IRSUSER.IRB_DLBR_DTL (
+			 DLBR_SN
+			,DLBR_DGR
+			,BIZ_MNG_NO
+			,DLBR_RSLT_REG_INST_CD
+			,DLBR_RSLT_RGTR_ID
+			,DLBR_TYPE_CD
+			,DLBR_DT
+			,DLBR_OPNN
+			,DLBR_FLMNO
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+			,BIZ_UNQNO
+		) VALUES (
+			 #{dlbrSn}
+			,(SELECT COALESCE(MAX(DLBR_DGR), 0)+1 FROM IRSUSER.IRB_DLBR_DTL WHERE DLBR_SN = #{dlbrSn})
+			,#{bizMngNo}
+			,#{auth.sInstMgno}		
+			,#{auth.sUserId}		
+			,#{dlbrTypeCd}		
+			,CAST(#{dlbrDt} AS TIMESTAMP)				
+			,#{dlbrOpnn}		
+			,#{dlbrFlmno}	
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP
+			,#{bizUnqno}
+		)
+	</insert>
+
+	<update id="updateAprvAplyIrbDtlDlbrSn" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 DLBR_SN = #{dlbrSn}
+			,PRCS_YMD = CURRENT_TIMESTAMP
+			,PRCS_TYPE_CD = #{prcsTypeCd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<select id="selectAprvAplyAddDataList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 A.BIZ_MNG_NO
+			,A.BIZ_DGR
+			,CAST(A.ADD_DATA_DGR AS TEXT) AS ADD_DATA_DGR
+			,A.DATA_DMND_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('DATA_DMND_TYPE_CD', A.DATA_DMND_TYPE_CD) AS DATA_DMND_TYPE_CD_NM
+			,TO_CHAR(A.DATA_DMND_DT, 'YYYY-MM-DD HH24:MI:SS') AS DATA_DMND_DT
+			,A.DATA_DMND_RSN
+			,A.DATA_DMND_FLMNO
+			,A.DATA_DMND_INST_CD
+			,COALESCE(A.DATA_DMND_YN, 'N') AS DATA_DMND_YN
+			,A.DATA_RQSTR_ID
+			,A.DATA_REG_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('DATA_REG_TYPE_CD', A.DATA_REG_TYPE_CD) AS DATA_REG_TYPE_CD_NM
+			,A.DATA_REG_CN
+			,TO_CHAR(A.DATA_REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS DATA_REG_DT
+			,A.DATA_RGTR_ID
+			,A.BIZ_PLND_FLMNO
+			,A.ETC_DATA_FLMNO
+			,A.CNVR_BASS_DATA_FLMNO
+			,A.CERT_VLD_BGNG_YMD
+			,A.CERT_VLD_END_YMD
+			,A.CERT_VLD_BGNG_YMD || ' ~ ' || A.CERT_VLD_END_YMD AS CERT_VLD_YMD
+			,A.DATA_IDNTY_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('DATA_IDNTY_TYPE_CD', A.DATA_IDNTY_TYPE_CD) AS DATA_IDNTY_TYPE_CD_NM
+			,A.DATA_IDNTY_CN
+			,TO_CHAR(A.DATA_IDNTY_DT, 'YYYY-MM-DD HH24:MI:SS') AS DATA_IDNTY_DT
+			,A.DATA_IDNTY_INST_CD
+			,A.DATA_IDFR_ID
+			,A.DEL_YN
+			,A.RGTR_ID
+			,A.REG_DT
+			,A.MDFR_ID
+			,A.MDFCN_DT
+			,CASE WHEN A.DATA_IDNTY_TYPE_CD = 'DIT0001' THEN '추가자료확인(승인)'
+				  WHEN A.DATA_IDNTY_TYPE_CD = 'DIT0002' THEN '추가자료확인(반려)'
+				  WHEN A.DATA_REG_TYPE_CD = 'DRT0001' THEN '추가자료제출'
+				  WHEN A.DATA_DMND_TYPE_CD = 'DAT0001' THEN '추가자료요청'
+			 ELSE '-'
+			 END AS STS
+			,CASE WHEN CAST(#{addDataDgr} AS NUMERIC) = A.ADD_DATA_DGR THEN '현재문서' ELSE '상세보기' END AS BTN_CTL
+		FROM IRSUSER.IRB_ADD_DATA_DTL A
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.DEL_YN = 'N'
+		ORDER BY A.ADD_DATA_DGR DESC
+	</select>
+	
+	<select id="selectAprvAplyAddData" resultType="egovMap" parameterType="map">
+		SELECT 
+			 A.BIZ_MNG_NO
+			,A.BIZ_DGR
+			,CAST(A.ADD_DATA_DGR AS TEXT) AS ADD_DATA_DGR
+			,A.DATA_DMND_TYPE_CD
+			,A.DATA_DMND_DT
+			,A.DATA_DMND_RSN
+			,A.DATA_DMND_FLMNO
+			,A.DATA_DMND_INST_CD
+			,COALESCE(A.DATA_DMND_YN, 'N') AS DATA_DMND_YN
+			,A.DATA_RQSTR_ID
+			,A.DATA_REG_TYPE_CD
+			,A.DATA_REG_CN
+			,A.DATA_REG_DT
+			,A.DATA_RGTR_ID
+			,A.BIZ_PLND_FLMNO
+			,A.ETC_DATA_FLMNO
+			,A.CNVR_BASS_DATA_FLMNO
+			,A.CERT_VLD_BGNG_YMD
+			,A.CERT_VLD_END_YMD
+			,COALESCE(A.DATA_IDNTY_TYPE_CD, '') AS DATA_IDNTY_TYPE_CD
+			,A.DATA_IDNTY_CN
+			,A.DATA_IDNTY_DT
+			,A.DATA_IDNTY_INST_CD
+			,A.DATA_IDFR_ID
+			,A.DEL_YN
+			,A.RGTR_ID
+			,A.REG_DT
+			,A.MDFR_ID
+			,A.MDFCN_DT
+		FROM IRSUSER.IRB_ADD_DATA_DTL A
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.ADD_DATA_DGR = CAST(#{addDataDgr} AS NUMERIC)
+		AND A.DEL_YN = 'N'
+	</select>
+	
+	<select id="selectAprvAplyAddDataEmpty" resultType="egovMap" parameterType="map">
+		SELECT 
+			 '' AS BIZ_MNG_NO
+			,'' AS BIZ_DGR
+			,'' AS ADD_DATA_DGR
+			,'' AS DATA_DMND_TYPE_CD
+			,'' AS DATA_DMND_DT
+			,'' AS DATA_DMND_RSN
+			,'' AS DATA_DMND_FLMNO
+			,'' AS DATA_DMND_INST_CD
+			,'N' AS DATA_DMND_YN
+			,'' AS DATA_RQSTR_ID
+			,'' AS DATA_REG_TYPE_CD
+			,'' AS DATA_REG_CN
+			,'' AS DATA_REG_DT
+			,'' AS DATA_RGTR_ID
+			,'' AS BIZ_PLND_FLMNO
+			,'' AS ETC_DATA_FLMNO
+			,'' AS CNVR_BASS_DATA_FLMNO
+			,'' AS CERT_VLD_BGNG_YMD
+			,'' AS CERT_VLD_END_YMD
+			,'' AS DATA_IDNTY_TYPE_CD
+			,'' AS DATA_IDNTY_CN
+			,'' AS DATA_IDNTY_DT
+			,'' AS DATA_IDNTY_INST_CD
+			,'' AS DATA_IDFR_ID
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+	</select>
+	
+	<update id="updateAprvAplyAgree" parameterType="map">
+		UPDATE IRSUSER.IRB_EXCR_DTL SET 
+			 AGRE_YN = 'Y'
+			,AGRE_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,INST_AGRE_YN = 'Y'
+			,INST_AGRE_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+		AND SN = #{sn}
+	</update>
+	
+	<select id="selectAprvAplyIrbExcrDtlAgreCnt" resultType="egovMap" parameterType="map">
+		SELECT 
+			 COUNT(*) OVER() AS TOT_CNT
+			,(
+				SELECT COUNT(*) 
+				FROM IRSUSER.IRB_EXCR_DTL 
+				WHERE 1=1
+				AND BIZ_MNG_NO = A.BIZ_MNG_NO 
+				AND BIZ_DGR = A.BIZ_DGR 
+				AND AGRE_YN = 'Y'
+			) AS AGRE_CNT
+		FROM IRSUSER.IRB_EXCR_DTL A 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+	
+	<update id="updateAprvAplyPrcsTypeCd" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET 
+			 PRCS_TYPE_CD = #{prcsTypeCd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyPrcsTypeCdYmd" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET 
+			 PRCS_TYPE_CD = #{prcsTypeCd}
+			,PRCS_YMD = CURRENT_TIMESTAMP
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyVldDgr" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET 
+			 BIZ_UNQNO = #{bizUnqno}
+			,VLD_BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			,BIZ_CHG_PSBLTY_YN = #{bizChgPsbltyYn}
+			,CERT_PRD_UPDT_PSBLTY_YN = #{certPrdUpdtPsbltyYn}
+			,CERT_BGNG_YMD_CHG_PSBLTY_YN = #{certBgngYmdChgPsbltyYn}
+			,RTADTI_SCSN_PSBLTY_YN = #{rtadtiScsnPsbltyYn}
+			,ADD_DATA_DMND_PSBLTY_YN = #{addDataDmndPsbltyYn}
+			,DLAY_DCLR_DMND_PSBLTY_YN = #{dlayDclrDmndPsbltyYn}
+			,BIZ_RTRCN_DMND_PSBLTY_YN = #{bizRtrcnDmndPsbltyYn}
+			,KOFF_DCLR_PSBLTY_YN = #{koffDclrPsbltyYn}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<select id="selectAprvAplyPgmOriDgr" resultType="egovMap" parameterType="map">
+		SELECT 			
+			CAST(CASE WHEN VLD_BIZ_DGR > 0 THEN VLD_BIZ_DGR ELSE PRCS_DGR END AS TEXT) AS MIN_BIZ_DGR
+		FROM IRSUSER.IRB_BSC A 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{prgrmMngNo}
+		AND A.DEL_YN = 'N'	
+	</select>
+	
+	<select id="selectAprvAplyPrgmMaxDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 B.BIZ_MNG_NO
+			,B.BIZ_DGR
+			,B.AGREE_MGNO
+			,B.AGREE_DGR
+			,(
+				SELECT CNCLD_KRN_NM 
+				FROM IRSUSER.AGREE_STIPL_BSC 
+				WHERE CNCLD_MGNO = B.AGREE_MGNO 
+				AND CNCLD_DGR = B.AGREE_DGR
+			) AS AGREE_MGNO_NM
+			,B.AGREE_CLAUS_CD
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,B.BPLC_NM
+			,B.BIZ_ORGT_NM
+			,B.BIZ_KRN_NM
+			,B.CERT_VLD_BGNG_YMD
+			,B.CERT_VLD_END_YMD
+			,CAST(CAST(B.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(B.CERT_VLD_END_YMD AS DATE) AS TEXT) AS CERT_VLD_YMD
+			,B.BIZ_FLD_CD
+			,B.BIZ_DTLS_FLD_CD
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) AS BIZ_FLD_CD_NM
+			,(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_NM	
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) || ' > ' || 
+			(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_SNM	
+			,B.BIZ_PLND_FLMNO
+			,B.ETC_DATA_FLMNO
+			,B.CNVR_BASS_DATA_FLMNO
+			,B.REDD_PLUS_YN
+			,(
+				SELECT
+					'(변경전 : ' || CAST(CAST(T2.CERT_VLD_BGNG_YMD AS DATE) AS TEXT) || ' ~ ' || CAST(CAST(T2.CERT_VLD_END_YMD AS DATE) AS TEXT) || ' )'
+				FROM IRSUSER.IRB_BSC T1
+				INNER JOIN IRSUSER.IRB_PRGRM_DTL T2
+				ON T1.BIZ_MNG_NO = T2.BIZ_MNG_NO
+				AND T2.BIZ_DGR = (
+									SELECT MAX(D1.BIZ_DGR) 
+									FROM IRSUSER.IRB_PRGRM_DTL D1
+									INNER JOIN IRSUSER.IRB_DTL D2
+									ON D1.BIZ_MNG_NO = D2.BIZ_MNG_NO
+									AND D1.BIZ_DGR = D2.BIZ_DGR
+									WHERE 1=1
+									AND D1.BIZ_MNG_NO = #{bizMngNo} 
+									AND D1.BIZ_DGR <![CDATA[<]]> CAST(#{bizDgr} AS NUMERIC)	
+									AND D2.PRCS_TYPE_CD IN ('PTC0018', 'PTC0029', 'PTC0031', 'PTC0032', 'PTC0026')	
+								)
+				WHERE 1=1
+				AND T1.BIZ_MNG_NO = #{bizMngNo}
+			) AS OLD_CERT_VLD_YMD
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_PRGRM_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{prgrmMngNo}
+		AND B.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+	
+	<select id="selectAprvAplyPgmMaxNtnList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 T1.CNCLD_MGNO
+			,T1.CNCLD_DGR
+			,T2.NTN_CD
+			,(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = T2.NTN_CD) AS NTN_CD_NM
+			,COALESCE(T3.INST_NM, '') AS INST_NM
+			,COALESCE(T3.DEPT_NM, '') AS DEPT_NM
+			,CASE WHEN COALESCE(T3.IATA_NTN_CD, '') = '' THEN 'N' ELSE 'Y' END AS NTN_CHK
+		FROM (
+			SELECT 
+				 A.CNCLD_MGNO
+				,A.CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{prgrmMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{prgrmMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N' 
+			UNION
+			SELECT 
+				  B.REL_CNCLD_MGNO AS CNCLD_MGNO
+				 ,(SELECT MAX(CNCLD_DGR) FROM IRSUSER.AGREE_STIPL_BSC WHERE CNCLD_MGNO = B.REL_CNCLD_MGNO) AS CNCLD_DGR
+			FROM IRSUSER.AGREE_STIPL_BSC A
+			INNER JOIN IRSUSER.AGREE_STIPL_REL B
+			ON A.CNCLD_MGNO = B.CNCLD_MGNO 
+			WHERE 1=1
+			AND A.CNCLD_MGNO = (
+				SELECT AGREE_MGNO 
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{prgrmMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.CNCLD_DGR = (
+				SELECT AGREE_DGR
+				FROM IRSUSER.IRB_PRGRM_DTL A
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{prgrmMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			)
+			AND A.DEL_YN = 'N'
+			AND B.DEL_YN = 'N'
+		) T1
+		INNER JOIN IRSUSER.AGREE_STIPL_NTN_DTL T2
+		ON T1.CNCLD_MGNO = T2.CNCLD_MGNO 
+		AND T1.CNCLD_DGR = T2.CNCLD_DGR
+		LEFT OUTER JOIN IRSUSER.IRB_PRGRM_NTN_DTL T3
+		ON T2.NTN_CD = T3.IATA_NTN_CD
+		AND T3.BIZ_MNG_NO = #{prgrmMngNo}
+		AND T3.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</select>
+	
+	<select id="selectAprvAplyPgmMaxMhdlgList" resultType="egovMap" parameterType="map">
+		SELECT 	
+			 A.MHDLG_MGNO 
+			,C.MHDLG_ORGT_NM 
+			,C.MHDLG_KRN_NM 
+		FROM IRSUSER.IRB_PRGRM_MHDLG_DTL A
+		INNER JOIN IRSUSER.MHDLG_BSC B
+		ON A.MHDLG_MGNO = B.MHDLG_MGNO 
+		INNER JOIN IRSUSER.MHDLG_DTL C
+		ON B.MHDLG_MGNO = C.MHDLG_MGNO 
+		AND B.VLD_MHDLG_DGR = C.MHDLG_DGR
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{prgrmMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'
+		AND C.DEL_YN = 'N'
+	</select>
+	
+	<insert id="insertAprvAplyAddReq" parameterType="map">
+		INSERT INTO IRSUSER.IRB_ADD_DATA_DTL (
+			 BIZ_MNG_NO
+			,BIZ_DGR
+			,ADD_DATA_DGR
+			,DATA_DMND_TYPE_CD
+			,DATA_DMND_DT
+			,DATA_DMND_RSN
+			,DATA_DMND_FLMNO
+			,DATA_DMND_YN
+			,DATA_DMND_INST_CD			
+			,DATA_RQSTR_ID
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT			
+		) VALUES (
+			 #{bizMngNo}
+			,CAST(#{bizDgr} AS NUMERIC)
+			,(SELECT COALESCE(MAX(ADD_DATA_DGR), 0) + 1 FROM IRSUSER.IRB_ADD_DATA_DTL WHERE BIZ_MNG_NO = #{bizMngNo})
+			,#{dataDmndTypeCd}
+			,CURRENT_TIMESTAMP
+			,#{dataDmndRsn}
+			,#{dataDmndFlmno}
+			,#{dataDmndYn}
+			,#{auth.sInstMgno}
+			,#{auth.sUserId}
+			,'N'
+			,#{auth.sUserId}
+			,CURRENT_TIMESTAMP	
+		)
+	</insert>
+	
+	<update id="updateAprvAplyYnBsc" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 BIZ_CHG_PSBLTY_YN = #{bizChgPsbltyYn}
+			,CERT_PRD_UPDT_PSBLTY_YN = #{certPrdUpdtPsbltyYn} 
+			,CERT_BGNG_YMD_CHG_PSBLTY_YN = #{certBgngYmdChgPsbltyYn}
+			,RTADTI_SCSN_PSBLTY_YN = #{rtadtiScsnPsbltyYn}
+			,ADD_DATA_DMND_PSBLTY_YN = #{addDataDmndPsbltyYn} 
+			,DLAY_DCLR_DMND_PSBLTY_YN = #{dlayDclrDmndPsbltyYn} 
+			,BIZ_RTRCN_DMND_PSBLTY_YN = #{bizRtrcnDmndPsbltyYn}
+			,KOFF_DCLR_PSBLTY_YN = #{koffDclrPsbltyYn} 
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP 	
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateAprvAplyAddDtl" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 ADD_DATA_TYPE_CD = #{addDataTypeCd} 
+			,ADD_DATA_PRCS_YMD = ''
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP 	
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyAddDtlWithFile" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 CERT_VLD_BGNG_YMD = #{certVldBgngYmd} 
+			,CERT_VLD_END_YMD = #{certVldEndYmd} 
+			,ADD_DATA_TYPE_CD = #{addDataTypeCd} 
+			,ADD_DATA_PRCS_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,BIZ_PLND_FLMNO = #{bizPlndFlmno}
+			,ETC_DATA_FLMNO = #{etcDataFlmno}
+			,CNVR_BASS_DATA_FLMNO = #{cnvrBassDataFlmno}
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP 	
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyAddDtlWithYmd" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 ADD_DATA_TYPE_CD = #{addDataTypeCd} 
+			,ADD_DATA_PRCS_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,BIZ_PLND_FLMNO = #{bizPlndFlmno}
+			,ETC_DATA_FLMNO = #{etcDataFlmno}
+			,CNVR_BASS_DATA_FLMNO = #{cnvrBassDataFlmno}
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP 	
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyAddCfm" parameterType="map">
+		UPDATE IRSUSER.IRB_ADD_DATA_DTL SET
+			 DATA_IDNTY_TYPE_CD = #{dataIdntyTypeCd}
+			,DATA_IDNTY_CN = #{dataIdntyCn}
+			,DATA_IDNTY_DT = CURRENT_TIMESTAMP
+			,DATA_IDNTY_INST_CD = #{auth.sInstMgno} 
+			,DATA_IDFR_ID = #{auth.sUserId} 
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP	
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+		AND ADD_DATA_DGR = CAST(#{addDataDgr} AS NUMERIC)
+	</update>
+	
+	<select id="selectAprvAplyUnitList" resultType="egovMap" parameterType="map">
+		SELECT 
+			 ROW_NUMBER() OVER() AS RN
+			,B.BIZ_MNG_NO
+			,CAST(B.BIZ_DGR AS TEXT) AS BIZ_DGR
+			,B.DGR_REG_RSN_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', B.DGR_REG_RSN_CD) AS DGR_REG_RSN_CD_NM
+			,B.AGREE_MGNO
+			,(
+				SELECT CNCLD_KRN_NM 
+				FROM IRSUSER.AGREE_STIPL_BSC 
+				WHERE CNCLD_MGNO = B.AGREE_MGNO 
+				AND CNCLD_DGR = B.AGREE_DGR
+			) AS AGREE_MGNO_NM
+			,B.AGREE_DGR
+			,B.INST_MGNO
+			,B.USER_ID
+			,B.PRGRM_MNG_NO
+			,B.BPLC_NM
+			,B.BIZ_ENFC_PLC_NM
+			,B.IATA_NTN_CD
+			,(SELECT NTN_KORN_NM FROM IRSUSER.COM_NTN_CD_BSC WHERE IATA_NTN_CD = B.IATA_NTN_CD) AS IATA_NTN_CD_NM 	
+			,B.APLY_CL_CD
+			,IRSUSER.FN_GET_CODENM('APLY_CL_CD', B.APLY_CL_CD) AS APLY_CL_CD_NM	
+			,B.AGREE_CLAUS_CD
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', B.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,B.BIZ_FORM_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_FORM_CD', B.BIZ_FORM_CD) AS BIZ_FORM_CD_NM		
+			,B.BIZ_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', B.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,B.BIZ_SCAL_CD
+			,IRSUSER.FN_GET_CODENM('BIZ_SCAL_CD', B.BIZ_SCAL_CD) AS BIZ_SCAL_CD_NM	
+			,B.BIZ_ORGT_NM
+			,B.BIZ_KRN_NM
+			,B.KOFF_PRNMNT_YMD
+			,B.CERT_VLD_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', B.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM	
+			,B.CERT_VLD_BGNG_YMD
+			,B.CERT_VLD_END_YMD
+			,B.CERT_VLD_BGNG_YMD || ' ~ ' || B.CERT_VLD_END_YMD AS CERT_VLD_YMD
+			,COALESCE(B.BFCNVR_RDCQTY, 0) AS BFCNVR_RDCQTY
+			,B.RDC_UNIT_CD
+			,COALESCE(B.BFCNVR_RDCQTY, 0) || ' ' || IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', B.RDC_UNIT_CD) AS BFCNVR_RDCQTY_NM	
+			,B.CNVR_COEF_CN
+			,B.CNVR_BASS_CN
+			,COALESCE(B.ATCNVR_RDCQTY, 0) AS ATCNVR_RDCQTY
+			,COALESCE(B.ATCNVR_RDCQTY, 0) || ' ' || IRSUSER.FN_GET_CODENM('RDC_UNIT_CD', 'RUC0001') AS ATCNVR_RDCQTY_NM
+			,B.BIZ_FLD_CD
+			,B.BIZ_DTLS_FLD_CD
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) AS BIZ_FLD_CD_NM
+			,(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_NM	
+			,(
+				SELECT BIZ_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_BSC 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD
+			) || ' > ' || 
+			(
+				SELECT BIZ_DTLS_FLD_KORN_NM 
+				FROM IRSUSER.COM_BIZ_FLD_DTL 
+				WHERE BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD 
+				AND BIZ_FLD_DTLS_CD_MGNO = B.BIZ_DTLS_FLD_CD
+			) AS BIZ_FLD_CD_SNM			
+			,COALESCE(B.SOP_RDCQTY, 0) AS SOP_RDCQTY
+			,B.SOP_UNIT_CD
+			,CAST(COALESCE(B.SOP_RDCQTY, 0) AS TEXT) || ' ' || IRSUSER.FN_GET_CODENM('SOP_UNIT_CD', B.SOP_UNIT_CD) AS SOP_UNIT_CD_NM
+			,COALESCE(B.OMGE_RDCQTY, 0) AS OMGE_RDCQTY
+			,B.OMGE_UNIT_CD
+			,CAST(COALESCE(B.OMGE_RDCQTY, 0) AS TEXT) || ' ' || IRSUSER.FN_GET_CODENM('OMGE_UNIT_CD', B.OMGE_UNIT_CD) AS OMGE_UNIT_CD_NM
+			,B.BIZ_PLND_FLMNO
+			,B.ETC_DATA_FLMNO
+			,B.CNVR_BASS_DATA_FLMNO
+			,B.TRSM_YN
+			,CASE WHEN B.TRSM_YN = 'Y' THEN '동의' ELSE '미동의' END AS TRSM_YN_NM
+			,B.CMPTNC_INST_MNG_NO
+			,B.APLY_TYPE_CD
+			,B.APLY_YMD
+			,B.PRCS_TYPE_CD
+			,B.PRCS_YMD
+			,B.ADD_DATA_TYPE_CD
+			,B.ADD_DATA_PRCS_YMD
+			,B.EVL_SN
+			,B.DIC_DLBR_SN
+			,B.DLBR_SN
+			,B.DLAY_SN
+			,B.RTRCN_SN
+			,B.DEL_YN
+			,A.BIZ_UNQNO
+			,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', B.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM
+			,D.BZENT_NM
+			,B.CHG_CN
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		AND A.PRCS_DGR = B.BIZ_DGR
+		INNER JOIN IRSUSER.IRB_EXCR_DTL C
+		ON B.BIZ_MNG_NO = C.BIZ_MNG_NO
+		AND B.BIZ_DGR = C.BIZ_DGR
+		AND B.INST_MGNO = C.INST_MGNO
+		INNER JOIN IRSUSER.INST_BSC D
+		ON C.INST_MGNO = D.INST_MGNO
+		WHERE 1=1
+		AND B.PRGRM_MNG_NO = #{prgrmMngNo}
+		ORDER BY B.BIZ_MNG_NO ASC		
+	</select>
+	
+	<select id="selectAprvAplyKoffBsc" resultType="egovMap" parameterType="map">
+		SELECT
+			 BIZ_MNG_NO 
+			,BIZ_KOFF_DGR 
+			,BIZ_KOFF_YMD
+			,CASE WHEN COALESCE(BIZ_KOFF_YMD, '') = '' THEN ''
+				  ELSE CAST(CAST(BIZ_KOFF_YMD AS DATE) AS TEXT) 
+			END AS BIZ_KOFF_YMD_NM
+			,KOFF_RPT_FLMNO 
+			,BIZ_KOFF_YN 
+		FROM IRSUSER.IRB_BSC 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_KOFF_DGR <![CDATA[<=]]> CAST(#{bizDgr} AS NUMERIC)
+		AND BIZ_KOFF_YN = 'Y'
+	</select>
+	
+	<select id="selectAprvAplyKoffBscEmpty" resultType="egovMap" parameterType="map">
+		SELECT
+		 	 BIZ_MNG_NO 
+			,'0' AS BIZ_KOFF_DGR 
+			,'' AS BIZ_KOFF_YMD
+			,'' AS KOFF_RPT_FLMNO 
+			,'N' AS BIZ_KOFF_YN 
+		FROM IRSUSER.IRB_BSC 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</select>
+	
+	<select id="selectAprvAplyDlayRstList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+				SELECT 
+					 B.DLAY_SN
+					,B.DLAY_PRCS_DGR
+					,B.DLAY_PRCS_DGR || '차' AS DLAY_PRCS_DGR_NM
+					,B.BIZ_MNG_NO
+					,B.DLAY_DMND_TYPE_CD
+					,B.DLAY_DMND_DT
+					,B.BIZ_KOFF_PRNMNT_YMD
+					,CASE WHEN COALESCE(B.BIZ_KOFF_PRNMNT_YMD, '') = '' THEN ''
+				  		  ELSE CAST(CAST(B.BIZ_KOFF_PRNMNT_YMD AS DATE) AS TEXT) 
+					END AS BIZ_KOFF_PRNMNT_YMD_NM
+					,B.DLAY_DMND_RSN
+					,B.DLAY_DMND_FLMNO
+					,COALESCE(B.DLAY_IDNTY_TYPE_CD, '') AS DLAY_IDNTY_TYPE_CD
+					,TO_CHAR(B.DLAY_IDNTY_DT, 'YYYY-MM-DD HH24:MI:SS') AS DLAY_IDNTY_DT
+					,B.DLAY_IDNTY_CN
+					,B.DEL_YN
+					,B.RGTR_ID
+					,TO_CHAR(B.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+					,B.MDFR_ID
+					,TO_CHAR(B.MDFCN_DT, 'YYYY-MM-DD HH24:MI:SS') AS MDFCN_DT
+					,B.BIZ_DGR
+					,IRSUSER.FN_GET_CODENM('DLAY_IDNTY_TYPE_CD', B.DLAY_IDNTY_TYPE_CD) AS DLAY_IDNTY_TYPE_CD_NM
+					,IRSUSER.FN_GET_CODENM('DLAY_DMND_TYPE_CD', B.DLAY_DMND_TYPE_CD) AS DLAY_DMND_TYPE_CD_NM
+					,TO_CHAR(B.DLAY_DLBR_DT, 'YYYY-MM-DD HH24:MI:SS') AS DLAY_DLBR_DT
+					,B.DLAY_DLBR_CN
+					,COALESCE(B.DLAY_DLBR_TYPE_CD, '') AS DLAY_DLBR_TYPE_CD
+					,IRSUSER.FN_GET_CODENM('DLBR_TYPE_CD', B.DLAY_DLBR_TYPE_CD) AS DLAY_DLBR_TYPE_CD_NM
+					,B.DLAY_IDNTY_FLMNO
+					,B.DLAY_DLBR_FLMNO
+				FROM IRSUSER.IRB_DTL A
+				INNER JOIN IRSUSER.IRB_DLAY_DTL B
+				ON A.DLAY_SN = B.DLAY_SN 
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+				AND B.BIZ_DGR <![CDATA[<=]]> CAST(#{bizDgr} AS NUMERIC)
+				ORDER BY B.DLAY_PRCS_DGR DESC
+			) V
+		) U			
+	</select>
+	
+	<select id="selectAprvAplyDlayRegInfo" resultType="egovMap" parameterType="map">
+		SELECT 			
+			 CAST(COALESCE(MAX(B.DLAY_SN), 0) AS TEXT) AS DLAY_SN
+			,COALESCE(MAX(B.DLAY_PRCS_DGR), 0)+1 AS DLAY_PRCS_DGR
+			,COALESCE(MAX(B.DLAY_PRCS_DGR), 0)+1 || '차' AS DLAY_PRCS_DGR_NM
+			,'' AS BIZ_MNG_NO
+			,'' AS DLAY_DMND_TYPE_CD
+			,'' AS DLAY_DMND_DT
+			,'' AS BIZ_KOFF_PRNMNT_YMD
+			,'' AS DLAY_DMND_RSN
+			,'' AS DLAY_DMND_FLMNO
+			,'' AS DLAY_IDNTY_TYPE_CD
+			,'' AS DLAY_IDNTY_DT
+			,'' AS DLAY_IDNTY_CN
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+			,'' AS BIZ_DGR
+			,'' AS DLAY_DLBR_DT
+			,'' AS DLAY_DLBR_CN
+			,'' AS DLAY_DLBR_TYPE_CD
+			,'' AS DLAY_IDNTY_FLMNO
+			,'' AS DLAY_DLBR_FLMNO
+		FROM IRSUSER.IRB_DTL A
+		LEFT OUTER JOIN IRSUSER.IRB_DLAY_DTL B
+		ON A.DLAY_SN = B.DLAY_SN 
+		AND B.DLAY_PRCS_DGR = (SELECT COALESCE(MAX(DLAY_PRCS_DGR), 0) FROM IRSUSER.IRB_DLAY_DTL WHERE DLAY_SN = A.DLAY_SN)
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+	
+	<update id="updateAprvAplyDlayDicDlbr" parameterType="map">
+		UPDATE IRSUSER.IRB_DLAY_DTL SET
+			 DLAY_IDNTY_TYPE_CD = #{dlayIdntyTypeCd}
+			,DLAY_IDNTY_DT = CURRENT_TIMESTAMP   
+			,DLAY_IDNTY_CN = #{dlayIdntyCn}
+			,DLAY_IDNTY_FLMNO = #{dlayIdntyFlmno}
+			,DLAY_IDNTY_INST_MGNO = #{auth.sInstMgno}
+			,DLAY_IDNTY_ID = #{auth.sUserId} 
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP	
+		WHERE 1=1
+		AND DLAY_SN = #{dlaySn}
+		AND DLAY_PRCS_DGR = CAST(#{dlayPrcsDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyDlayDlbr" parameterType="map">
+		UPDATE IRSUSER.IRB_DLAY_DTL SET
+			 DLAY_DLBR_TYPE_CD = #{dlayDlbrTypeCd}
+			,DLAY_DLBR_DT = CURRENT_TIMESTAMP   
+			,DLAY_DLBR_CN = #{dlayDlbrCn}
+			,DLAY_DLBR_FLMNO = #{dlayDlbrFlmno}
+			,DLAY_DLBR_INST_MGNO = #{auth.sInstMgno}
+			,DLAY_DLBR_ID = #{auth.sUserId} 
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP	
+		WHERE 1=1
+		AND DLAY_SN = #{dlaySn}
+		AND DLAY_PRCS_DGR = CAST(#{dlayPrcsDgr} AS NUMERIC)
+	</update>
+	
+	<select id="selectAprvAplyDlayRegMaxInfo" resultType="egovMap" parameterType="map">
+		SELECT 			
+			 CAST(COALESCE(MAX(B.DLAY_SN), 0) AS TEXT) AS DLAY_SN
+			,COALESCE(MAX(B.DLAY_PRCS_DGR), 1) AS DLAY_PRCS_DGR
+			,COALESCE(MAX(B.DLAY_PRCS_DGR), 1) || '차' AS DLAY_PRCS_DGR_NM
+			,'' AS BIZ_MNG_NO
+			,'' AS DLAY_DMND_TYPE_CD
+			,'' AS DLAY_DMND_DT
+			,'' AS BIZ_KOFF_PRNMNT_YMD
+			,'' AS DLAY_DMND_RSN
+			,'' AS DLAY_DMND_FLMNO
+			,'' AS DLAY_IDNTY_TYPE_CD
+			,'' AS DLAY_IDNTY_DT
+			,'' AS DLAY_IDNTY_CN
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+			,'' AS BIZ_DGR
+			,'' AS DLAY_DLBR_DT
+			,'' AS DLAY_DLBR_CN
+			,'' AS DLAY_DLBR_TYPE_CD
+			,'' AS DLAY_IDNTY_FLMNO
+			,'' AS DLAY_DLBR_FLMNO
+		FROM IRSUSER.IRB_DTL A
+		LEFT OUTER JOIN IRSUSER.IRB_DLAY_DTL B
+		ON A.DLAY_SN = B.DLAY_SN 
+		AND B.DLAY_PRCS_DGR = (SELECT COALESCE(MAX(DLAY_PRCS_DGR), 0) FROM IRSUSER.IRB_DLAY_DTL WHERE DLAY_SN = A.DLAY_SN)
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)	
+	</select>
+	
+	<update id="updateAprvAplyIrbBscYn" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 BIZ_CHG_PSBLTY_YN = #{bizChgPsbltyYn}
+			,CERT_PRD_UPDT_PSBLTY_YN = #{certPrdUpdtPsbltyYn}
+			,CERT_BGNG_YMD_CHG_PSBLTY_YN = #{certBgngYmdChgPsbltyYn}
+			,RTADTI_SCSN_PSBLTY_YN = #{rtadtiScsnPsbltyYn}
+			,ADD_DATA_DMND_PSBLTY_YN = #{addDataDmndPsbltyYn}
+			,DLAY_DCLR_DMND_PSBLTY_YN = #{dlayDclrDmndPsbltyYn}
+			,BIZ_RTRCN_DMND_PSBLTY_YN = #{bizRtrcnDmndPsbltyYn}
+			,KOFF_DCLR_PSBLTY_YN = #{koffDclrPsbltyYn}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+		
+	<update id="updateAprvAplyIrbDtlKoffPrnmntYmd" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 KOFF_PRNMNT_YMD = #{koffPrnmntYmd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateAprvAplyPrdDlbrSave" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 CERT_VLD_BGNG_YMD = #{certVldBgngYmd}
+			,CERT_VLD_END_YMD = #{certVldEndYmd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<select id="selectAprvAplyCnt" resultType="egovMap" parameterType="map">
+		SELECT CAST(COUNT(*) AS TEXT) AS CNT
+		FROM IRSUSER.IRB_HSTRY 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND HSTRY_TYPE_CD = 'BHT0011'
+	</select>
+	
+	<select id="selectAprvAplyPrdCnt" resultType="int" parameterType="map">
+		SELECT COUNT(*) AS CNT
+		FROM IRSUSER.IRB_HSTRY 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND HSTRY_TYPE_CD = 'BHT0013'
+	</select>
+	
+	<select id="selectAprvAplyBizUnqnoCnt" resultType="int" parameterType="map">
+		SELECT COUNT(*) AS CNT
+		FROM IRSUSER.IRB_BSC
+		WHERE 1=1
+		AND BIZ_MNG_NO != #{bizMngNo}
+		AND BIZ_UNQNO = #{bizUnqno}
+	</select>
+	
+	<update id="updateAprvAplyIrbBscDicDlbrDgr" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 DIC_DLBR_DGR = CAST(#{bizDgr} AS NUMERIC)
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateAprvAplyIrbDtlFileScsn" parameterType="map">
+		UPDATE IRSUSER.IRB_DTL SET
+			 BIZ_PLND_FLMNO = SCSN_BIZ_PLND_FLMNO
+			,ETC_DATA_FLMNO = SCSN_ETC_DATA_FLMNO 
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</update>
+	
+	<select id="selectAprvAplyMasterScsn" resultType="int" parameterType="map">
+		SELECT 
+			 SN 
+		FROM IRSUSER.IRB_SCSN_EXCR_DTL 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+		AND DEL_YN = 'N'
+	</select>
+	
+	<delete id="deleteAprvAplyIrbExcrScsn" parameterType="map">
+		DELETE
+		FROM IRSUSER.IRB_EXCR_DTL 
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+		AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+		AND INST_MGNO = (
+			SELECT 
+				 HNOV_INST_MGNO 
+			FROM IRSUSER.IRB_SCSN_EXCR_DTL 
+			WHERE 1=1
+			AND BIZ_MNG_NO = #{bizMngNo}
+			AND BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+			AND DEL_YN = 'N'
+		)	
+	</delete>	
+	
+	<insert id="insertAprvAplyIrbExcrScsn" parameterType="map">
+		INSERT INTO IRSUSER.IRB_EXCR_DTL (
+			 BIZ_MNG_NO
+			,BIZ_DGR
+			,SN
+			,INST_MGNO
+			,DMST_CL_CD
+			,BFCNVR_RDCQTY
+			,RDC_UNIT_CD
+			,CNVR_COEF_CN
+			,ATCNVR_RDCQTY
+			,AGRE_YN
+			,AGRE_YMD
+			,INST_AGRE_YN
+			,INST_AGRE_YMD
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT			
+			,CNVR_BASS_CN
+			,BZENT_NM
+		)	
+		SELECT 
+			 A.BIZ_MNG_NO
+			,A.BIZ_DGR
+			,CASE WHEN #{sn} = '1' AND A.SN = 1 THEN A.SN 
+			      ELSE (SELECT COALESCE(MAX(SN),0)+1 FROM IRSUSER.IRB_EXCR_DTL WHERE BIZ_MNG_NO = A.BIZ_MNG_NO AND BIZ_DGR = A.BIZ_DGR)
+			END AS SN
+			,A.WPMP_INST_MGNO AS INST_MGNO
+			,'DCC0001' AS DMST_CL_CD
+			,A.WPMP_ATCNVR_RDCQTY AS BFCNVR_RDCQTY
+			,'RUC0001' AS RDC_UNIT_CD
+			,'' AS CNVR_COEF_CN
+			,A.WPMP_ATCNVR_RDCQTY AS ATCNVR_RDCQTY
+			,A.AGRE_YN
+			,A.AGRE_YMD
+			,A.INST_AGRE_YN
+			,A.INST_AGRE_YMD
+			,A.DEL_YN
+			,A.RGTR_ID
+			,A.REG_DT			
+			,'' AS CNVR_BASS_CN
+			,B.BZENT_NM
+		FROM IRSUSER.IRB_SCSN_EXCR_DTL A 
+		INNER JOIN IRSUSER.INST_BSC B
+		ON A.WPMP_INST_MGNO = B.INST_MGNO 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+		AND A.BIZ_DGR = CAST(#{bizDgr} AS NUMERIC)
+	</insert>	
+	
+</mapper>

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import gov.me.irs.common.constants.Const;
@@ -41,6 +42,9 @@ public class RaonKFileUtil {
 	
 	private final CommonProperties commonProperties;
 	
+	private static final String DEFAULT_FILE_NAME= "download";				/* default 파일명 */
+	private static final String DEFAULT_FILE_EXT= "xlsx";					/* default 엑셀 확장자명 */
+
 	/**
 	 * 파일명 추출하기
 	 * @param originalFilename 원본파일명
@@ -269,6 +273,33 @@ public class RaonKFileUtil {
 		
 		return null;
 
+	}
+	
+	/**
+	 * 날짜 포함된 파일명 조립하기
+	 * 
+	 * @param name
+	 * @return - 파일명_YYYYMMDD.확장자명
+	 */
+	public String getFilenameWithDate(String name, String defaultFilename, String defaultExt) {
+		if(ObjectUtils.isEmpty(name)) {
+			return defaultFilename + "." + defaultExt;
+		} else {
+			String fileName = this.getFilename(name);
+			String ext = this.getFilenameExtension(name, false);
+			
+			return fileName + "_" + DateUtil.getDate("yyyyMMdd") + "." + ext;
+		}
+	}
+	
+	/**
+	 * 날짜 포함된 엑셀 파일명 조립하기
+	 * 
+	 * @param name
+	 * @return - 파일명_YYYYMMDD.확장자명
+	 */
+	public String getExcelFilenameWithDate(String name) {
+		return this.getFilenameWithDate(name, DEFAULT_FILE_NAME, DEFAULT_FILE_EXT);
 	}
 	
 }

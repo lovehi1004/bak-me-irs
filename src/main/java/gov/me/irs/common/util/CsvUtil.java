@@ -12,7 +12,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import gov.me.irs.common.constants.Const;
-import gov.me.irs.common.file.vo.FileVo;
+import gov.me.irs.common.file.vo.RaonKFileVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CsvUtil {
 	
-	private final FileUtil fileUtil;
+	private final RaonKFileUtil raonKFileUtil;
 	
 	/**
 	 * CSV 파일 생성하기
@@ -49,9 +49,9 @@ public class CsvUtil {
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 1. CSV파일 - 임시파일 생성하기 ■■■■■■■■■■■■■■■■■■■■ */
-		FileVo tempVo = new FileVo();
-		tempVo.setFilePath(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
-		tempVo.setFileNm(fileUtil.getTempFilename());
+		RaonKFileVo tempVo = new RaonKFileVo();
+		tempVo.setFilePath(raonKFileUtil.getTempFilePendingDeleteWeeklyPathNm());
+		tempVo.setFileNm(raonKFileUtil.getTempFilename());
 		
 		File file = new File(tempVo.getFileFullPath());
 		

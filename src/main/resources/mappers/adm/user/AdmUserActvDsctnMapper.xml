@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmUserActvDsctnMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 활동내역 - 목록조회 총건수 조회 -->
+	<select id="selectUserActvDsctnListCnt" resultType="int" parameterType="map">
+		/* AdmUserActvDsctnMapper.selectUserActvDsctnListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.USER_ACTV_DSCTN A
+		 INNER JOIN irsuser.USER_BSC B
+			ON B.USER_ID = A.USER_ID
+		 WHERE 1=1
+		<if test="srhLgnId != null and !srhLgnId.equals('')">
+		   AND B.LGN_ID = #{srhLgnId}
+		</if>
+		<if test="srhAcsYmdFrom != null and !srhAcsYmdFrom.equals('')">
+		   AND A.ACS_YMD <![CDATA[>=]]> #{srhAcsYmdFrom}
+		</if>
+		<if test="srhAcsYmdTo != null and !srhAcsYmdTo.equals('')">
+		   AND A.ACS_YMD  <![CDATA[<=]]> #{srhAcsYmdTo}
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 활동내역 - 목록조회 -->
+	<select id="selectUserActvDsctnList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmUserActvDsctnMapper.selectUserActvDsctnList */
+		SELECT A.SYS_CL_CD 
+			 , A.USER_ID
+			 , B.LGN_ID
+			 , B.FLNM 
+			 , A.INQ_CN
+			 , A.ACS_YMD  
+			 , A.ACS_HR 
+			 , TO_CHAR(TO_TIMESTAMP (A.ACS_YMD,'yyyyMMdd'),'yyyy-MM-dd') ||' '|| TO_CHAR(TO_TIMESTAMP(A.ACS_HR,'HHmmss'),'HH:mm:ss') AS ACS_TIME
+			 , A.IP_ADDR
+		  FROM irsuser.USER_ACTV_DSCTN A
+		 INNER JOIN irsuser.USER_BSC B
+			ON B.USER_ID = A.USER_ID
+		 WHERE 1=1
+		<if test="srhLgnId != null and !srhLgnId.equals('')">
+		   AND B.LGN_ID = #{srhLgnId}
+		</if>
+		<if test="srhAcsYmdFrom != null and !srhAcsYmdFrom.equals('')">
+		   AND A.ACS_YMD <![CDATA[>=]]> #{srhAcsYmdFrom}
+		</if>
+		<if test="srhAcsYmdTo != null and !srhAcsYmdTo.equals('')">
+		   AND A.ACS_YMD  <![CDATA[<=]]> #{srhAcsYmdTo}
+		</if>
+		ORDER BY A.ACS_YMD DESC , A.ACS_HR DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 활동내역 - 액셀다운로드 -->
+	<select id="selectUserActvDsctnExcel" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmUserActvDsctnMapper.selectUserActvDsctnExcel */
+		SELECT A.SN
+			 , B.LGN_ID
+			 , B.FLNM 
+			 , A.INQ_CN
+			 , TO_CHAR(TO_TIMESTAMP (A.ACS_YMD,'yyyyMMdd'),'yyyy-MM-dd') ||' '|| TO_CHAR(TO_TIMESTAMP(A.ACS_HR,'HHmmss'),'HH:mm:ss') AS ACS_TIME
+			 , A.IP_ADDR
+		  FROM irsuser.USER_ACTV_DSCTN A
+		 INNER JOIN irsuser.USER_BSC B
+			ON B.USER_ID = A.USER_ID
+		 WHERE 1=1
+		<if test="srhLgnId != null and !srhLgnId.equals('')">
+		   AND B.LGN_ID = #{srhLgnId}
+		</if>
+		<if test="srhAcsYmdFrom != null and !srhAcsYmdFrom.equals('')">
+		   AND A.ACS_YMD <![CDATA[>=]]> #{srhAcsYmdFrom}
+		</if>
+		<if test="srhAcsYmdTo != null and !srhAcsYmdTo.equals('')">
+		   AND A.ACS_YMD  <![CDATA[<=]]> #{srhAcsYmdTo}
+		</if>
+		ORDER BY A.SN DESC
+				) V
+		) U
+		LIMIT CAST( #{srhTo} AS NUMERIC)
+		OFFSET CAST ( #{srhFrom} AS NUMERIC) -1
+	</select>
+
+
+	
+</mapper>

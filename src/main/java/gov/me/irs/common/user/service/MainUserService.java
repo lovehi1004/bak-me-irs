@@ -59,8 +59,8 @@ public class MainUserService {
 	 * @return
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public Map<String, Object> selectcheckLoginIdCnt(Map<String, Object> requestMap) {
-		return mainUserMapper.selectcheckLoginIdCnt(requestMap);
+	public Map<String, Object> selectLoginIdCnt(Map<String, Object> requestMap) {
+		return mainUserMapper.selectLoginIdCnt(requestMap);
 	}
 	
 	/**

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.join.mapper.BizMbrJoinMapper">
+	
+	<!-- [사용자] 메인 > 회원가입 - 사업수행자공통조회 -->
+	<select id="selectCorpSrhList" resultType="egovMap" parameterType="map">
+		/* BizMbrJoinMapper.selectCorpSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 메인 > 회원가입 - 중복아이디공통조회 -->
+	<select id="selectIdSrhList" resultType="egovMap" parameterType="map">
+		/* BizMbrJoinMapper.selectIdSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 메인 > 회원가입 - 주소공통조회 -->
+	<select id="selectAddrSrhList" resultType="egovMap" parameterType="map">
+		/* BizMbrJoinMapper.selectAddrSrhList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [사용자] 메인 > 회원가입 - 사용자등록 -->
+	<insert id="insertMbrJoin" parameterType="map">
+		/* BizMbrJoinMapper.insertMbrJoin */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+
+	
+</mapper>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.nti.mapper.AdmMsgMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 목록조회 총건수 조회 -->
+	<select id="selectMsgListCnt" resultType="int" parameterType="map">
+		/* AdmMsgMapper.selectMsgListCnt */
+		SELECT COUNT(*)
+		  FROM (SELECT MSG_MGNO
+					 , MSG_NM
+					 , USE_YN
+					 , DEL_YN
+					 , REG_DT
+					 , MDFCN_DT
+				FROM irsuser.MSG_BSC
+				WHERE DEL_YN = 'N' AND USE_YN = 'Y') P
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 목록조회 -->
+	<select id="selectMsgList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmMsgMapper.selectMsgList */
+		SELECT '' AS CHK 
+			 , MSG_MGNO
+			 , MSG_NM
+			 , USE_YN
+			 , DEL_YN
+			 , TO_CHAR(REG_DT, 'YYYY-MM-DD') AS REG_DT
+			 , TO_CHAR(MDFCN_DT, 'YYYY-MM-DD') AS MDFCN_DT
+		FROM irsuser.MSG_BSC
+		WHERE DEL_YN = 'N' 
+		<if test="srhMsgNm != null and !srhMsgNm.equals('')">
+		AND (MSG_NM LIKE CONCAT('%', #{srhMsgNm}, '%') )			
+		</if>
+		AND USE_YN = 'Y'
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 상세조회 -->
+	<select id="selectMsgBsc" resultType="egovMap" parameterType="map">
+		/* AdmMsgMapper.selectMsgBsc */
+		SELECT MSG_MGNO
+			 , MSG_NM
+			 , MSG_CN
+		  	 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+		FROM irsuser.MSG_BSC
+		WHERE MSG_MGNO = #{msgMgno} AND USE_YN = 'Y' AND DEL_YN = 'N' 
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 상세조회 (파라미터리스트) -->
+	<select id="selectMsgDetail" resultType="egovMap" parameterType="map">
+		/* AdmMsgMapper.selectMsgDetail */
+		SELECT MSG_MGNO
+			 , SN
+			 , INPT_TYPE_CD
+			 , INPT_CN
+		  	 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+		FROM irsuser.MSG_DTL
+		WHERE MSG_MGNO = #{msgMgno} AND USE_YN = 'Y' AND DEL_YN = 'N' 
+	</select>
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 메세지코드 생성 (등록시)-->
+	<select id="selectMsgCode" resultType="egovMap" parameterType="map">
+		/* AdmMsgMapper.selectMsgCode */
+		SELECT CONCAT( 'MSG'
+				 , TO_CHAR(CURRENT_TIMESTAMP, 'yy')
+				 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(MSG_MGNO, (4 + 1), 10)), '0') AS NUMERIC) + 1 AS TEXT)
+					   , 9 - 4
+					   , '0'
+				   )
+		   ) AS MSG_MGNO
+		FROM irsuser.MSG_BSC
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 기본 등록 -->
+	<insert id="insertMsg" parameterType="map">
+		/* AdmMsgMapper.insertMsg */
+		INSERT 
+		  INTO IRSUSER.MSG_BSC
+			 ( MSG_MGNO
+			 , MSG_NM
+			 , MSG_CN
+			 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		VALUES
+			 (
+			   #{msgMgno}
+			 , #{msgNm}
+			 , #{msgCn}
+			 , 'Y'
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 기본 이력등록 -->
+	<insert id="insertMsgHist" parameterType="map">
+		/* AdmMsgMapper.insertMsgHist */
+		insert 
+		  into irsuser.MSG_BSC_HSTRY
+			 ( HSTRY_TYPE_CD
+			 , HSTRY_YMD
+			 , msg_mgno
+			 , msg_nm
+			 , msg_cn
+			 , use_yn
+			 , del_yn
+			 , rgtr_id
+			 , reg_dt
+			 , mdfr_id
+			 , mdfcn_dt
+			 )
+		values
+			 ( #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{msgMgno}
+			 , #{msgNm}
+			 , #{msgCn}
+			 , 'Y'
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 상세 등록 -->
+	<insert id="insertMsgDtl" parameterType="map">
+		/* AdmMsgMapper.insertMsgDtl */
+		INSERT 
+		  INTO IRSUSER.MSG_DTL
+			 ( MSG_MGNO
+			 , SN
+			 , INPT_TYPE_CD
+			 , INPT_CN
+			 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		VALUES
+			 (
+			   #{msgMgno}
+			 , (SELECT COALESCE(MAX(SN), 0) + 1 FROM irsuser.MSG_DTL)
+			 , #{inptTypeCd}
+			 , #{inptCn}
+			 , 'Y'
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 상세 이력등록 -->
+	<insert id="insertMsgDtlHist" parameterType="map">
+		/* AdmMsgMapper.insertMsgDtlHist */
+		INSERT 
+		  INTO IRSUSER.MSG_DTL_HSTRY
+			 ( HSTRY_TYPE_CD
+			 , HSTRY_YMD
+			 , MSG_MGNO
+			 , SN
+			 , INPT_TYPE_CD
+			 , INPT_CN
+			 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		VALUES
+			 ( #{hstryTypeCd}
+			 , CURRENT_TIMESTAMP
+			 , #{msgMgno}
+			 , (SELECT COALESCE(MAX(SN), 0) + 1 FROM irsuser.MSG_DTL_HSTRY)
+			 , #{inptTypeCd}
+			 , #{inptCn}
+			 , 'Y'
+			 , 'N'
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+			 , #{mdfrId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 수정 -->
+	<update id="updateMsgBsc" parameterType="map">
+		/* AdmMsgMapper.updateMsgBsc */
+		UPDATE irsuser.MSG_BSC
+			SET MSG_NM = #{msgNm}
+			  , MSG_CN = #{msgCn}
+			  , MDFR_ID = #{mdfrId}
+			  , MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE
+			MSG_MGNO = #{msgMgno}
+	</update>
+	<!-- [관리자] 사업수행자관리 > 알림(SMS) 관리 > 메시지 관리 - 수정을 위한 메세지 파라미터 List 삭제 -->
+	<delete id="updateDelMsgDtl" parameterType="map">
+		/* AdmMsgMapper.updateDelMsgDtl */
+		DELETE FROM
+			irsuser.MSG_DTL
+		WHERE
+			MSG_MGNO = #{msgMgno}
+	</delete>
+	
+</mapper>

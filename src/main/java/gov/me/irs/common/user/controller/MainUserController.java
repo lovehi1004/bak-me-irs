@@ -38,7 +38,7 @@ public class MainUserController {
 
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		Map<String, Object> resultMap = mainUserService.selectcheckLoginIdCnt(dsCheckUserInfo);
+		Map<String, Object> resultMap = mainUserService.selectLoginIdCnt(dsCheckUserInfo);
 		
 		nexacroResult.addDataSet("dsCheckUserInfo", resultMap);
 		

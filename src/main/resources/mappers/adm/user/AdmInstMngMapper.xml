@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmInstMngMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 목록조회 총건수 조회 -->
+	<select id="selectInstMngListCnt" resultType="int" parameterType="map">
+		/* AdmInstMngMapper.selectInstMngListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.INST_BSC IB
+		 WHERE IB.DEL_YN = 'N'
+		<if test='directorYn != null and directorYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+		   AND IB.INST_MGNO IN (
+									SELECT ISD.INST_MGNO
+									  FROM IRSUSER.USER_BSC U
+									 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+									    ON U.USER_ID = #{sUserId}
+									   AND ISD.INFO_MNG_INST_MGNO = U.INST_MGNO			/* 관할관장기관 기준으로 조회 */
+		   )
+		</if>
+		<if test='outsourcingYn != null and outsourcingYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+		   AND IB.INST_MGNO IN (
+									SELECT ISD.INST_MGNO
+									  FROM IRSUSER.USER_BSC U
+									 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+									    ON U.USER_ID = #{sUserId}
+									   AND ISD.INFO_MNG_INST_MGNO = U.UP_INST_MGNO			/* 위탁기관 기준으로 조회 */
+		   )
+		</if>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND IB.BZENT_NM LIKE CONCAT('%', irsuser.fn_transform_special_chars(#{srhBzentNm}), '%')				/* 사업체명으로 검색 */
+		</if>
+		<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')">
+		   AND IB.INST_CLSF_CD = #{srhInstClsfCd}							/* 업체분류로 검색 */
+		</if>
+		<if test="srhRprsvNm != null and !srhRprsvNm.equals('')">
+		   AND IB.RPRSV_NM LIKE CONCAT('%', irsuser.fn_transform_special_chars(#{srhRprsvNm}), '%')				/* 대표자명으로 검색 */
+		</if>
+		<if test="srhBzentClCd != null and !srhBzentClCd.equals('')">
+		   AND IB.BZENT_CL_CD = #{srhBzentClCd}								/* 사업체구분코드로 검색 */
+		</if>
+		<if test="srhCrno != null and !srhCrno.equals('')">
+		   AND IB.CRNO LIKE CONCAT('%', TRIM(#{srhCrno}), '%')				/* 법인등록번호로 검색 */
+		</if>
+		<if test="srhBrno != null and !srhBrno.equals('')">
+		   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')				/* 사업자등록번호로 검색 */
+		</if>
+		<if test="srhGovInstYn != null and !srhGovInstYn.equals('')">
+		   AND IB.GOV_INST_YN = #{srhGovInstYn}								/* 정부기관여부로 검색 */
+		</if>
+		<if test="srhAcntSttsClCd != null and !srhAcntSttsClCd.equals('')">
+		   AND IB.ACNT_STTS_CL_CD = #{srhAcntSttsClCd}						/* 계정상태구분코드로 검색 */
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 목록조회 -->
+	<select id="selectInstMngList" resultType="egovMap" parameterType="map">
+		/* AdmInstMngMapper.selectInstMngList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+			 , (
+			 	SELECT COUNT(*)
+			 	  FROM irsuser.USER_BSC UB
+			 	 WHERE UB.INST_MGNO = U.INST_MGNO
+			 	   AND UB.DEL_YN = 'N'
+			 )
+			 , CASE WHEN U.ACNT_STTS_CL_CD = 'ASC0001'           THEN ''			/* 회원가입신청 기능으로 생성된 경우           ▶ 버튼 표시 X, 등록관리메뉴 에서 승인만 가능 */
+	 				WHEN U.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND U.INST_CLSF_CD <![CDATA[<>]]> 'ICC0005' THEN ''			/* 승인Y AND 일반사업체 X                      ▶ 버튼 표시 X, 변경불가 */
+	 				WHEN U.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND U.INST_CLSF_CD = 'ICC0005'              THEN '변경'		/* 승인Y AND 일반사업체Y                       ▶ [변경]버튼, 1. 전체관리자가 업체정보 및 계정 담당자 정보 변경 가능, 2. 할당업체는 계정 담당자 정보만 변경 가능 */
+	 				ELSE '' END																		/* 기타                                        ▶ 버튼 표시 X */
+			   AS PRCS_GBN_NM			/* 작업구분 - 신청건수는 항상 0건 or 1건 */
+			 , CASE WHEN U.ACNT_STTS_CL_CD = 'ASC0001'           THEN '2'			/* 회원가입신청 기능으로 생성된 경우           ▶ 버튼 표시 X, 등록관리메뉴 에서 승인만 가능 */
+	 				WHEN U.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND U.INST_CLSF_CD <![CDATA[<>]]> 'ICC0005' THEN '3'			/* 승인Y AND 일반사업체 X                      ▶ 버튼 표시 X, 변경불가 */
+	 				WHEN U.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND U.INST_CLSF_CD = 'ICC0005'              THEN '4'		/* 승인Y AND 일반사업체Y                       ▶ [변경]버튼, 1. 전체관리자가 업체정보 및 계정 담당자 정보 변경 가능, 2. 할당업체는 계정 담당자 정보만 변경 가능 */
+	 				ELSE '5' END																		/* 기타                                        ▶ 버튼 표시 X */
+			   AS PRCS_GBN_NO			/* 작업구분 - 신청건수는 항상 0건 or 1건 */
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT IB.INST_MGNO                     /* 기관관리번호 */
+						 , IB.INST_CLSF_CD                  /* 업체분류 */
+						 , IB.BZENT_NM                      /* 사업체명 */
+						 , IB.RPRSV_NM                      /* 대표자명 */
+						 , IB.CRNO                          /* 법인등록번호 */
+						 , IB.BRNO                          /* 사업자등록번호 */
+						 , IB.BZENT_CL_CD                   /* 사업체구분코드 */
+						 , IB.CORP_TEL_DDD || '-' || IB.CORP_TEL_TLPNO || '-' || IB.CORP_TEL_PHINO  AS FULL_CORP_TEL_NO         /* 전체법인전화번호 */
+						 , IB.GOV_INST_YN                   /* 정부기관여부 */
+						 , IB.ACNT_STTS_CL_CD               /* 계정상태구분코드 */
+					  FROM irsuser.INST_BSC IB
+					 WHERE IB.DEL_YN = 'N'
+					<if test='directorYn != null and directorYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+					   AND IB.INST_MGNO IN (
+												SELECT ISD.INST_MGNO
+												  FROM IRSUSER.USER_BSC U
+												 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+												    ON U.USER_ID = #{sUserId}
+												   AND ISD.INFO_MNG_INST_MGNO = U.INST_MGNO			/* 관할관장기관 기준으로 조회 */
+					   )
+					</if>
+					<if test='outsourcingYn != null and outsourcingYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+					   AND IB.INST_MGNO IN (
+												SELECT ISD.INST_MGNO
+												  FROM IRSUSER.USER_BSC U
+												 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+												    ON U.USER_ID = #{sUserId}
+												   AND ISD.INFO_MNG_INST_MGNO = U.UP_INST_MGNO			/* 위탁기관 기준으로 조회 */
+					   )
+					</if>
+					<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+					   AND IB.BZENT_NM LIKE CONCAT('%', irsuser.fn_transform_special_chars(#{srhBzentNm}), '%')				/* 사업체명으로 검색 */
+					</if>
+					<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')">
+					   AND IB.INST_CLSF_CD = #{srhInstClsfCd}							/* 업체분류로 검색 */
+					</if>
+					<if test="srhRprsvNm != null and !srhRprsvNm.equals('')">
+					   AND IB.RPRSV_NM LIKE CONCAT('%', irsuser.fn_transform_special_chars(#{srhRprsvNm}), '%')				/* 대표자명으로 검색 */
+					</if>
+					<if test="srhBzentClCd != null and !srhBzentClCd.equals('')">
+					   AND IB.BZENT_CL_CD = #{srhBzentClCd}								/* 사업체구분코드로 검색 */
+					</if>
+					<if test="srhCrno != null and !srhCrno.equals('')">
+					   AND IB.CRNO LIKE CONCAT('%', TRIM(#{srhCrno}), '%')				/* 법인등록번호로 검색 */
+					</if>
+					<if test="srhBrno != null and !srhBrno.equals('')">
+					   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')				/* 사업자등록번호로 검색 */
+					</if>
+					<if test="srhGovInstYn != null and !srhGovInstYn.equals('')">
+					   AND IB.GOV_INST_YN = #{srhGovInstYn}								/* 정부기관여부로 검색 */
+					</if>
+					<if test="srhAcntSttsClCd != null and !srhAcntSttsClCd.equals('')">
+					   AND IB.ACNT_STTS_CL_CD = #{srhAcntSttsClCd}						/* 계정상태구분코드로 검색 */
+					</if>
+					 ORDER BY COALESCE(IB.APRV_YMD, '99991231') DESC, IB.REG_DT DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 상세조회 - 사업체정보 -->
+	<select id="selectInstDetail" resultType="egovMap" parameterType="map">
+		/* AdmInstMngMapper.selectInstDetail */
+		SELECT IB.INST_MGNO                                                                                         /* 기관관리번호 */
+			 , IB.INST_CLSF_CD                                                                                      /* 기관분류코드 */
+			 , IB.INST_DTLS_CLSF_CD                                                                                 /* 기관세부분류코드 */
+			 , IB.GOV_INST_YN                                                                                       /* 정부기관여부 */
+			 , IB.ACNT_STTS_CL_CD                                                                                   /* 계정상태구분코드 */
+			 , IB.BZENT_NM                                                                                          /* 사업체명 */
+			 , IB.BZENT_CL_CD                                                                                       /* 사업체구분코드 */
+			 , IB.CRNO                                                                                              /* 법인등록번호 */
+			 , IB.BRNO                                                                                              /* 사업자등록번호 */
+			 , IB.RPRSV_NM                                                                                          /* 대표자명 */
+			 , IB.CORP_TEL_DDD                                                                                      /* 법인전화지역번호 */
+			 , IB.CORP_TEL_TLPNO                                                                                    /* 법인전화국번호 */
+			 , IB.CORP_TEL_PHINO                                                                                    /* 법인전화개별번호 */
+			 , IB.CORP_TEL_DDD || '-' || IB.CORP_TEL_TLPNO || '-' || IB.CORP_TEL_PHINO  AS FULL_CORP_TEL_NO         /* 전체법인전화번호 */
+			 , IB.RDNM_CD                                                                                           /* 도로명코드 */
+			 , IB.ADDR                                                                                              /* 주소 */
+			 , IB.DTL_ADDR                                                                                          /* 상세주소 */
+			 , IB.UP_INST_MGNO                                                                                      /* 상위기관관리번호 */
+			 , UIB.BZENT_NM                                                      AS UP_INST_NM						/* 상위기관명 */
+			 , irsuser.fn_get_codenm('BZENT_CL_CD', IB.BZENT_CL_CD)              AS BZENT_CL_CD_NM					/* 사업체구분코드명 */
+			 , irsuser.fn_get_codenm('INST_CLSF_CD', IB.INST_CLSF_CD)            AS INST_CLSF_CD_NM					/* 기관분류코드명 */
+			 , CASE WHEN IB.GOV_INST_YN = 'Y' THEN '여' ELSE '부' END            AS GOV_INST_YN_NM					/* 정부기관여부명 */
+			 , irsuser.fn_get_codenm('ACNT_STTS_CL_CD', IB.ACNT_STTS_CL_CD)      AS ACNT_STTS_CL_CD_NM				/* 기관계정상태구분코드명 */
+			 , IB.BRDOC_FLMNO                                                                                       /* 사업자등록증파일번호 */
+			 , (
+			 	SELECT COALESCE(ARRAY_TO_STRING(ARRAY_AGG(FD.FILE_MGNO),  ','), '') AS BRDOC_FLMNO_FILE_MGNO 
+			 	  FROM irsuser.COM_FILE_DTL FD
+			 	 WHERE FD.FILE_GROUP_MGNO = IB.BRDOC_FLMNO
+			 	   AND FD.DEL_YN = 'N'
+			 ) AS BRDOC_FLMNO_FILE_MGNO
+			 , CASE WHEN IB.ACNT_STTS_CL_CD = 'ASC0001'           THEN ''			/* 회원가입신청 기능으로 생성된 경우           ▶ 버튼 표시 X, 등록관리메뉴 에서 승인만 가능 */
+	 				WHEN IB.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND IB.INST_CLSF_CD <![CDATA[<>]]> 'ICC0005' THEN ''			/* 승인Y AND 일반사업체 X                      ▶ 버튼 표시 X, 변경불가 */
+	 				WHEN IB.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND IB.INST_CLSF_CD = 'ICC0005'              THEN '변경'		/* 승인Y AND 일반사업체Y                       ▶ [변경]버튼, 1. 전체관리자가 업체정보 및 계정 담당자 정보 변경 가능, 2. 할당업체는 계정 담당자 정보만 변경 가능 */
+	 				ELSE '' END																		/* 기타                                        ▶ 버튼 표시 X */
+			   AS PRCS_GBN_NM			/* 작업구분 - 신청건수는 항상 0건 or 1건 */
+			 , CASE WHEN IB.ACNT_STTS_CL_CD = 'ASC0001'           THEN '2'			/* 회원가입신청 기능으로 생성된 경우           ▶ 버튼 표시 X, 등록관리메뉴 에서 승인만 가능 */
+	 				WHEN IB.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND IB.INST_CLSF_CD <![CDATA[<>]]> 'ICC0005' THEN '3'			/* 승인Y AND 일반사업체 X                      ▶ 버튼 표시 X, 변경불가 */
+	 				WHEN IB.ACNT_STTS_CL_CD = 'ASC0002'
+	 				 AND IB.INST_CLSF_CD = 'ICC0005'              THEN '4'		/* 승인Y AND 일반사업체Y                       ▶ [변경]버튼, 1. 전체관리자가 업체정보 및 계정 담당자 정보 변경 가능, 2. 할당업체는 계정 담당자 정보만 변경 가능 */
+	 				ELSE '5' END																		/* 기타                                        ▶ 버튼 표시 X */
+			   AS PRCS_GBN_NO			/* 작업구분 - 신청건수는 항상 0건 or 1건 */
+			 , IB.CMPTNC_INST_MGNO					/* 관할기관관리번호 */
+			 , CIB.BZENT_NM AS CMPTNC_INST_NM		/* 관할기관명 */
+			 , IB.PSN_ACNT_UNQ_NO					/* 보유계정고유번호 */
+		  FROM irsuser.INST_BSC IB
+		 INNER JOIN irsuser.INST_BSC UIB
+		    ON UIB.INST_MGNO = IB.UP_INST_MGNO
+		   AND UIB.DEL_YN = 'N'
+		  LEFT OUTER JOIN irsuser.INST_BSC CIB
+		    ON CIB.INST_MGNO = IB.CMPTNC_INST_MGNO
+		   AND CIB.DEL_YN = 'N'
+		  LEFT OUTER JOIN irsuser.COM_FILE_DTL FD
+		    ON FD.FILE_GROUP_MGNO = IB.BRDOC_FLMNO
+		   AND FD.DEL_YN = 'N'
+		 WHERE IB.DEL_YN = 'N'
+		   AND IB.INST_MGNO = #{instMgno}
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 상세조회 - 계정 담당자 정보 목록 -->
+	<select id="selectUserList" resultType="egovMap" parameterType="map">
+		/* AdmInstMngMapper.selectUserList */
+		SELECT U.USER_ID                           /* 사용자ID */ 
+			 , U.FLNM                              /* 성명 */
+			 , U.LGN_ID                            /* 로그인ID */
+			 , U.USER_CL_CD                        /* 사용자구분코드 */
+			 , U.DEPT_NM                           /* 부서명 */
+			 , U.JBPS_NM                           /* 직위명 */
+			 , U.TEL_DDD                           /* 전화지역번호 */
+			 , U.TEL_TLPNO                         /* 전화국번호 */
+			 , U.TEL_PHINO                         /* 전화개별번호 */
+			 , U.TEL_DDD || '-' || U.TEL_TLPNO || '-' || U.TEL_PHINO             AS FULL_TEL_NO              /* 전체전화번호 */
+			 , U.HDPON_DDD                         /* 핸드폰지역번호 */
+			 , U.HDPON_TLPNO                       /* 핸드폰국번호 */
+			 , U.HDPON_PHINO                       /* 핸드폰개별번호 */
+			 , U.HDPON_DDD || '-' || U.HDPON_TLPNO || '-' || U.HDPON_PHINO       AS FULL_HDPON_NO            /* 전체핸드폰번호 */
+			 , U.FAX_DDD                           /* 팩스지역번호 */
+			 , U.FAX_TLPNO                         /* 팩스국번호 */
+			 , U.FAX_PHINO                         /* 팩스개별번호 */
+			 , U.FAX_DDD || '-' || U.FAX_TLPNO || '-' || U.FAX_PHINO             AS FULL_FAX_NO              /* 전체팩스번호 */
+			 , U.EML_ID                            /* 이메일ID */
+			 , U.EML_ADDR                          /* 이메일주소 */
+			 , U.EML_ID || '@' || U.EML_ADDR                                      AS EML_FULL_ADDR			/* 이메일전체주소 */
+			 , CASE WHEN U.ACNT_STTS_CL_CD = 'ASC0001' THEN irsuser.fn_get_codenm('ACNT_STTS_CL_CD', U.ACNT_STTS_CL_CD)                   			/* 계정상태구분코드-그리드 출력용 */
+			 		ELSE U.ACNT_STTS_CL_CD END AS ACNT_STTS_CL_CD
+			 , U.INST_MGNO                         /* 기관관리번호 */
+			 , U.UP_INST_MGNO                      /* 상위기관관리번호 */
+			 , U.SMS_NTI_YN                        /* sms알림여부 */
+			 , U.ACNT_STTS_CL_CD AS ORG_ACNT_STTS_CL_CD               /* 계정상태구분코드-변경전 */
+			 , irsuser.fn_get_codenm('ACNT_STTS_CL_CD', U.ACNT_STTS_CL_CD) AS ORG_ACNT_STTS_CL_CD_NM				/* 계정상태구분코드명 */
+			 , 'N' AS GRID_CMM_CHECK               /* 체크박스 */
+		  FROM irsuser.USER_BSC U
+		 WHERE U.DEL_YN = 'N'
+		   AND U.INST_MGNO = #{instMgno}
+		 ORDER BY U.FLNM
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체정보 저장 - 업체정보 변경 -->
+	<update id="updateInstBsc" parameterType="map">
+		/* AdmInstMngMapper.updateInstBsc */
+		UPDATE irsuser.INST_BSC
+		   SET MDFR_ID = #{sUserId}
+		<if test="bzentNm != null and !bzentNm.equals('')">
+		 	 , BZENT_NM = #{bzentNm}
+		</if>
+		<if test="crno != null and !crno.equals('')">
+		 	 , CRNO = #{crno}
+		</if>
+		<if test="brno != null and !brno.equals('')">
+		 	 , BRNO = #{brno}
+		</if>
+		<if test="rprsvNm != null and !rprsvNm.equals('')">
+		 	 , RPRSV_NM = #{rprsvNm}
+		</if>
+		<if test="corpTelDdd != null and !corpTelDdd.equals('')">
+		 	 , CORP_TEL_DDD = #{corpTelDdd}
+		</if>
+		<if test="corpTelTlpno != null and !corpTelTlpno.equals('')">
+		 	 , CORP_TEL_TLPNO = #{corpTelTlpno}
+		</if>
+		<if test="corpTelPhino != null and !corpTelPhino.equals('')">
+		 	 , CORP_TEL_PHINO = #{corpTelPhino}
+		</if>
+		<if test="rdnmCd != null and !rdnmCd.equals('')">
+		 	 , RDNM_CD = #{rdnmCd}
+		</if>
+		<if test="addr != null and !addr.equals('')">
+		 	 , ADDR = #{addr}
+		</if>
+		<if test="dtlAddr != null and !dtlAddr.equals('')">
+		 	 , DTL_ADDR = #{dtlAddr}
+		</if>
+		<if test="brdocFlmno != null and !brdocFlmno.equals('')">
+		 	 , BRDOC_FLMNO = #{brdocFlmno}
+		</if>
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE INST_MGNO = #{instMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체정보 저장 - 기관변경이력기본 생성 - [irsuser.INST_CHG_HSTRY_BSC] -->
+	<insert id="insertInstChgHstryBsc" parameterType="map">
+		<selectKey keyProperty="chgMgno" resultType="string" order="BEFORE">
+			/* AdmInstMngMapper.insertInstChgHstryBsc.selectKey */
+			SELECT CONCAT( 'CM'
+						 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(CHG_MGNO, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+							   , 10 - 2
+							   , '0'
+						   )
+				   )
+			  FROM irsuser.INST_CHG_HSTRY_BSC
+			 WHERE INST_MGNO = #{instMgno}
+		</selectKey>
+		/* AdmInstMngMapper.insertInstChgHstryBsc */
+		INSERT
+		  INTO irsuser.INST_CHG_HSTRY_BSC
+			 ( INST_MGNO                   /* 기관관리번호 */
+			 , CHG_MGNO                    /* 변경관리번호 */
+			 , PRCS_USER_ID                /* 처리사용자ID */
+			 , CHG_DT                      /* 변경일시 */
+			 , DEL_YN                      /* 삭제여부 */
+			 , CHG_PRCS_TYPE_CD            /* 기관변경처리구분코드 */
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{instMgno}                 /* 기관관리번호 */
+			 , #{chgMgno}                  /* 변경관리번호 */
+			 , #{sUserId}                  /* 처리사용자ID */
+			 , CURRENT_TIMESTAMP           /* 변경일시 */
+			 , 'N'                         /* 삭제여부 */
+			 , #{chgPrcsTypeCd}            /* 기관변경처리구분코드 */
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체정보 저장 - 기관변경이력상세 생성 - [irsuser.INST_CHG_HSTRY_DTL] -->
+	<insert id="insertInstChgHstryDtl" parameterType="map">
+		<selectKey keyProperty="chgArtclSn" resultType="int" order="BEFORE">
+			/* AdmInstMngMapper.insertInstChgHstryDtl.selectKey */
+			SELECT COALESCE(MAX(CHG_ARTCL_SN), 0) + 1
+			  FROM irsuser.INST_CHG_HSTRY_DTL
+		 	 WHERE INST_MGNO = #{instMgno}
+		 	   AND CHG_MGNO = #{chgMgno}
+		</selectKey>
+		/* AdmInstMngMapper.insertInstChgHstryDtl */
+		INSERT
+		  INTO irsuser.INST_CHG_HSTRY_DTL
+			 ( INST_MGNO                   /* 기관관리번호 */
+			 , CHG_MGNO                    /* 변경관리번호 */
+			 , CHG_ARTCL_SN                /* 변경항목일련번호 */
+			 , CHG_CL_CD                   /* 변경구분코드 */
+			 , CHG_ARTCL_NM                /* 변경항목명 */
+			 , BCHG_CN                     /* 변경전내용 */
+			 , ACHG_CN                     /* 변경후내용 */
+			 , FILE_TYPE_CL_CD             /* 파일유형구분코드 */
+			 , FILE_YN                     /* 파일여부 */
+		<if test="userId != null and !userId.equals('')">
+			 , USER_ID                     /* 변경대상 사용자ID */
+		</if>
+			 , DEL_YN                      /* 삭제여부 */
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{instMgno}
+			 , #{chgMgno}
+			 , #{chgArtclSn}
+			 , #{chgClCd}
+			 , #{chgArtclNm}
+	<choose>
+		<when test='chgClCd == "CCC0003" and chgArtclFieldNm == "userClCd"'>
+			 , irsuser.fn_get_codenm('USER_CL_CD', #{bchgCn})
+			 , irsuser.fn_get_codenm('USER_CL_CD', #{achgCn})
+		</when>
+		<when test='chgClCd == "CCC0003" and chgArtclFieldNm == "acntSttsClCd"'>
+			 , irsuser.fn_get_codenm('ACNT_STTS_CL_CD', #{bchgCn})
+			 , irsuser.fn_get_codenm('ACNT_STTS_CL_CD', #{achgCn})
+		</when>
+		<otherwise>
+			 , #{bchgCn}
+			 , #{achgCn}
+		</otherwise>
+	</choose>
+			 , #{fileTypeClCd}             /* 파일유형구분코드 */
+			 , #{fileYn}                   /* 파일여부 */
+		<if test="userId != null and !userId.equals('')">
+			 , #{userId}
+		</if>
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체 변경 이력 목록조회 총건수 조회 -->
+	<select id="selectInstChgHstryListCnt" resultType="int" parameterType="map">
+		/* AdmInstMngMapper.selectInstChgHstryListCnt */
+		SELECT COUNT(*)
+		  FROM (
+				SELECT 1
+				  FROM irsuser.INST_CHG_HSTRY_BSC HB
+				 INNER JOIN irsuser.INST_CHG_HSTRY_DTL HD
+				    ON HB.INST_MGNO = HD.INST_MGNO
+				   AND HB.CHG_MGNO = HD.CHG_MGNO
+				 WHERE HB.INST_MGNO = #{srhInstMgno}
+				 GROUP BY HB.INST_MGNO, HB.CHG_MGNO, HB.CHG_PRCS_TYPE_CD, HB.CHG_DT
+		  ) U
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체 변경 이력 목록조회 -->
+	<select id="selectInstChgHstryList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmInstMngMapper.selectInstChgHstryList */
+		SELECT HB.INST_MGNO
+			 , HB.CHG_MGNO
+			 , CASE WHEN MAX(HD.CHG_CL_CD) = 'CCC0003' THEN '계정담당자정보'
+			 		ELSE ARRAY_TO_STRING(ARRAY_AGG(HD.CHG_ARTCL_NM),  ', ')
+			   END AS CHG_ARTCL_NM
+<!-- 			 , ARRAY_TO_STRING(ARRAY_AGG(HD.CHG_ARTCL_NM),  ', ') AS CHG_ARTCL_NM -->
+			 , HB.CHG_PRCS_TYPE_CD
+			 , TO_CHAR(HB.CHG_DT, 'yyyyMMddHHmmss') AS CHG_DT
+		  FROM irsuser.INST_CHG_HSTRY_BSC HB
+		 INNER JOIN irsuser.INST_CHG_HSTRY_DTL HD
+		    ON HB.INST_MGNO = HD.INST_MGNO
+		   AND HB.CHG_MGNO = HD.CHG_MGNO
+		 WHERE HB.INST_MGNO = #{srhInstMgno}
+		 GROUP BY HB.INST_MGNO, HB.CHG_MGNO, HB.CHG_PRCS_TYPE_CD, HB.CHG_DT
+		 ORDER BY HB.CHG_MGNO DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 업체 변경 상세이력 목록조회 -->
+	<select id="selectInstChgHstryDtlList" resultType="egovMap" parameterType="map">
+		/* AdmInstMngMapper.selectInstChgHstryDtlList */
+		SELECT CASE WHEN HD.CHG_CL_CD = 'CCC0003' THEN irsuser.fn_get_codenm('CHG_CL_CD', HD.CHG_CL_CD) || E'\n' || '[' || COALESCE(U.FLNM, '') || ']'
+					ELSE HD.CHG_CL_CD
+			   END AS CHG_CL_CD
+			 , HD.CHG_ARTCL_NM
+			 , HD.BCHG_CN
+			 , HD.ACHG_CN
+			 , COALESCE(HD.FILE_TYPE_CL_CD, '') AS FILE_TYPE_CL_CD		/* 파일유형구분코드 */
+			 , HD.FILE_YN												/* 파일여부 */
+			 , COALESCE((CASE WHEN HD.FILE_YN = 'Y' THEN (
+													SELECT DTL.ORGNL_FILE_NM || '.' || DTL.FILE_EXTN_NM
+													  FROM irsuser.COM_FILE_GROUP_BSC GRP
+													 INNER JOIN irsuser.COM_FILE_DTL DTL
+													    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
+													   AND GRP.FILE_GROUP_MGNO = SPLIT_PART( HD.BCHG_CN,':', 1 )
+													   AND GRP.DEL_YN = 'N'
+													   AND DTL.FILE_MGNO = SPLIT_PART( HD.BCHG_CN,':', 2 )
+			 									)
+			 		ELSE ''
+			   END), '') AS BCHG_CN_ORGNL_FILE_NM
+			 , COALESCE((CASE WHEN HD.FILE_YN = 'Y' THEN (
+													SELECT DTL.ORGNL_FILE_NM || '.' || DTL.FILE_EXTN_NM
+													  FROM irsuser.COM_FILE_GROUP_BSC GRP
+													 INNER JOIN irsuser.COM_FILE_DTL DTL
+													    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
+													   AND GRP.FILE_GROUP_MGNO = SPLIT_PART( HD.ACHG_CN,':', 1 )
+													   AND GRP.DEL_YN = 'N'
+													   AND DTL.FILE_MGNO = SPLIT_PART( HD.ACHG_CN,':', 2 )
+			 									)
+			 		ELSE ''
+			   END), '') AS ACHG_CN_ORGNL_FILE_NM
+			 , ROW_NUMBER() OVER(ORDER BY HD.CHG_ARTCL_SN) AS NO
+		  FROM irsuser.INST_CHG_HSTRY_DTL HD
+		  LEFT OUTER JOIN irsuser.USER_BSC U
+		  ON U.USER_ID = HD.USER_ID
+		 WHERE HD.INST_MGNO = #{srhInstMgno}
+		   AND HD.CHG_MGNO = #{srhChgMgno}
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 업체관리 - 계정 담당자 정보 목록 저장 - 사용자정보 변경하기 -->
+	<update id="updateUser" parameterType="map">
+		/* AdmInstMngMapper.updateUser */
+		UPDATE irsuser.USER_BSC
+		   SET MDFR_ID = #{sUserId}
+		<if test="userClCd != null and !userClCd.equals('')">
+		 	 , USER_CL_CD = #{userClCd}
+		</if>
+		<if test="acntSttsClCd != null and !acntSttsClCd.equals('')">
+		 	 , ACNT_STTS_CL_CD = #{acntSttsClCd}
+		</if>
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE USER_ID = #{userId}
+		   AND ACNT_STTS_CL_CD <![CDATA[<>]]> 'ASC0001'			/* 미승인은 수정불가 - 미승인사용자는 등록관리 메뉴에서 심의승인 처리로만 변경되어야 한다. */
+	</update>
+	
+</mapper>

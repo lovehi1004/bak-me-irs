@@ -29,13 +29,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import gov.me.irs.common.constants.ExcelConst;
-import gov.me.irs.common.file.vo.FileVo;
 import gov.me.irs.common.util.DateUtil;
-import gov.me.irs.common.util.FileUtil;
+import gov.me.irs.common.util.RaonKFileUtil;
 import gov.me.irs.common.excel.ColSpan;
 import gov.me.irs.common.excel.ExcelCell;
 import gov.me.irs.common.excel.ExcelMatrix;
 import gov.me.irs.common.excel.RowSpan;
+import gov.me.irs.common.file.vo.RaonKFileVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExcelUtil {
 	
-	private final FileUtil fileUtil;
+	private final RaonKFileUtil raonKFileUtil;
 	
 	/**
 	 * 엑셀 업로드 파일 읽어서 list로 변환하기
@@ -200,7 +200,7 @@ public class ExcelUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public File getXssfFile(ExcelMatrix headerMatrix, ExcelMatrix cellMatrix, List<Map<String, Object>> dataList, String sheetname, boolean isAddDateFooter) throws Exception {
+	public File getXssfFile(ExcelMatrix headerMatrix, ExcelMatrix cellMatrix, List<Map<String, Object>> dataList, String sheetname, boolean exceptFooter) throws Exception {
 		ExcelCell matrixHeader[][] = headerMatrix.getMatrix();
 		ExcelCell matrixCell[][] = cellMatrix.getMatrix();
 		
@@ -303,7 +303,7 @@ public class ExcelUtil {
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 11. 엑셀 공통 푸터영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
-		if(isAddDateFooter) {
+		if(!exceptFooter) {
 			Row commonRow = sheet.createRow(rowCount);
 			Cell commonCell = commonRow.createCell(0);
 			commonCell.setCellStyle(this.getDefaultCommonFooterCellStyle(workbook));
@@ -334,9 +334,9 @@ public class ExcelUtil {
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 13. 엑셀파일 - 임시파일 생성하기 ■■■■■■■■■■■■■■■■■■■■ */
-		FileVo tempVo = new FileVo();
-		tempVo.setFilePath(fileUtil.getTempFilePendingDeleteWeeklyPathNm());
-		tempVo.setFileNm(fileUtil.getTempFilename());
+		RaonKFileVo tempVo = new RaonKFileVo();
+		tempVo.setFilePath(raonKFileUtil.getTempFilePendingDeleteWeeklyPathNm());
+		tempVo.setFileNm(raonKFileUtil.getTempFilename());
 		
 		File file = new File(tempVo.getFileFullPath());
 		
@@ -459,6 +459,16 @@ public class ExcelUtil {
 		style.setFont(font);
 		
 		return style;
+	}
+	
+	/**
+	 * 날짜 포함된 엑셀파일명 조립하기
+	 * 
+	 * @param name
+	 * @return - 파일명_YYYYMMDD.확장자명
+	 */
+	public final String getExcelFileName(String name) {
+		return raonKFileUtil.getExcelFilenameWithDate(name);
 	}
 	
 }

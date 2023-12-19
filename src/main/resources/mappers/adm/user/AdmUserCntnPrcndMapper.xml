@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmUserCntnPrcndMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 접속현황 - 목록조회 총건수 조회 -->
+	<select id="selectUserCntnPrcndListCnt" resultType="int" parameterType="map">
+		/* AdmUserCntnPrcndMapper.selectUserCntnPrcndListCnt */
+		SELECT COUNT(*)
+		  FROM (
+		  		SELECT DISTINCT USER_ID
+			 		 , MAX(SN) AS SN
+			 	  FROM irsuser.USER_CNTN_DSCTN
+			 	 GROUP BY USER_ID
+				) A
+		 INNER JOIN irsuser.user_cntn_dsctn B
+		 	ON B.SN = A.SN
+		   AND B.USER_ID = A.USER_ID
+		 INNER JOIN irsuser.USER_BSC C
+			ON C.USER_ID = B.USER_ID
+		 INNER JOIN irsuser.INST_BSC D 
+			ON D.INST_MGNO = C.INST_MGNO 
+		 WHERE 1=1
+		<if test="srhUserClCd != null and !srhUserClCd.equals('')">
+		   AND B.USER_CL_CD = #{srhUserClCd}
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 접속현황 - 목록조회 -->
+	<select id="selectUserCntnPrcndList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmUserCntnPrcndMapper.selectUserCntnPrcndList */
+		SELECT B.USER_ID
+			 , B.USER_CL_CD
+			 , irsuser.FN_GET_CODENM('USER_CL_CD',B.USER_CL_CD) AS USER_CL_CD_NM
+			 , D.BZENT_NM
+			 , B.LGN_ID
+			 , C.FLNM
+			 , TO_CHAR(TO_TIMESTAMP(B.CNTN_YMD,'yyyyMMdd'),'yyyy-MM-dd') AS CNTN_YMD
+			 , B.CNTN_HR
+		  FROM (
+		  		SELECT DISTINCT USER_ID
+			 		 , MAX(SN) AS SN
+			 	  FROM irsuser.USER_CNTN_DSCTN
+			 	 GROUP BY USER_ID
+				) A
+		 INNER JOIN irsuser.user_cntn_dsctn B
+		 	ON B.SN = A.SN
+		   AND B.USER_ID = A.USER_ID
+		 INNER JOIN irsuser.USER_BSC C
+			ON C.USER_ID = B.USER_ID
+		 INNER JOIN irsuser.INST_BSC D 
+			ON D.INST_MGNO = C.INST_MGNO 
+		 WHERE 1=1
+		<if test="srhUserClCd != null and !srhUserClCd.equals('')">
+		   AND B.USER_CL_CD = #{srhUserClCd}
+		</if>
+		 ORDER BY B.SN DESC 
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자 접속현황 - 액셀다운로드 -->
+	<select id="selectUserCntnPrcndExcel" resultType="egovMap" parameterType="map">
+		/* AdmUserCntnPrcndMapper.selectUserCntnPrcndExcel */
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		SELECT B.SN
+			 , irsuser.FN_GET_CODENM('USER_CL_CD',B.USER_CL_CD) AS USER_CL_NM
+			 , D.BZENT_NM
+			 , B.LGN_ID
+			 , C.FLNM
+			 , TO_CHAR(TO_TIMESTAMP(B.CNTN_YMD,'yyyyMMdd'),'yyyy-MM-dd') AS CNTN_YMD
+		  FROM (
+		  		SELECT DISTINCT USER_ID
+			 		 , MAX(SN) AS SN
+			 	  FROM irsuser.USER_CNTN_DSCTN
+			 	 GROUP BY USER_ID
+				) A
+		 INNER JOIN irsuser.user_cntn_dsctn B
+		 	ON B.SN = A.SN
+		   AND B.USER_ID = A.USER_ID
+		 INNER JOIN irsuser.USER_BSC C
+			ON C.USER_ID = B.USER_ID
+		 INNER JOIN irsuser.INST_BSC D 
+			ON D.INST_MGNO = C.INST_MGNO 
+		 WHERE 1=1
+		<if test="srhUserClCd != null and !srhUserClCd.equals('')">
+		   AND B.USER_CL_CD = #{srhUserClCd}
+		</if>
+		 ORDER BY B.SN DESC 
+		 		) V
+		) U
+		LIMIT CAST( #{srhTo} AS NUMERIC)
+		OFFSET CAST ( #{srhFrom} AS NUMERIC) -1
+	</select>
+
+</mapper>

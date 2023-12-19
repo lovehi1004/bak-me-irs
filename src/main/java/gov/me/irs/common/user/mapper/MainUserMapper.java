@@ -19,7 +19,7 @@ public interface MainUserMapper {
 	 * @param requestMap
 	 * @return
 	 */
-	Map<String, Object> selectcheckLoginIdCnt(Map<String, Object> requestMap);
+	Map<String, Object> selectLoginIdCnt(Map<String, Object> requestMap);
 	
 	/**
 	 * 메인 > 사용자 > 회원가입 > 회원가입신청 - 사업체정보 생성 [INST_BSC]

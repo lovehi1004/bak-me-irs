@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.prcnd.mapper.AdmRtrcnPrcndMapper">
+	
+	<select id="selectRtrcnPrcndListCnt" resultType="int" parameterType="map">
+		SELECT
+			COUNT(*) AS CNT
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		AND A.PRCS_DGR = B.BIZ_DGR
+		INNER JOIN IRSUSER.COM_BIZ_FLD_BSC C
+		ON B.BIZ_FLD_CD = C.BIZ_FLD_CD_MGNO
+		INNER JOIN IRSUSER.COM_BIZ_FLD_DTL D
+		ON B.BIZ_DTLS_FLD_CD = D.BIZ_FLD_DTLS_CD_MGNO
+		INNER JOIN IRSUSER.IRB_EXCR_DTL E
+		ON B.BIZ_MNG_NO = E.BIZ_MNG_NO
+		AND B.BIZ_DGR = E.BIZ_DGR
+		AND E.SN = 1
+		INNER JOIN IRSUSER.INST_BSC F
+		ON E.INST_MGNO = F.INST_MGNO
+		WHERE 1=1
+		AND A.RTRCN_SN <![CDATA[>]]> 0
+	<choose>
+		<when test="srhPrcsTypeCd eq 'RPR0001'">AND A.RTRCN_TYPE_CD = 'RPR0001'</when>
+		<when test="srhPrcsTypeCd eq 'RPR0002'">AND A.RTRCN_TYPE_CD = 'RPR0002'</when>
+		<when test="srhPrcsTypeCd eq 'RPR0003'">AND A.RTRCN_TYPE_CD = 'RPR0003'</when>
+		<when test="srhPrcsTypeCd eq 'RPR0004'">AND A.RTRCN_TYPE_CD = 'RPR0004'</when>
+	</choose>
+	<if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+		AND B.CMPTNC_INST_MNG_NO = #{srhInstMngNo} 
+	</if>
+	<if test="srhBizNm != null and !srhBizNm.equals('')">
+		AND (
+			B.BIZ_ORGT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%' 
+			OR 
+			B.BIZ_KRN_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%'
+		)
+	</if>		
+	<if test="srhExcr != null and !srhExcr.equals('')">
+		AND EXISTS (
+			SELECT 
+				T2.BIZ_MNG_NO
+			FROM IRSUSER.INST_BSC T1
+			INNER JOIN IRSUSER.IRB_EXCR_DTL T2
+			ON T1.INST_MGNO = T2.INST_MGNO 
+			WHERE 1=1
+			AND T2.BIZ_MNG_NO = B.BIZ_MNG_NO 
+			AND T2.BIZ_DGR = B.BIZ_DGR
+			AND T1.BZENT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhExcr}) || '%'
+		)	
+	</if>
+		AND A.DEL_YN = 'N'
+		AND A.DEL_YN = 'N'
+	</select>
+
+	<select id="selectRtrcnPrcndList" resultType="egovMap" parameterType="map">
+		SELECT
+			'' AS CHK	
+			,(COUNT(*) OVER()) - (U.RN-1) AS NO	
+			,U.BIZ_MNG_NO
+			,U.BIZ_DGR
+			,U.DGR_REG_RSN_CD
+			,U.BIZ_TYPE_CD
+			,U.PRGRM_MNG_NO
+			,U.RTRCN_PRCS_DT
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM	
+			,U.RTRCN_DMND_TYPE_CD
+			,CASE WHEN U.RTRCN_DMND_TYPE_CD = 'RDT0001' THEN '사전통보' ELSE '사업취소(기승인)' END AS RTRCN_DMND_TYPE_CD_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_ORGT_NM FROM (
+							SELECT 
+								BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_ORGT_NM 	
+				ELSE U.BIZ_ORGT_NM 	
+			END AS BIZ_ORGT_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_KRN_NM FROM (
+							SELECT 
+								BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_KRN_NM
+				ELSE U.BIZ_KRN_NM 	
+			END AS BIZ_KRN_NM
+			,U.BIZ_FLD_KORN_NM 
+			,U.BIZ_DTLS_FLD_KORN_NM 
+			,U.BZENT_NM
+			,U.RTRCN_TYPE_CD
+			,CASE WHEN U.RTRCN_TYPE_CD = 'RPR0001' THEN '사전통보'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0002' THEN '이의신청'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0003' THEN '사업취소'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0004' THEN '사업취소보류'
+			 	  ELSE '-'
+			END AS RTRCN_TYPE_CD_NM
+			,U.CMPTNC_INST_MNG_NO
+			,'1' AS INST_STS
+			,COALESCE((SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = U.CMPTNC_INST_MNG_NO), '-') AS INST_NM	
+		<choose>
+			<when test="auth.sInstClsfCd eq 'ICC0001'">
+			,CASE WHEN U.RTRCN_TYPE_CD = 'RPR0001' THEN '조회'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0002' THEN '처리'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0003' THEN '조회'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0004' THEN '조회'
+			 	  ELSE '조회'
+			END AS BTN_NM
+			</when>
+			<when test="auth.sInstClsfCd eq 'ICC0003' or auth.sInstClsfCd eq 'ICC0004'">
+			,CASE WHEN U.RTRCN_TYPE_CD = 'RPR0001' THEN '조회'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0002' THEN '처리'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0003' THEN '조회'
+			      WHEN U.RTRCN_TYPE_CD = 'RPR0004' THEN '조회'
+			 	  ELSE '조회'
+			END AS BTN_NM
+			</when>
+			<otherwise>
+			, '조회' AS BTN_NM
+			</otherwise>
+		</choose>					
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+			(
+				SELECT 
+					 A.BIZ_MNG_NO, A.RTRCN_TYPE_CD, A.RTRCN_DMND_TYPE_CD, A.RTRCN_PRCS_DT
+					,B.BIZ_DGR, B.BIZ_TYPE_CD, B.PRGRM_MNG_NO, B.BIZ_ORGT_NM, B.BIZ_KRN_NM
+					,B.CMPTNC_INST_MNG_NO, B.DGR_REG_RSN_CD, B.AGREE_CLAUS_CD
+					,C.BIZ_FLD_KORN_NM
+					,D.BIZ_DTLS_FLD_KORN_NM
+					,F.BZENT_NM
+				FROM IRSUSER.IRB_BSC A
+				INNER JOIN IRSUSER.IRB_DTL B
+				ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+				AND A.PRCS_DGR = B.BIZ_DGR
+				INNER JOIN IRSUSER.COM_BIZ_FLD_BSC C
+				ON B.BIZ_FLD_CD = C.BIZ_FLD_CD_MGNO
+				INNER JOIN IRSUSER.COM_BIZ_FLD_DTL D
+				ON B.BIZ_DTLS_FLD_CD = D.BIZ_FLD_DTLS_CD_MGNO
+				INNER JOIN IRSUSER.IRB_EXCR_DTL E
+				ON B.BIZ_MNG_NO = E.BIZ_MNG_NO
+				AND B.BIZ_DGR = E.BIZ_DGR
+				AND E.SN = 1
+				INNER JOIN IRSUSER.INST_BSC F
+				ON E.INST_MGNO = F.INST_MGNO
+				WHERE 1=1
+				AND A.RTRCN_SN <![CDATA[>]]> 0
+			<choose>
+				<when test="srhPrcsTypeCd eq 'RPR0001'">AND A.RTRCN_TYPE_CD = 'RPR0001'</when>
+				<when test="srhPrcsTypeCd eq 'RPR0002'">AND A.RTRCN_TYPE_CD = 'RPR0002'</when>
+				<when test="srhPrcsTypeCd eq 'RPR0003'">AND A.RTRCN_TYPE_CD = 'RPR0003'</when>
+				<when test="srhPrcsTypeCd eq 'RPR0003'">AND A.RTRCN_TYPE_CD = 'RPR0004'</when>
+			</choose>
+			<if test="srhInstMngNo != null and !srhInstMngNo.equals('')">
+				AND B.CMPTNC_INST_MNG_NO = #{srhInstMngNo} 
+			</if>
+			<if test="srhBizNm != null and !srhBizNm.equals('')">
+				AND (
+					B.BIZ_ORGT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%' 
+					OR 
+					B.BIZ_KRN_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%'
+				)
+			</if>		
+			<if test="srhExcr != null and !srhExcr.equals('')">
+				AND EXISTS (
+					SELECT 
+						T2.BIZ_MNG_NO
+					FROM IRSUSER.INST_BSC T1
+					INNER JOIN IRSUSER.IRB_EXCR_DTL T2
+					ON T1.INST_MGNO = T2.INST_MGNO 
+					WHERE 1=1
+					AND T2.BIZ_MNG_NO = B.BIZ_MNG_NO 
+					AND T2.BIZ_DGR = B.BIZ_DGR
+					AND T1.BZENT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhExcr}) || '%'
+				)	
+			</if>
+				AND A.DEL_YN = 'N'
+				AND A.DEL_YN = 'N'
+				ORDER BY A.MDFCN_DT DESC
+			) V
+		) U 
+		LIMIT #{pageNavigation.listSize}
+		OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}
+	</select>
+	
+	<!-- [사용자] 사업취소 검색 -->
+	<select id="selectRtrcnPrcndPopListCnt" resultType="int" parameterType="map">
+		SELECT
+			COUNT(*) AS CNT
+		FROM IRSUSER.IRB_BSC A
+		INNER JOIN IRSUSER.IRB_DTL B
+		ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+		AND A.PRCS_DGR = B.BIZ_DGR 
+		WHERE 1=1		
+		<if test="srhBizNm != null and !srhBizNm.equals('')">
+		AND (
+			B.BIZ_ORGT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%' 
+			OR 
+			B.BIZ_KRN_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%'
+		)
+		</if>
+		<if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+		AND B.BIZ_TYPE_CD = #{srhBizTypeCd}
+		</if>
+		AND A.DEL_YN = 'N'
+		AND B.DEL_YN = 'N'  
+	</select>
+	
+	<!-- [사용자] 사업취소 검색 -->
+	<select id="selectRtrcnPrcndPopList" resultType="egovMap" parameterType="map">
+		SELECT
+			'' AS CHK	
+			,(COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.BIZ_MNG_NO
+			,CAST(U.BIZ_DGR AS TEXT) AS BIZ_DGR
+			,U.DGR_REG_RSN_CD
+			,U.BIZ_TYPE_CD
+			,IRSUSER.FN_GET_CODENM('AGREE_CLAUS_CD', U.AGREE_CLAUS_CD) AS AGREE_CLAUS_CD_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_ORGT_NM FROM (
+							SELECT 
+								BIZ_ORGT_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_ORGT_NM 	
+				ELSE U.BIZ_ORGT_NM 	
+			END AS BIZ_ORGT_NM
+			,CASE WHEN U.BIZ_TYPE_CD = 'BTC0003'
+				THEN '[' || 
+					(
+						SELECT T.BIZ_KRN_NM FROM (
+							SELECT 
+								BIZ_KRN_NM, RANK() OVER(PARTITION BY BIZ_MNG_NO ORDER BY BIZ_DGR DESC) AS RN 
+							FROM IRSUSER.IRB_PRGRM_DTL 
+							WHERE 1=1
+							AND BIZ_MNG_NO = U.PRGRM_MNG_NO
+						) T
+						WHERE T.RN = 1 
+					) || '] ' || U.BIZ_KRN_NM
+				ELSE U.BIZ_KRN_NM 	
+			END AS BIZ_KRN_NM
+			,IRSUSER.FN_GET_CODENM('BIZ_TYPE_CD', U.BIZ_TYPE_CD) AS BIZ_TYPE_CD_NM
+			,IRSUSER.FN_GET_CODENM('CERT_VLD_TYPE_CD', U.CERT_VLD_TYPE_CD) AS CERT_VLD_TYPE_CD_NM		
+			,U.CERT_VLD_BGNG_YMD 
+			,U.CERT_VLD_END_YMD  	
+			,COALESCE((SELECT BZENT_NM FROM IRSUSER.INST_BSC WHERE INST_MGNO = U.CMPTNC_INST_MNG_NO),'-') AS BZENT_NM
+			,IRSUSER.FN_GET_CODENM('PRCS_TYPE_CD', U.PRCS_TYPE_CD) AS PRCS_TYPE_CD_NM	
+			,CASE WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0001' THEN '자료요청'
+			      WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0002' THEN '자료제출'
+			      WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0003' THEN '자료확인(반려)'
+			      WHEN COALESCE(U.ADD_DATA_TYPE_CD, '') = 'ADT0004' THEN '자료확인(승인)'
+				  ELSE '-'
+			END AS ADD_DATA_NM 
+		<choose>
+			<when test="auth.sInstClsfCd eq 'ICC0001'">
+			,CASE WHEN U.BIZ_RTRCN_DMND_PSBLTY_YN = 'Y' THEN '1' ELSE '0' END AS BTN_STS
+			,CASE WHEN U.BIZ_RTRCN_DMND_PSBLTY_YN = 'Y' THEN '선택' ELSE '선택불가' END AS BTN_NM
+			</when>
+			<when test="auth.sInstClsfCd eq 'ICC0003' or auth.sInstClsfCd eq 'ICC0004'">
+			,CASE WHEN U.BIZ_RTRCN_DMND_PSBLTY_YN = 'Y' AND U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} THEN '1' ELSE '0' END AS BTN_STS
+			,CASE WHEN U.BIZ_RTRCN_DMND_PSBLTY_YN = 'Y' AND U.CMPTNC_INST_MNG_NO = #{auth.sUpInstMgno} THEN '선택' ELSE '선택불가' END AS BTN_NM
+			</when>
+			<otherwise>
+			,'0' AS BTN_STS
+			,'선택불가' AS BTN_NM
+			</otherwise>
+		</choose>					
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, V.*
+			FROM
+				(
+				SELECT 
+					 A.BIZ_MNG_NO, A.BIZ_RTRCN_DMND_PSBLTY_YN
+					,B.BIZ_DGR ,B.AGREE_CLAUS_CD, B.BIZ_ORGT_NM, B.BIZ_KRN_NM, B.BIZ_TYPE_CD  
+					,B.CERT_VLD_TYPE_CD, B.CERT_VLD_BGNG_YMD, B.CERT_VLD_END_YMD, B.DGR_REG_RSN_CD
+					,B.PRCS_TYPE_CD, B.ADD_DATA_TYPE_CD, B.PRGRM_MNG_NO, B.CMPTNC_INST_MNG_NO			
+				FROM IRSUSER.IRB_BSC A
+				INNER JOIN IRSUSER.IRB_DTL B
+				ON A.BIZ_MNG_NO = B.BIZ_MNG_NO 
+				AND A.PRCS_DGR = B.BIZ_DGR 
+				WHERE 1=1		
+				<if test="srhBizNm != null and !srhBizNm.equals('')">
+				AND (
+					B.BIZ_ORGT_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%' 
+					OR 
+					B.BIZ_KRN_NM LIKE '%' || IRSUSER.FN_TRANSFORM_SPECIAL_CHARS(#{srhBizNm}) || '%'
+				)
+				</if>
+				<if test="srhBizTypeCd != null and !srhBizTypeCd.equals('')">
+				AND B.BIZ_TYPE_CD = #{srhBizTypeCd}
+				</if>					
+				AND A.DEL_YN = 'N'
+				AND B.DEL_YN = 'N'
+				ORDER BY A.MDFCN_DT DESC		
+			) V
+		) U
+		LIMIT #{pageNavigation.listSize}
+		OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}		
+	</select>
+	
+	<select id="selectRtrcnRegDetail" resultType="egovMap" parameterType="map">
+		SELECT 
+			 CAST(COALESCE(MAX(A.RTRCN_SN), 1) AS TEXT) AS RTRCN_SN 
+			,'' AS RTRCN_DGR
+			,MAX(A.BIZ_MNG_NO) AS BIZ_MNG_NO 
+			,'' AS RTRCN_DMND_TYPE_CD
+			,'' AS RTRCN_DMND_CL_CD
+			,'' AS RTRCN_DMND_CN
+			,'' AS RTRCN_DMND_FLMNO
+			,'' AS RTRCN_DMND_DT
+			,'' AS OBJC_POSE_OPNN
+			,'' AS OBJC_POSE_FLMNO
+			,'' AS OBJC_POSE_DT
+			,'' AS PRCS_RSLT_CD
+			,'' AS PRCS_OPNN
+			,'' AS PRCS_FLMNO
+			,'' AS PRCS_DT
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+		FROM IRSUSER.IRB_BSC A
+		LEFT OUTER JOIN IRSUSER.IRB_RTRCN_DTL B
+		ON A.RTRCN_SN = B.RTRCN_SN 
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+	</select>
+	
+	<select id="selectAprvAplyRtrcnSn" resultType="int" parameterType="map">
+		SELECT NEXTVAL('IRSUSER.IRB_RTRCN_SN_SEQ')
+	</select>
+	
+	<insert id="insertAprvAplyRtrcnDtl" parameterType="map">
+		INSERT INTO IRSUSER.IRB_RTRCN_DTL (
+			 RTRCN_SN
+			,RTRCN_DGR
+			,BIZ_MNG_NO
+			,RTRCN_DMND_TYPE_CD
+			,RTRCN_DMND_CL_CD
+			,RTRCN_DMND_CN
+			,RTRCN_DMND_FLMNO
+			,RTRCN_DMND_DT
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+			,RTRCN_DMND_RGTR_ID
+		) VALUES (
+			 #{rtrcnSn}
+			,(SELECT COALESCE(MAX(RTRCN_DGR), 0)+1 FROM IRSUSER.IRB_RTRCN_DTL WHERE RTRCN_SN = #{rtrcnSn})
+			,#{bizMngNo}	
+			,#{rtrcnDmndTypeCd}
+			,#{rtrcnDmndClCd}
+			,#{rtrcnDmndCn}
+			,#{rtrcnDmndFlmno}
+			,CURRENT_TIMESTAMP
+			,'N'
+			,#{auth.sUserId}		
+			,CURRENT_TIMESTAMP		
+			,#{auth.sUserId}	
+		)
+	</insert>
+	
+	<update id="updateAprvAplyRtrcnBsc" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET 
+			 RTRCN_SN = #{rtrcnSn}
+			,RTRCN_TYPE_CD = #{rtrcnTypeCd}
+			,RTRCN_DMND_TYPE_CD = #{rtrcnDmndTypeCd}
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+			,RTRCN_PRCS_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<select id="selectAprvAplyRtrcnList" resultType="egovMap" parameterType="map">
+		SELECT
+			 (COUNT(*) OVER()) - (U.RN-1) AS NO
+			,U.*
+		FROM (
+			SELECT
+				 ROW_NUMBER() OVER() AS RN
+				,V.*
+			FROM (
+				SELECT 
+					 B.RTRCN_SN
+					,B.RTRCN_DGR
+					,B.RTRCN_DGR || '차' AS RTRCN_DGR_NM
+					,B.BIZ_MNG_NO
+					,B.RTRCN_DMND_TYPE_CD
+					,IRSUSER.FN_GET_CODENM('RTRCN_DMND_TYPE_CD', B.RTRCN_DMND_TYPE_CD) AS RTRCN_DMND_TYPE_CD_NM
+					,B.RTRCN_DMND_CL_CD
+					,IRSUSER.FN_GET_CODENM('RTRCN_DMND_CL_CD', B.RTRCN_DMND_CL_CD) AS RTRCN_DMND_CL_CD_NM
+					,B.RTRCN_DMND_CN
+					,B.RTRCN_DMND_FLMNO
+					,TO_CHAR(B.RTRCN_DMND_DT, 'YYYY-MM-DD HH24:MI:SS') AS RTRCN_DMND_DT
+					,B.OBJC_POSE_OPNN
+					,B.OBJC_POSE_FLMNO
+					,TO_CHAR(B.OBJC_POSE_DT, 'YYYY-MM-DD HH24:MI:SS') AS OBJC_POSE_DT
+					,B.PRCS_RSLT_CD
+					,IRSUSER.FN_GET_CODENM('RTRCN_PRCS_RSLT_CD', B.PRCS_RSLT_CD) AS PRCS_RSLT_CD_NM
+					,B.PRCS_OPNN
+					,B.PRCS_FLMNO
+					,TO_CHAR(B.PRCS_DT, 'YYYY-MM-DD HH24:MI:SS') AS PRCS_DT
+					,B.DEL_YN
+					,B.RGTR_ID
+					,TO_CHAR(B.REG_DT, 'YYYY-MM-DD HH24:MI:SS') AS REG_DT
+					,B.MDFR_ID
+					,TO_CHAR(B.MDFCN_DT, 'YYYY-MM-DD HH24:MI:SS') AS MDFCN_DT
+				FROM IRSUSER.IRB_BSC A
+				INNER JOIN IRSUSER.IRB_RTRCN_DTL B
+				ON A.RTRCN_SN = B.RTRCN_SN 
+				WHERE 1=1
+				AND A.BIZ_MNG_NO = #{bizMngNo}
+				ORDER BY B.RTRCN_DGR DESC
+			) V
+		) U	
+	</select>
+	
+	<select id="selectAprvAplyRtrcnReg" resultType="egovMap" parameterType="map">
+		SELECT 			
+			 CAST(COALESCE(MAX(B.RTRCN_SN), 0) AS TEXT) AS RTRCN_SN
+			,CAST(COALESCE(MAX(B.RTRCN_DGR), 1) AS TEXT) AS RTRCN_DGR
+			,CAST(COALESCE(MAX(B.RTRCN_DGR), 1) AS TEXT) || '차' AS RTRCN_DGR_NM
+			,'' AS RTRCN_DMND_TYPE_CD
+			,'' AS RTRCN_DMND_TYPE_CD_NM
+			,'' AS RTRCN_DMND_CL_CD
+			,'' AS RTRCN_DMND_CL_CD_NM
+			,'' AS RTRCN_DMND_CN
+			,'' AS RTRCN_DMND_FLMNO
+			,'' AS RTRCN_DMND_DT
+			,'' AS OBJC_POSE_OPNN
+			,'' AS OBJC_POSE_FLMNO
+			,'' AS OBJC_POSE_DT
+			,'' AS PRCS_RSLT_CD
+			,'' AS PRCS_RSLT_CD_NM
+			,'' AS PRCS_OPNN
+			,'' AS PRCS_FLMNO
+			,'' AS PRCS_DT
+			,'' AS DEL_YN
+			,'' AS RGTR_ID
+			,'' AS REG_DT
+			,'' AS MDFR_ID
+			,'' AS MDFCN_DT
+		FROM IRSUSER.IRB_BSC A
+		LEFT OUTER JOIN IRSUSER.IRB_RTRCN_DTL B
+		ON A.RTRCN_SN = B.RTRCN_SN 
+		AND B.RTRCN_DGR = (SELECT COALESCE(MAX(RTRCN_DGR), 0) FROM IRSUSER.IRB_RTRCN_DTL WHERE RTRCN_SN = A.RTRCN_SN)
+		WHERE 1=1
+		AND A.BIZ_MNG_NO = #{bizMngNo}
+	</select>
+	
+	<update id="updateRtrcnRst" parameterType="map">
+		UPDATE IRSUSER.IRB_RTRCN_DTL SET
+			 PRCS_RSLT_CD = #{prcsRsltCd}
+			,PRCS_OPNN = #{prcsOpnn}   
+			,PRCS_FLMNO = #{prcsFlmno} 
+			,PRCS_DT = CURRENT_TIMESTAMP 
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+			,PRCS_RGTR_ID = #{auth.sUserId}
+		WHERE 1=1
+		AND RTRCN_SN = #{rtrcnSn}
+		AND RTRCN_DGR = CAST(#{rtrcnDgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateRtrcnBscOk" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 RTRCN_TYPE_CD = #{rtrcnTypeCd}   
+			,RTRCN_DMND_TYPE_CD = #{rtrcnDmndTypeCd}
+			,BIZ_RTRCN_YN = 'Y'
+			,BIZ_RTRCN_YMD = TO_CHAR(CURRENT_TIMESTAMP, 'YYYYMMDD')
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+			,RTRCN_PRCS_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<update id="updateRtrcnBsc" parameterType="map">
+		UPDATE IRSUSER.IRB_BSC SET
+			 RTRCN_TYPE_CD = #{rtrcnTypeCd}   
+			,MDFR_ID = #{auth.sUserId}
+			,MDFCN_DT = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND BIZ_MNG_NO = #{bizMngNo}
+	</update>
+	
+	<insert id="insertAprvAplyRtrcnDtlOk" parameterType="map">
+		INSERT INTO IRSUSER.IRB_RTRCN_DTL (
+			 RTRCN_SN
+			,RTRCN_DGR
+			,BIZ_MNG_NO
+			,RTRCN_DMND_TYPE_CD
+			,RTRCN_DMND_CL_CD
+			,RTRCN_DMND_CN
+			,RTRCN_DMND_FLMNO
+			,RTRCN_DMND_DT
+			,DEL_YN
+			,RGTR_ID
+			,REG_DT
+			,PRCS_RSLT_CD
+			,PRCS_OPNN
+			,PRCS_DT
+			,RTRCN_DMND_RGTR_ID
+			,PRCS_RGTR_ID
+		) VALUES (
+			 #{rtrcnSn}
+			,(SELECT COALESCE(MAX(RTRCN_DGR), 0)+1 FROM IRSUSER.IRB_RTRCN_DTL WHERE RTRCN_SN = #{rtrcnSn})
+			,#{bizMngNo}	
+			,#{rtrcnDmndTypeCd}
+			,#{rtrcnDmndClCd}
+			,#{rtrcnDmndCn}
+			,#{rtrcnDmndFlmno}
+			,CURRENT_TIMESTAMP
+			,'N'
+			,#{auth.sUserId}		
+			,CURRENT_TIMESTAMP		
+			,#{prcsRsltCd}
+			,#{prcsOpnn}
+			,CURRENT_TIMESTAMP
+			,#{auth.sUserId}
+			,#{auth.sUserId}
+		)
+	</insert>
+	
+</mapper>

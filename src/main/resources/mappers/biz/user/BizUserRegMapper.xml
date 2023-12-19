@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.biz.user.mapper.BizUserRegMapper">
+	
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 목록조회 총건수 조회 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 목록조회 총건수 조회 -->
+	<select id="selectUserRegListCnt" resultType="int" parameterType="map">
+		/* BizUserRegMapper.selectUserRegListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.USER_APLY_BSC UA
+		 WHERE 1 = 1
+		   AND DEL_YN = 'N'
+	<choose>
+		<when test='directorYn != null and directorYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+		   AND UA.INST_MGNO IN (
+									SELECT ISD.INST_MGNO
+									  FROM IRSUSER.USER_BSC U
+									 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+									    ON U.USER_ID = #{sUserId}
+									   AND ISD.INFO_MNG_INST_MGNO = U.INST_MGNO			/* 관할관장기관 기준으로 조회 */
+		   )
+		</when>
+		<when test='outsourcingYn != null and outsourcingYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+			   AND UA.INST_MGNO IN (
+										SELECT ISD.INST_MGNO
+										  FROM IRSUSER.USER_BSC U
+										 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+										    ON U.USER_ID = #{sUserId}
+										   AND ISD.INFO_MNG_INST_MGNO = U.UP_INST_MGNO			/* 위탁기관 기준으로 조회 */
+			   )
+		</when>
+		<otherwise>
+			<if test='superUserYn != null and superUserYn.equals("N")'><!-- 전체관리자면 전체목록 조회가능 -->
+			   AND UA.USER_ID = #{sUserId}										/* 전체관리자가 아니라면 본인꺼만 열람가능 */
+			</if>
+		</otherwise>
+	</choose>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND UA.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')				/* 사업체명으로 검색 */
+		</if>
+		<if test="srhRprsvNm != null and !srhRprsvNm.equals('')">
+		   AND UA.RPRSV_NM LIKE CONCAT('%', #{srhRprsvNm}, '%')				/* 대표자명으로 검색 */
+		</if>
+		<if test="srhFlnm != null and !srhFlnm.equals('')">
+		   AND UA.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')						/* 성명으로 검색 */
+		</if>
+		<if test="srhAplyPrcsTypeCd != null and !srhAplyPrcsTypeCd.equals('')">
+		   AND UA.APLY_PRCS_TYPE_CD = #{srhAplyPrcsTypeCd}								/* 처리유형코드로 검색 */
+		</if>
+	</select>
+	
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 목록조회 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 목록조회 -->
+	<select id="selectUserRegList" resultType="egovMap" parameterType="map">
+		/* BizUserRegMapper.selectUserRegList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+			 <!--
+			 	- 전체관리자는 사용자등록 신청을 하지 않으므로 전체관리자는 본인이 신청건인지 확인 안해도 됨
+			 	- 전체관리자만 승인/반려 권한을 부여받음
+			 	- 전체관리자가 반려처리시 신청자의 이의신청은 없음 - 프로세스정의서 Page.8
+			 		▶ 사용자등록 신청자는 이의신청 불가
+			 	- 처리상태는 총 3가지만 존재함 : [신청|심의반려|심의승인] [APC0001|APC0002|APC0003]
+			 	- 처리상태별 버튼 표시
+			 		##################################################
+			 			▶ [신청상태] - 전체관리자 : 심의, 신청자 : 관리자 승인대기
+			 			▶ [심의승인] - 전체관리자 : 조회, 신청자 : 조회
+			 			▶ [심의반려] - 전체관리자 : 조회, 신청자 : 조회
+			 		##################################################
+			 	으므로 신청상태의 신청자는 버튼명을 '관리자 승인대기'로 표시한다. - 프로세스정의서 [주요사항 0-2-1.1.]참고
+			 -->
+			 , CASE WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '관리자 승인대기'		/* 신청상태     AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '심의'					/* 신청상태     AND 전체관리자 ▶ 심의 버튼 */
+			 		
+			 		WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0002' THEN '조회'					/* 심의반려상태 AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0002' THEN '조회'					/* 심의반려상태 AND 전체관리자 ▶ 조회 버튼 */
+			 		
+			 		WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0003' THEN '조회'					/* 심의승인상태 AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0003' THEN '조회'					/* 심의승인상태 AND 전체관리자 ▶ 조회 버튼 */
+			 		
+			 		ELSE '조회'																				/* 기타 ▶ 조회 버튼 */
+			 		
+			   END AS APLY_PRCS_GBN_NM
+			 , CASE WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '1'						/* 신청상태     AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '2'						/* 신청상태     AND 전체관리자 ▶ 심의 버튼 */
+			 		
+			 		WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0002' THEN '3'						/* 심의반려상태 AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0002' THEN '4'						/* 심의반려상태 AND 전체관리자 ▶ 조회 버튼 */
+			 		
+			 		WHEN #{sUserId} = U.USER_ID AND U.APLY_PRCS_TYPE_CD = 'APC0003' THEN '5'						/* 심의승인상태 AND 본인꺼면   ▶ 조회 버튼 */
+			 		WHEN #{superUserYn} = 'Y'   AND U.APLY_PRCS_TYPE_CD = 'APC0003' THEN '6'						/* 심의승인상태 AND 전체관리자 ▶ 조회 버튼 */
+			 		
+			 		ELSE '7'																				/* 기타 ▶ 조회 버튼 */
+			 		
+			   END AS APLY_PRCS_GBN_NO
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT UA.APLY_MGNO                        /* 신청관리번호 */
+						 , UA.INST_MGNO                        /* 기관관리번호 */
+						 , UA.BZENT_NM                         /* 사업체명 */
+						 , UA.INST_CLSF_CD                     /* 기관분류코드 */
+						 , UA.RPRSV_NM                         /* 대표자명 */
+						 , UA.BRNO                             /* 사업자등록번호 */
+						 , UA.LGN_ID                           /* 아이디 */
+						 , UA.FLNM                             /* 성명 */
+						 , UA.USER_CL_CD                       /* 사용자구분코드 */
+						 , UA.APLY_TYPE_CD                     /* 신청유형코드 */
+						 , UA.APLY_YMD                         /* 신청일자 */
+						 , UA.APLY_PRCS_YMD                    /* 처리일자 */
+						 , UA.APLY_PRCS_TYPE_CD                /* 처리유형코드 */
+						 , UA.USER_ID                          /* 신청자 사용자ID */
+					  FROM irsuser.USER_APLY_BSC UA
+					 WHERE 1 = 1
+					   AND DEL_YN = 'N'
+				<choose>
+					<when test='directorYn != null and directorYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+						   AND UA.INST_MGNO IN (
+													SELECT ISD.INST_MGNO
+													  FROM IRSUSER.USER_BSC U
+													 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+													    ON U.USER_ID = #{sUserId}
+													   AND ISD.INFO_MNG_INST_MGNO = U.INST_MGNO			/* 관할관장기관 기준으로 조회 */
+						   )
+					</when>
+					<when test='outsourcingYn != null and outsourcingYn.equals("Y")'><!-- 관할관장기관 기준으로 조회 -->
+						   AND UA.INST_MGNO IN (
+													SELECT ISD.INST_MGNO
+													  FROM IRSUSER.USER_BSC U
+													 INNER JOIN IRSUSER.INST_STNG_DTL ISD
+													    ON U.USER_ID = #{sUserId}
+													   AND ISD.INFO_MNG_INST_MGNO = U.UP_INST_MGNO			/* 위탁기관 기준으로 조회 */
+						   )
+					</when>
+					<otherwise>
+						<if test='superUserYn != null and superUserYn.equals("N")'><!-- 전체관리자면 전체목록 조회가능 -->
+						   AND UA.USER_ID = #{sUserId}										/* 전체관리자가 아니라면 본인꺼만 열람가능 */
+						</if>
+					</otherwise>
+				</choose>
+					<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+					   AND UA.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')				/* 사업체명으로 검색 */
+					</if>
+					<if test="srhRprsvNm != null and !srhRprsvNm.equals('')">
+					   AND UA.RPRSV_NM LIKE CONCAT('%', #{srhRprsvNm}, '%')				/* 대표자명으로 검색 */
+					</if>
+					<if test="srhFlnm != null and !srhFlnm.equals('')">
+					   AND UA.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')						/* 성명으로 검색 */
+					</if>
+					<if test="srhAplyPrcsTypeCd != null and !srhAplyPrcsTypeCd.equals('')">
+					   AND UA.APLY_PRCS_TYPE_CD = #{srhAplyPrcsTypeCd}								/* 처리유형코드로 검색 */
+					</if>
+					ORDER BY UA.REG_DT DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 상세조회 - 사용자신청정보 사업체정보, 사용자정보, 첨부파일정보 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 상세조회 - 사용자신청정보 사업체정보, 사용자정보, 첨부파일정보 -->
+	<select id="selectUserRegDetail" resultType="egovMap" parameterType="map">
+		/* BizUserRegMapper.selectUserRegDetail */
+		<!-- 사업체정보 -->
+		SELECT UA.INST_MGNO
+			 , UA.INST_CLSF_CD
+			 , UA.INST_DTLS_CLSF_CD
+			 , UA.GOV_INST_YN
+			 , UA.INST_ACNT_STTS_CL_CD
+			 , UA.BZENT_NM
+			 , UA.BZENT_CL_CD
+			 , UA.BRNO
+			 , UA.CRNO
+			 , UA.RPRSV_NM
+			 , UA.CORP_TEL_DDD
+			 , UA.CORP_TEL_TLPNO
+			 , UA.CORP_TEL_PHINO
+			 , UA.CORP_TEL_DDD || '-' || UA.CORP_TEL_TLPNO || '-' || UA.CORP_TEL_PHINO  AS FULL_CORP_TEL_NO         /* 전체법인전화번호 */
+			 , UA.RDNM_CD
+			 , UA.ADDR
+			 , UA.DTL_ADDR
+			 , UA.UP_INST_MGNO																					/* 상위기관관리번호 */
+			 , UIB.BZENT_NM                                                      AS UP_INST_NM					/* 상위기관명 */
+			 , irsuser.fn_get_codenm('BZENT_CL_CD', UA.BZENT_CL_CD)              AS BZENT_CL_CD_NM				/* 사업체구분코드명 */
+			 , irsuser.fn_get_codenm('INST_CLSF_CD', UA.INST_CLSF_CD)            AS INST_CLSF_CD_NM				/* 기관분류코드명 */
+			 , CASE WHEN UA.GOV_INST_YN = 'Y' THEN '여' ELSE '부' END            AS GOV_INST_YN_NM				/* 정부기관여부명 */
+			 , irsuser.fn_get_codenm('ACNT_STTS_CL_CD', UA.INST_ACNT_STTS_CL_CD) AS INST_ACNT_STTS_CL_CD_NM		/* 기관계정상태구분코드명 */
+		<!-- 사용자정보 -->
+			 , UA.LGN_ID                            /* 로그인ID */
+			 , UA.FLNM                              /* 성명 */
+			 , UA.USER_CL_CD                        /* 사용자구분코드 */
+			 , UA.DEPT_NM                           /* 부서명 */
+			 , UA.JBPS_NM                           /* 직위명 */
+			 , UA.TEL_DDD                           /* 전화지역번호 */
+			 , UA.TEL_TLPNO                         /* 전화국번호 */
+			 , UA.TEL_PHINO                         /* 전화개별번호 */
+			 , UA.TEL_DDD || '-' || UA.TEL_TLPNO || '-' || UA.TEL_PHINO             AS FULL_TEL_NO              /* 전체전화번호 */
+			 , UA.HDPON_DDD                         /* 핸드폰지역번호 */
+			 , UA.HDPON_TLPNO                       /* 핸드폰국번호 */
+			 , UA.HDPON_PHINO                       /* 핸드폰개별번호 */
+			 , UA.HDPON_DDD || '-' || UA.HDPON_TLPNO || '-' || UA.HDPON_PHINO       AS FULL_HDPON_NO            /* 전체핸드폰번호 */
+			 , UA.FAX_DDD                           /* 팩스지역번호 */
+			 , UA.FAX_TLPNO                         /* 팩스국번호 */
+			 , UA.FAX_PHINO                         /* 팩스개별번호 */
+			 , UA.FAX_DDD || '-' || UA.FAX_TLPNO || '-' || UA.FAX_PHINO             AS FULL_FAX_NO              /* 전체팩스번호 */
+			 , UA.EML_ID                            /* 이메일ID */
+			 , UA.EML_ADDR                          /* 이메일주소 */
+			 , UA.SMS_NTI_YN                        /* sms알림여부 */
+			 , UA.USER_ACNT_STTS_CL_CD
+			 , irsuser.fn_get_codenm('USER_CL_CD', UA.USER_CL_CD)                   AS USER_CL_CD_NM			/* 사용자구분코드명 */
+			 , UA.EML_ID || '@' || UA.EML_ADDR                                      AS EML_FULL_ADDR			/* 이메일전체주소 */
+			 , CASE WHEN UA.SMS_NTI_YN = 'Y' THEN '동의' ELSE '미동의' END          AS SMS_NTI_YN_NM			/* sms알림여부명 */
+		<!-- 첨부파일정보 -->
+			 , UA.BRDOC_FLMNO
+			 , (
+			 	SELECT COALESCE(ARRAY_TO_STRING(ARRAY_AGG(FD.FILE_MGNO),  ','), '') AS BRDOC_FLMNO_FILE_MGNO 
+			 	  FROM irsuser.COM_FILE_DTL FD
+			 	 WHERE FD.FILE_GROUP_MGNO = UA.BRDOC_FLMNO
+			 	   AND FD.DEL_YN = 'N'
+			 ) AS BRDOC_FLMNO_FILE_MGNO
+		<!-- 상태정보 -->
+			 , UA.APLY_TYPE_CD                       /* 신청유형코드 */ 
+			 , UA.APLY_YMD                           /* 신청일자 */ 
+			 , UA.APLY_PRCS_TYPE_CD                       /* 처리유형코드 */ 
+			 , UA.APLY_PRCS_YMD                           /* 처리일자 */ 
+		<!-- 기타정보 -->
+			 , UA.USER_ID                            /* 사용자ID */ 
+			 , UA.PSWD                               /* 비밀번호 */ 
+		  FROM irsuser.USER_APLY_BSC UA
+		 INNER JOIN irsuser.INST_BSC UIB
+		    ON UIB.INST_MGNO = UA.UP_INST_MGNO
+		   AND UIB.DEL_YN = 'N'
+		 WHERE 1 = 1
+		   AND UA.DEL_YN = 'N'
+		   AND UA.APLY_MGNO = #{aplyMgno}
+	</select>
+	
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 상세조회 - 심의결과조회 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 상세조회 - 심의결과조회 -->
+	<select id="selectDlbrInfoDetail" resultType="egovMap" parameterType="map">
+		/* BizUserRegMapper.selectDlbrInfoDetail */
+		SELECT APLY_MGNO                                    /* 신청관리번호 */
+			 , DLBR_DGR                                     /* 심의차수 */
+			 , DLBR_DGR || '차' AS DLBR_DGR_NM              /* 심의차수명 */
+			 , DLBR_TYPE_CD                                 /* 심의유형코드 */
+			 , TO_CHAR(DLBR_DT, 'yyyyMMdd') AS DLBR_DT      /* 심의일시 */
+			 , DLBR_OPNN                                    /* 심의의견 */
+			 , irsuser.fn_get_codenm('USER_DLBR_TYPE_CD', DLBR_TYPE_CD)            AS DLBR_TYPE_CD_NM			/* 심의유형코드명 */
+		  FROM irsuser.USER_APLY_DLBR_DTL
+		 WHERE 1 = 1
+		   AND DEL_YN = 'N'
+		   AND APLY_MGNO = #{aplyMgno}
+	</select>
+	
+</mapper>

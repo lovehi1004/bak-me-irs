@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmComCdMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드목록조회 총건수 조회 -->
+	<select id="selectComGrpCdListCnt" resultType="int" parameterType="map">
+		/* AdmComCdMapper.selectComGrpCdListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.COM_GROUP_CD_BSC
+		 WHERE 1 = 1
+		<if test="srhGroupCdMgno != null and !srhGroupCdMgno.equals('')">
+		   AND GROUP_CD_MGNO LIKE CONCAT('%', #{srhGroupCdMgno}, '%')
+		</if>
+		<if test="srhGroupCdKornNm != null and !srhGroupCdKornNm.equals('')">
+		   AND GROUP_CD_KORN_NM LIKE CONCAT('%', #{srhGroupCdKornNm}, '%')
+		</if>
+		<if test="srhGroupCdEngNm != null and !srhGroupCdEngNm.equals('')">
+		   AND GROUP_CD_ENG_NM LIKE CONCAT('%', #{srhGroupCdEngNm}, '%')
+		</if>
+		<if test="srhDelYn != null and !srhDelYn.equals('')">
+		   AND DEL_YN = #{srhDelYn}
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드목록조회 -->
+	<select id="selectComGrpCdList" resultType="egovMap" parameterType="map">
+		/* AdmComCdMapper.selectComGrpCdList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+			 , (SELECT COUNT(*) FROM irsuser.COM_CD_DTL C WHERE C.GROUP_CD_MGNO = U.GROUP_CD_MGNO) AS CD_CNT	/* 코드건수 */
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT GROUP_CD_MGNO							/* 그룹코드 */
+						 , GROUP_CD_KORN_NM							/* 그룹코드한글명 */
+						 , GROUP_CD_ENG_NM							/* 그룹코드영문명 */
+						 , GROUP_CD_CN								/* 그룹코드설명 */
+						 , DEL_YN									/* 사용여부 */
+					  FROM irsuser.COM_GROUP_CD_BSC
+					 WHERE 1 = 1
+					<if test="srhGroupCdMgno != null and !srhGroupCdMgno.equals('')">
+					   AND GROUP_CD_MGNO LIKE CONCAT('%', #{srhGroupCdMgno}, '%')
+					</if>
+					<if test="srhGroupCdKornNm != null and !srhGroupCdKornNm.equals('')">
+					   AND GROUP_CD_KORN_NM LIKE CONCAT('%', #{srhGroupCdKornNm}, '%')
+					</if>
+					<if test="srhGroupCdEngNm != null and !srhGroupCdEngNm.equals('')">
+					   AND GROUP_CD_ENG_NM LIKE CONCAT('%', #{srhGroupCdEngNm}, '%')
+					</if>
+					<if test="srhDelYn != null and !srhDelYn.equals('')">
+					   AND DEL_YN = #{srhDelYn}
+					</if>
+					 ORDER BY GROUP_CD_MGNO ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 코드목록조회 -->
+	<select id="selectComCdList" resultType="egovMap" parameterType="map">
+		/* AdmComCdMapper.selectComCdList */
+		SELECT G.GROUP_CD_MGNO
+			 , C.CD_MGNO
+			 , C.CD_KORN_NM
+			 , C.CD_ENG_NM
+			 , C.CD_CN
+			 , C.SORT_SEQO
+			 , C.DEL_YN
+		  FROM irsuser.COM_CD_DTL C
+		 INNER JOIN irsuser.COM_GROUP_CD_BSC G
+		    ON G.GROUP_CD_MGNO = C.GROUP_CD_MGNO
+		   AND G.GROUP_CD_MGNO = #{srhGroupCdMgno}
+		 WHERE 1 = 1
+		 ORDER BY C.SORT_SEQO ASC
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드상세조회 -->
+	<select id="selectComGrpCdDetail" resultType="egovMap" parameterType="map">
+		/* AdmComCdMapper.selectComGrpCdDetail */
+		SELECT G.GROUP_CD_MGNO							/* 그룹코드 */
+			 , G.GROUP_CD_KORN_NM						/* 그룹코드한글명 */
+			 , G.GROUP_CD_ENG_NM						/* 그룹코드영문명 */
+			 , G.GROUP_CD_CN							/* 그룹코드설명 */
+			 , G.DEL_YN									/* 사용여부 */
+			 , (SELECT COUNT(*) FROM irsuser.COM_CD_DTL C WHERE C.GROUP_CD_MGNO = G.GROUP_CD_MGNO) AS CD_CNT	/* 코드건수 */
+		  FROM irsuser.COM_GROUP_CD_BSC G
+		 WHERE G.GROUP_CD_MGNO = #{srhGroupCdMgno}
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드수정 -->
+	<update id="updateComGrpCd" parameterType="map">
+		/* AdmComCdMapper.updateComGrpCd */
+		UPDATE irsuser.COM_GROUP_CD_BSC
+		   SET GROUP_CD_KORN_NM = #{groupCdKornNm}
+		     , GROUP_CD_ENG_NM = #{groupCdEngNm}
+		     , GROUP_CD_CN = #{groupCdCn}
+		     , DEL_YN = #{delYn}
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD_MGNO = #{groupCdMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드기본 삭제 -->
+	<update id="deleteComGrpCd" parameterType="map">
+		/* AdmComCdMapper.deleteComGrpCd */
+		DELETE FROM irsuser.COM_GROUP_CD_BSC WHERE GROUP_CD_MGNO = #{groupCdMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드등록 -->
+	<insert id="insertComGrpCd" parameterType="map">
+		/* AdmComCdMapper.insertComGrpCd */
+		INSERT
+		  INTO irsuser.COM_GROUP_CD_BSC
+			 ( GROUP_CD_MGNO
+			 , GROUP_CD_KORN_NM
+			 , GROUP_CD_ENG_NM
+			 , GROUP_CD_CN
+			 , CD_REG_LMT_CNT
+			 , DEL_YN
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{groupCdMgno}
+			 , #{groupCdKornNm}
+			 , #{groupCdEngNm}
+			 , #{groupCdCn}
+			 , 0
+			 , #{delYn}
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 그룹코드기본 중복 조회 -->
+	<select id="selectComGrpCdCnt" resultType="egovMap" parameterType="map">
+		/* AdmComCdMapper.selectComGrpCdCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{groupCdMgno} as GROUP_CD_MGNO
+		  FROM irsuser.COM_GROUP_CD_BSC
+		 WHERE GROUP_CD_MGNO = #{groupCdMgno}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+	<!-- #### 코드 등록 가능여부 조회 -->
+	<select id="selectCdRegYn" resultType="string" parameterType="map">
+		/* AdmComCdMapper.selectCdRegYn */
+		SELECT CASE WHEN U.CD_REG_LMT_CNT = 0 THEN 'Y'					<!-- 코드등록제한건수가 0 이면 무제한 등록가능하므로 0이면 예외없이 등록가능 -->
+			 		WHEN U.CD_REG_LMT_CNT <![CDATA[<=]]> U.CNT THEN 'N'	
+			 		ELSE 'Y'
+			   END
+		  FROM (SELECT G.GROUP_CD, G.CD_REG_LMT_CNT, COUNT(*) AS CNT
+				  FROM irsuser.COM_CD_DTL C
+				 INNER JOIN irsuser.COM_GROUP_CD_BSC G
+				    ON G.GROUP_CD = C.GROUP_CD
+				   AND G.GROUP_CD = #{groupCd}
+				 WHERE 1 = 1
+				   AND C.DEL_YN = 'N'
+				   AND G.DEL_YN = 'N'
+				 GROUP BY G.GROUP_CD, G.CD_REG_LMT_CNT
+		  ) U
+	</select>
+	
+	<!-- #### 코드상세 중복 조회 -->
+	<select id="selectComCd" resultType="int" parameterType="map">
+		/* AdmComCdMapper.selectComCd */
+		SELECT COUNT(*) AS CNT
+		  FROM irsuser.COM_CD_DTL
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+		   AND DEL_YN = 'N'
+	</select>
+	
+	<!-- #### [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 코드상세조회 -->
+	<select id="selectComCdDetail" resultType="egovMap" parameterType="map">
+		/* AdmComCdMapper.selectComCdDetail */
+		SELECT G.GROUP_CD
+			 , C.CD
+			 , C.CD_NM
+			 , C.CD_ENG_NM
+			 , C.CD_EXPLN
+			 , C.SORT_SNO
+			 , C.USE_YN
+		  FROM irsuser.COM_CD_DTL C
+		 INNER JOIN irsuser.COM_GROUP_CD_BSC G
+		    ON G.GROUP_CD = C.GROUP_CD
+		   AND G.GROUP_CD = #{groupCd}
+		 WHERE 1 = 1
+		   AND CD = #{cd}
+		   AND C.DEL_YN = 'N'
+		   AND G.DEL_YN = 'N'
+	</select>
+
+	<!-- #### [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 코드등록 -->
+	<insert id="insertComCd" parameterType="map">
+		/* AdmComCdMapper.insertComCd */
+		INSERT
+		  INTO irsuser.COM_CD_DTL
+			 ( GROUP_CD
+			 , CD
+			 , CD_NM
+			 , CD_ENG_NM
+			 , CD_EXPLN
+			 , SORT_SNO
+			 , USE_YN
+			 , RGTR_ID
+			 )
+			 (SELECT #{groupCd}
+				   , #{cd}
+				   , #{cdNm}
+				   , #{cdEngNm}
+				   , #{cdExpln}
+				   , COALESCE(MAX(SORT_SNO), 0)+1
+				   , #{useYn}
+				   , #{sessionUserId}
+				FROM irsuser.COM_CD_DTL
+			   WHERE GROUP_CD = #{groupCd}
+			 )
+	</insert>
+
+	<!-- #### [관리자] 사업수행자관리 > 코드관리 > 공통 코드 관리 - 코드수정 -->
+	<update id="updateComCd" parameterType="map">
+		/* AdmComCdMapper.updateComCd */
+		UPDATE irsuser.COM_CD_DTL
+		   SET CD_NM = #{cdNm}
+		     , CD_ENG_NM = #{cdEngNm}
+		     , CD_EXPLN = #{cdExpln}
+		     , USE_YN = #{useYn}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+	</update>
+
+	<!-- #### 코드상세 삭제 -->
+	<update id="deleteComCd" parameterType="map">
+		/* AdmComCdMapper.deleteComCd */
+		UPDATE irsuser.COM_CD_DTL
+		   SET DEL_YN = 'Y'
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE GROUP_CD = #{groupCd}
+		   AND CD = #{cd}
+	</update>
+	
+</mapper>

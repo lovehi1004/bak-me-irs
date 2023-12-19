@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.aply.mapper.AdmYmdChgAplyMapper">
+	
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 시작일변경목록조회 총건수 조회 -->
+	<select id="selectYmdChgAplyListCnt" resultType="int" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyListCnt */
+		SELECT COUNT(*)
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+	</select>
+	
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 시작일변경목록조회 -->
+	<select id="selectYmdChgAplyList" resultType="egovMap" parameterType="map">
+		<include refid="gov.me.irs.common.PagingMapper.pagingPreSql" />
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 시작일변경상세조회 -->
+	<select id="selectYmdChgAplyDetail" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDetail */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 평가결과등록 -->
+	<insert id="insertYmdChgAplyEvlRslt" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyEvlRslt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 평가결과조회 -->
+	<select id="selectYmdChgAplyEvlRslt" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyEvlRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 사전심의결과등록 -->
+	<insert id="insertYmdChgAplyDicDlbrRslt" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyDicDlbrRslt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 이의신청조회 -->
+	<select id="selectYmdChgAplyObjcAply" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyObjcAply */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 사전심의결과조회 -->
+	<select id="selectYmdChgAplyDicDlbrRslt" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDicDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 기승인건확인 -->
+	<insert id="insertYmdChgAplyAprv" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyAprv */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 심의결과등록 -->
+	<insert id="insertYmdChgAplyDlbrRslt" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyDlbrRslt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 심의결과조회 -->
+	<select id="selectYmdChgAplyDlbrRslt" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDlbrRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 추가자료요청등록 -->
+	<insert id="insertYmdChgAplyDataDmnd" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyDataDmnd */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 추가자료요청조회 -->
+	<select id="selectYmdChgAplyDataDmnd" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDataDmnd */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 추가자료확인조회 -->
+	<select id="selectYmdChgAplyDataIdnty" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDataIdnty */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 추가자료결과등록 -->
+	<insert id="insertYmdChgAplyDataRslt" parameterType="map">
+		/* AdmYmdChgAplyMapper.insertYmdChgAplyDataRslt */
+		INSERT
+		  INTO irsuser.TEMP_TABLE
+			 ( COL
+			 , USE_YN
+			 , RGTR_ID
+			 )
+		VALUES
+			 ( #{col}
+			 , #{useYn}
+			 , #{sessionUserId}
+			 )
+	</insert>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 추가자료결과확인 -->
+	<select id="selectYmdChgAplyDataRslt" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyDataRslt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 이력목록조회 -->
+	<select id="selectYmdChgAplyHistList" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyHistList */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 보고서출력 -->
+	<select id="selectYmdChgAplyRpt" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyRpt */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE CONDITION = #{condition}
+	</select>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 관장기관변경 -->
+	<update id="updateYmdChgAplyInst" parameterType="map">
+		/* AdmYmdChgAplyMapper.updateYmdChgAplyInst */
+		UPDATE irsuser.TEMP_TABLE
+		   SET COL = #{col}
+		     , MDFR_ID = #{sessionUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE CONDITION = #{condition}
+	</update>
+
+	<!-- [관리자] 사업관리 > 사업 신청 관리 > 인증유효기간 시작일 변경 신청 - 액셀다운로드 -->
+	<select id="selectYmdChgAplyExcel" resultType="egovMap" parameterType="map">
+		/* AdmYmdChgAplyMapper.selectYmdChgAplyExcel */
+		SELECT '컬럼정보' AS COL
+		  FROM irsuser.TEMP_TABLE
+		 WHERE 1 = 1
+		 ORDER BY TEMP_SEQ ASC
+	</select>
+
+
+	
+</mapper>

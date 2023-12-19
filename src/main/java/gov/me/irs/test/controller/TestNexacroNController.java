@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,11 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
-//import gov.me.irs.admin.mnm.service.MnmService;
-//import gov.me.irs.admin.statistics.service.StatisticsService;
-import gov.me.irs.common.constants.Const;
-import gov.me.irs.common.file.service.FileService;
-import gov.me.irs.common.file.vo.FileVo;
 import gov.me.irs.core.config.property.JasyptProperties;
 import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.config.property.Sn3hcvProperties;
@@ -47,8 +41,6 @@ public class TestNexacroNController {
 	private final JwtProperties jwtProperties;
 	
 	private final MessageSource messageSource;
-	
-	private final FileService fileService;
 	
 //	private final StatisticsService statisticsService;
 	
@@ -132,100 +124,6 @@ public class TestNexacroNController {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		nexacroResult.addDataSet("output1", list);
-		return nexacroResult;
-	}
-	
-	@PostMapping("/test/fileClone.do")
-	public NexacroResult fileClone(@ParamDataSet(name = "input1") Map<String, Object> requestMap) throws Exception {
-		
-		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
-		log.debug("[requestMap][{}]", requestMap);
-		log.debug("[※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※]");
-		
-		if(ObjectUtils.isEmpty(requestMap.get("fileGroupMgno"))) {
-			throw new Exception("fileGroupMgno - 파라미터 없음");
-		}
-		
-		
-		List<FileVo> list = fileService.saveCloneFileAndList(requestMap);
-		log.debug("[list][{}]", list);
-		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 파일복제시 사용 START ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		String newFileGroupMgno = fileService.saveCloneFile((String) requestMap.get("fileGroupMgno"));
-		log.debug("[newFileGroupMgno][{}]", newFileGroupMgno);
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 파일복제시 사용 END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		
-		
-		NexacroResult nexacroResult = new NexacroResult();
-		nexacroResult.addDataSet("output1", list);
-		return nexacroResult;
-	}
-	
-	/**
-	 * TEST - SINGLE 파일정보 최종저장처리
-	 * 
-	 * @param requestMap
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("/test/single/save.irs")
-	public NexacroResult testSingleSave(@ParamDataSet(name = "dsFileDetail") List<Map<String, Object>> dsAtchFileDetail
-			, @ParamDataSet(name = "dsSendFileDetail") Map<String, Object> dsSendFileDetail) throws Exception {
-		NexacroResult nexacroResult = new NexacroResult();
-		
-		/* #################### MULTI 파일정보 최종저장처리 START #################### */
-		/**
-		 * dsAtchFileDetail : 공통 파일 데이터셋 - 넥사크로 callback에서 넘어오는 정보
-		 * dsSendFileDetail : 업무 데이터셋
-		 */
-		if(!ObjectUtils.isEmpty(dsSendFileDetail.get("fileGroupMgno"))) {
-			boolean result = fileService.saveSingleFile(dsAtchFileDetail, dsSendFileDetail);
-			nexacroResult.addDataSet("output1", result);
-		}
-		/* #################### MULTI 파일정보 최종저장처리 END #################### */
-		
-		return nexacroResult;
-	}
-	
-	/**
-	 * TEST - MULTI 파일정보 최종저장처리
-	 * 
-	 * @param requestMap
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("/test/multi/save.irs")
-	public NexacroResult testMultiSave(@ParamDataSet(name = "dsFileDetail") List<Map<String, Object>> dsAtchFileDetail
-			, @ParamDataSet(name = "dsSendFileDetail") Map<String, Object> dsSendFileDetail) throws Exception {
-		NexacroResult nexacroResult = new NexacroResult();
-		
-		/* #################### MULTI 파일정보 최종저장처리 START #################### */
-		/**
-		 * dsAtchFileDetail : 공통 파일 데이터셋 - 넥사크로 callback에서 넘어오는 정보
-		 * dsSendFileDetail : 업무 데이터셋
-		 */
-		if(!ObjectUtils.isEmpty(dsSendFileDetail.get("fileGroupMgno"))) {
-			boolean result = fileService.saveMultiFile(dsAtchFileDetail ,dsSendFileDetail);
-			nexacroResult.addDataSet("output1", result);
-		}
-		/* #################### MULTI 파일정보 최종저장처리 END #################### */
-		
-		return nexacroResult;
-	}
-	
-//	private final MnmService mnmService;
-	
-	@PostMapping("/test/common/menu.irs")
-	public NexacroResult testMenu(@ParamDataSet(name = "inputMap") Map<String, Object> requestMap) throws Exception {
-		
-		NexacroResult nexacroResult = new NexacroResult();
-		
-		requestMap.put("sysClCd", Const.CODE.SYS_CL_CD_SCC0001);
-		requestMap.put("scc0001MenuMgno", Const.MENU.SCC0001_MENU_MGNO);
-		
-//		List<Map<String, Object>> list = mnmService.selectMenuList(requestMap);
-//		nexacroResult.addDataSet("list", list);
-		
 		return nexacroResult;
 	}
 	
