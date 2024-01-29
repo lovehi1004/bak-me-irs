@@ -458,6 +458,8 @@ public class ExcelUtil {
 		font.setBoldweight(Font.BOLDWEIGHT_NORMAL);		/* font weight - normal */
 		style.setFont(font);
 		
+		style.setWrapText(true);
+		
 		return style;
 	}
 	

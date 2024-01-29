@@ -96,6 +96,10 @@ public enum JwtAuthEnum implements CoreResponseEnumType {
 			JwtConst.AUTH_CODE.SESSION_INVALID,
 			JwtConst.AUTH_MESSAGE.SESSION_INVALID),									//세션체크 전용 - 실패시
 	
+	RSA_INVALID(
+			JwtConst.AUTH_CODE.RSA_INVALID,
+			JwtConst.AUTH_MESSAGE.RSA_INVALID),										//RSA 키가 유효하지 않은 경우 - WAS 재기동시 발생
+	
 	UNKNOWN_ERROR(
 			JwtConst.AUTH_CODE.UNKNOWN_ERROR,
 			JwtConst.AUTH_MESSAGE.UNKNOWN_ERROR),

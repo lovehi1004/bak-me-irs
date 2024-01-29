@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.irb_dlay_sn_seq
+CREATE SEQUENCE irb_dlay_sn_seq
 /******************************************************************************
-    프로그램명 : irsuser.irb_dlay_sn_seq 
+    프로그램명 : irb_dlay_sn_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.irb_dlay_sn_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.IRB_DLAY_SN_SEQ')
+		▶ SELECT NEXTVAL('IRB_DLAY_SN_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.irb_dlay_sn_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.irb_dlay_sn_seq IS '국제감축사업지연상세 지연일련번호 시퀀스';
+COMMENT ON SEQUENCE irb_dlay_sn_seq IS '국제감축사업지연상세 지연일련번호 시퀀스';

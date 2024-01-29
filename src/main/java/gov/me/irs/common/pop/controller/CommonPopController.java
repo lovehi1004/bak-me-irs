@@ -16,6 +16,7 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.pop.service.CommonPopService;
 import gov.me.irs.common.vo.PagingVo;
+import gov.me.irs.core.config.util.UserSession;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -133,15 +134,24 @@ public class CommonPopController {
 	 *
 	 * @param requestMap
 	 * @return
+	 * @throws Exception 
 	 */
 	@PostMapping("/common/pop/selectInstList.irs")
 	public NexacroResult selectInstList(@ParamDataSet(name = "dsSrh") Map<String, Object> dsSrh
-			, @ParamDataSet(name = "dsPageInfo") Map<String, Object> dsPageInfo) {
+			, @ParamDataSet(name = "dsPageInfo") Map<String, Object> dsPageInfo) throws Exception {
 		NexacroResult nexacroResult = new NexacroResult();
 		List<Map<String, Object>> dsInstList = null;
 		
 		/* ■■■■ 페이징처리 - 1. 페이징처리 필수정보 설정 ■■■■ */
 		PagingVo pagingVo = new PagingVo(dsPageInfo);
+		
+		String superUserYn = Const.CHARACTER.N;
+		
+		if(UserSession.isAuthenticated()) {
+			/* 로그인한 사용자가 전체관리자인가 확인하기 */
+			superUserYn = UserSession.isSuperUserYn();
+		}
+		dsSrh.put("superUserYn", superUserYn);
 		
 		/* ■■■■ 페이징처리 - 2. 목록 총건수 조회 ■■■■ */
 		int totalCount = commonPopService.selectInstListCnt(dsSrh);

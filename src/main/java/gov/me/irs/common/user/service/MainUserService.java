@@ -1,31 +1,22 @@
 package gov.me.irs.common.user.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
-
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.user.mapper.MainUserMapper;
-import gov.me.irs.core.crypt.util.RsaUtil;
-import gov.me.irs.core.enumeration.JwtAuthEnum;
+import gov.me.irs.core.jwt.util.JwtUtil;
 import gov.me.irs.core.raonk.service.RaonKService;
-import gov.me.irs.core.sign.exception.SignException;
+import gov.me.irs.core.safedb.Crypto;
 import gov.me.irs.core.user.entity.TableUser;
-import gov.me.irs.core.user.enumeration.RoleEnum;
-import gov.me.irs.core.user.enumeration.UserClCdEnum;
 import gov.me.irs.core.user.mapper.UserMapper;
-import gov.me.irs.core.user.service.CreateUserVo;
-import gov.me.irs.core.user.service.UserService;
+import gov.me.irs.core.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,17 +31,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MainUserService {
 	
-	private final MainUserMapper mainUserMapper;
-	
-	private final UserService userService;
-	
 	private final UserMapper userMapper;
+	
+	private final UserAplyService userAplyService;
+	
+	private final Crypto crypto;
 	
 	private final RaonKService raonKService;
 	
-	private final PasswordEncoder passwordEncoder;
+	private final MainUserMapper mainUserMapper;
 	
-	private final HttpSession session;
+	private final UserRepository userRepository;
 	
 	/**
 	 * 메인 > 사용자 > 회원가입 > 로그인 아이디 중복 검색 체크
@@ -60,177 +51,166 @@ public class MainUserService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public Map<String, Object> selectLoginIdCnt(Map<String, Object> requestMap) {
-		return mainUserMapper.selectLoginIdCnt(requestMap);
+		return userMapper.selectLoginIdCnt(requestMap);
 	}
 	
 	/**
 	 * 메인 > 사용자 > 회원가입 > 회원가입신청
-	 * 	▶ Target Table
-	 * 		- [SELECT] [irsuser.USER_BSC] [USER_ID]
-	 * 		- [INSERT] [irsuser.INST_BSC]
-	 * 		- [INSERT] [irsuser.USER_BSC]
-	 * 		- [INSERT] [irsuser.USER_APLY_BSC]
-	 * 		- [INSERT] [irsuser.USER_ROLE_DTL]
-	 * 		- [INSERT] [irsuser.JWT_USER_BSC]
-	 * 		- [INSERT] [irsuser.JWT_USER_ROLE_BSC]
 	 * 
-	 * @param dsInstInfo - 사업체정보
-	 * @param dsUserInfo - 사용자정보
-	 * @param dsInstInfoFile - 사업체정보 > 첨부파일정보
-	 * @param dsBrdocFlmnoFile - 공통파일정보-사업자등록증
+	 * @param dsInstInfo
+	 * @param dsUserInfo
 	 * @throws Exception
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public void insertUser(Map<String, Object> dsInstInfo
+	public void insertAply(Map<String, Object> dsInstInfo
 			, Map<String, Object> dsUserInfo
 			, Map<String, Object> dsInstInfoFile
 			, List<Map<String, Object>> dsBrdocFlmnoFile
 			) throws Exception {
 		
-		log.debug("[메인 > 사용자 > 회원가입 > 회원가입신청][{}]", ObjectUtils.isEmpty(dsInstInfo.get("instMgno")) ? "사업체 신규등록" : "사업체 선택");
+		log.debug("[메인 > 사용자 > 회원가입 > 회원가입신청 START]");
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 사업체정보(기관정보) 설정 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		String instClsfCd = (String) dsInstInfo.get("instClsfCd");
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 등록구분 확인 - {1 : 검색(신규사용자), 2 : 신규등록(신규가입)} ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		String registType = (String) dsInstInfo.get("registType");		/* 화면에서 넘어온 등록구분 값 */
 		
-		/* 초기값 설정 - instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 */
-		dsInstInfo.put("sameInstMgnoYn", "N");
-		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 사용자정보 설정 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		String acntRprsvYn = Const.CHARACTER.N;									//계정대표자여부
-		
-		String userClCd = (String) dsUserInfo.get("userClCd");			//사용자구분코드
-		UserClCdEnum userClCdEnum = UserClCdEnum.ofCode(userClCd);
-		
-		if(userClCdEnum == UserClCdEnum.BIZREPRESENT) {
-			acntRprsvYn = Const.CHARACTER.Y;
-		}
-		
-		String password = (String) dsUserInfo.get(Const.CORE.KEY_USER_PASSWORD);
-		/* 2. 비밀번호 RSA 복호화 */
-		try {
-			password = RsaUtil.decryptRsa(session, password);
-		} catch (Exception e) {
-			throw new SignException(JwtAuthEnum.UNKNOWN_ERROR.getCode(), e);
-		}
-		
-		log.debug("[param][{}]", password);
-		
-		String roleIdMgno = StringUtils.EMPTY;
-		if(userClCdEnum == UserClCdEnum.OUTSOURCING) {
-			roleIdMgno = RoleEnum.UNAPPROVEDOUTSOURCING.getCode();		//비승인위탁기관 권한
+		String aplyRegClCd = StringUtils.EMPTY;							/* 신청등록구분코드(신규가입|신규사용자|업체변경|사용자변경|사용자등록) */
+		String aplyPrcsTypeCd = "APC0001";								/* 신청처리유형코드(신청|심의반려|심의승인|관리자직권|업체직권) */
+		if("1".equals(registType)) {
+			aplyRegClCd = "ARC0002";					//신규사용자 ▶ [사용자생성]
 		} else {
-			roleIdMgno = RoleEnum.UNAPPROVED.getCode();		//비승인사용자 권한
+			aplyRegClCd = "ARC0001";					//신규가입 ▶ [업체생성 + 사용자생성]
 		}
 		
-		String lgnId = (String) dsUserInfo.get("lgnId");
-		String encptPswd = passwordEncoder.encode(password);
+		String instMgno = StringUtils.EMPTY;							/* 기관관리번호 */
+		String upInstMgno = StringUtils.EMPTY;							/* 상위기관관리번호 */
+		String aplyMgno = StringUtils.EMPTY;							/* 신청관리번호 */
+		String instClsfCd = (String) dsInstInfo.get("instClsfCd");		/* 기관분류(사업체분류) */
 		
-		dsUserInfo.put("acntRprsvYn", acntRprsvYn);
-		dsUserInfo.put("encptPswd", encptPswd);			//비밀번호 암호화
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 사용자ID 채번하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		String userId = userAplyService.selectUserId();					/* 사용자ID */
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3. 사용자정보 USER_ID 채번 [USER_BSC] ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		String userId = userMapper.selectUserId();
-		dsUserInfo.put("userId", userId);
-		dsUserInfo.put("sUserId", userId);			/* 비로그인 서비스이므로 채번된 사용자ID로 설정한다.
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 4. 사업체정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		if(ObjectUtils.isEmpty(dsInstInfo.get("instMgno"))) {			//신규등록이라면 파일정보 최종저장처리 및 사업체정보 생성
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3. 업체정보 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		//신규가입 - 업체정보 생성하기
+		if("ARC0001".equals(aplyRegClCd)) {
+			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3-1. 기관관리번호 채번하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			instMgno = userAplyService.selectInstMgno(dsInstInfo);
 			
-			/* 상위기관 ▶ [위탁기관은 관장기관지정 필수], [나머지는 본인 기관번호 세팅] */
+			dsInstInfo.put("instMgno", instMgno);
+			
+			String brdocFlmno = (String) dsInstInfoFile.get("brdocFlmno");		/* 사업자등록증 */
+			dsInstInfo.put("brdocFlmno", brdocFlmno);
+			
+			
+			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3-2. 상위기관 설정하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			//위탁기관은 상위기관 검색 필수이므로 상위기관관리번호가 넘어오고, 나머지는 해당기관관리번호와 상위기관관리번호를 동일하게 설정한다.
 			if(!"ICC0004".equals(instClsfCd)) {
-				dsInstInfo.put("sameInstMgnoYn", "Y");
+				upInstMgno = instMgno;											//상위기관관리번호 설정	
+				dsInstInfo.put("upInstMgno", upInstMgno);
+			} else {
+				upInstMgno = (String) dsInstInfo.get("upInstMgno");				//상위기관관리번호 설정
 			}
 			
-			dsInstInfo.put("rgtrId", userId);
-			dsInstInfo.put("brdocFlmno", dsInstInfoFile.get("brdocFlmno"));					//사업자등록증
+			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3-3. 미승인 상태 업체정보 생성하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			dsInstInfo.put("sUserId", userId);
+			userAplyService.insertInstAply(dsInstInfo);
 			
+			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3-4. 기관설정상세 정보 생성하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+			userAplyService.insertInstStngDtl(dsInstInfo);
+			
+		// 신규사용자는 기관관리번호가 존재함 
+		} else {
+			instMgno = (String) dsInstInfo.get("instMgno");
+			upInstMgno = (String) dsInstInfo.get("upInstMgno");				//상위기관관리번호 설정
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 4. 미승인 상태 사용자정보 생성하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		String rsaPassword = (String) dsUserInfo.get(Const.CORE.KEY_USER_PASSWORD);
+		String encptPswd = crypto.encryptRsaToSHA(rsaPassword);
+		dsUserInfo.put("encptPswd", encptPswd);			//비밀번호 암호화
+		
+		dsUserInfo.put("userId", userId);
+		dsUserInfo.put("instMgno", instMgno);
+		dsUserInfo.put("upInstMgno", upInstMgno);
+		dsUserInfo.put("sUserId", userId);
+		userAplyService.insertUserAply(dsUserInfo);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 5. 신청정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		Map<String, Object> aplyMap = new HashMap<String, Object>();
+		aplyMap.put("aplyRegClCd", aplyRegClCd);
+		aplyMap.put("aplyPrcsTypeCd", aplyPrcsTypeCd);
+		aplyMap.put("sUserId", userId);
+		aplyMgno = userAplyService.insertAply(aplyMap);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 6. 신청상세정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		aplyMap.put("aplyMgno", aplyMgno);
+		aplyMap.put("userId", userId);
+		aplyMap.put("instMgno", instMgno);
+		userAplyService.insertAplyDtl(aplyMap);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 7. 회원가입신청시 비승인사용자 권한정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		String lgnId = (String) dsUserInfo.get("lgnId");
+		String userClCd = (String) dsUserInfo.get("userClCd");
+		userAplyService.createUnapprovedUserRole(userId, lgnId, encptPswd, userClCd, userId);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 8. SINGLE 파일정보 최종저장처리 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		//신규가입 - 사업자등록증 최종저장처리 하기
+		if("ARC0001".equals(aplyRegClCd)) {
 			/* SINGLE 파일정보 최종저장처리 */
 			dsInstInfoFile.put("fileGroupMgno", dsInstInfoFile.get("brdocFlmno"));			//사업자등록증
 			raonKService.saveFile(dsInstInfoFile, dsBrdocFlmnoFile);
-			
-			log.debug("[사업체정보 생성]["+dsInstInfo+"]");
-			
-			/* 기관기본 정보 생성 */
-			mainUserMapper.insertInst(dsInstInfo);
-			
-			/* 기관설정상세 정보 생성 */
-			mainUserMapper.insertInstStngDtl(dsInstInfo);
-			
-			/* 생성된 사업체 식별자 설정 */
-			dsUserInfo.put("instMgno", dsInstInfo.get("instMgno"));
-			
-			if(Const.CHARACTER.Y.equals(dsInstInfo.get("sameInstMgnoYn"))) {
-				dsUserInfo.put("upInstMgno", dsInstInfo.get("instMgno"));
-			} else {
-				dsUserInfo.put("upInstMgno", dsInstInfo.get("upInstMgno"));
-			}
-			
-		} else {
-			String bzentClCd = (String) dsInstInfo.get("bzentClCd");
-			
-			//[사업수행자 && 비할당업체]이라면 파일정보 최종저장처리 및 사업체정보는 사용자신청기본 테이블에만 저장되면 됨
-			if("BCC0002".equals(bzentClCd)) {
-				/* SINGLE 파일정보 최종저장처리 */
-				dsInstInfoFile.put("fileGroupMgno", dsInstInfoFile.get("brdocFlmno"));			//사업자등록증
-				raonKService.saveFile(dsInstInfoFile, dsBrdocFlmnoFile);
-			}
-			
-			dsUserInfo.put("upInstMgno", dsInstInfo.get("upInstMgno"));
-			
-			/* 수업수행자 검색정보에서 기관관리번호, 상위기관관리번호 추출 */
-			dsUserInfo.put("instMgno", dsInstInfo.get("instMgno"));
-			/* 상위기관 ▶ [위탁기관은 관장기관지정 필수], [나머지는 본인 기관번호 세팅] */
-			if(!"ICC0004".equals(instClsfCd)) {
-				dsUserInfo.put("sameInstMgnoYn", "Y");
-			} else {
-				dsUserInfo.put("sameInstMgnoYn", "N");
-			}
 		}
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 5. 사용자정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		dsUserInfo.put("acntSttsClCd", "ASC0001");		//미승인
-		userMapper.insertUser(dsUserInfo);
-		/* 사용자ID 생성값 추출 */
+	}
+	
+	/**
+	 * 메인 > 사용자 > 아이디/비밀번호 찾기
+	 * 
+	 * @param dsSrh
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> find(Map<String, Object> dsSrh) throws Exception {
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 6. 사용자신청기본정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		Map<String, Object> userAplyMap = new HashMap<String, Object>();
-		userAplyMap.put("dsInstInfo", dsInstInfo);
-		userAplyMap.put("dsUserInfo", dsUserInfo);
-		userAplyMap.put("dsInstInfoFile", dsInstInfoFile);
-		mainUserMapper.insertUserAply(userAplyMap);
+		Map<String, Object> resultMap = mainUserMapper.selectFindUser(dsSrh);
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 7. 사용자 권한정보 생성 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		/* [USER_ROLE_DTL - 사용자역할상세] */
-		Map<String, Object> userRoleMap = new HashMap<String, Object>();
-		userRoleMap.put("userId", userId);
-		userRoleMap.put("roleIdMgno", roleIdMgno);
-		userRoleMap.put("sUserId", userId);
-		userService.insertUserRole(userRoleMap);
+		/* 처리결과 */
+		String resultType = (String) resultMap.get("resultType");
 		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 8. 사용자 권한정보 설정 - JWT ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		
-		/* 위탁기관인 경우 위탁기관 전용 권한 설정 ▶ 비승인위탁기관 */
-		List<String> roles = new ArrayList<String>();
-		if(userClCdEnum == UserClCdEnum.OUTSOURCING) {
-			roles = Arrays.asList(RoleEnum.UNAPPROVEDOUTSOURCING.getValue());		//비승인위탁기관 권한
-		} else {
-			roles = Arrays.asList(RoleEnum.UNAPPROVED.getValue());					//비승인사용자 권한
+		/* 비밀번호찾기 라면 */
+		if("2".equals(resultType)) {
+			String userId = (String) resultMap.get("userId");			/* 비밀번호찾기로 찾게된 사용자ID */
+			
+			/* 사용자ID가 존재한다면 비밀번호 초기화 해주기 */
+			if(!ObjectUtils.isEmpty(userId)) {
+				
+				/* 임시 비밀번호 생성 */
+				String initPswd = JwtUtil.getTemporaryPassword();
+				String newEncptPswd = crypto.encryptSHA(initPswd);
+				
+				/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. JWT 비밀번호 초기화 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+				TableUser tableUser = userRepository.findByUserId(userId);
+				
+				tableUser.setEncptPswd(newEncptPswd);
+				
+				/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 사용자기본 비밀번호 초기화 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+				Map<String, Object> dsUserInfo = new HashMap<String, Object>();
+				dsUserInfo.put("userId", userId);
+				dsUserInfo.put("type", "encptPswd");					/* 비밀번호 수정하기 */
+				dsUserInfo.put("encptPswd", newEncptPswd);
+				dsUserInfo.put("sUserId",  userId);
+				
+				userMapper.updateUser(dsUserInfo);
+				
+				/* 초기화된 비밀번호로 결과 설정 */
+				resultMap.put("result", initPswd);
+				
+			}
+			
 		}
 		
-		CreateUserVo vo = CreateUserVo.builder()
-				.userId(userId)
-				.roleIdMgno(roleIdMgno)
-				.lgnId(lgnId)
-				.encptPswd(encptPswd)
-				.userClCdEnum(userClCdEnum)
-				.roles(roles)
-				.build();
-		
-		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 9. 사용자 권한정보 생성 - JWT ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		/* [JWT_USER_BSC - JWT사용자기본], [JWT_USER_ROLE_BSC - JWT사용자역할기본] */
-		TableUser tableUser = userService.createNewUser(vo);
-		
-		log.debug("[tableUser][{}][{}]", tableUser == null, tableUser);
+		return resultMap;
 		
 	}
 }

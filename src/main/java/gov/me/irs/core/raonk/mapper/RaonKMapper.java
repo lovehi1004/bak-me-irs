@@ -1,6 +1,7 @@
 package gov.me.irs.core.raonk.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -119,4 +120,44 @@ public interface RaonKMapper {
 	 * @throws Exception
 	 */
 	int updateCloneFileNm(RaonKFileVo raonKFileVo) throws Exception;
+	
+	/**
+	 * 파일그룹일련번호 채번
+	 * 
+	 * @return
+	 */
+	String selectFileGroupMgno();
+	
+	/**
+	 * 파일일련번호 채번
+	 * 
+	 * @param fileGroupMgno - 파일그룹일련번호
+	 * @return
+	 */
+	String selectFileMgno(String fileGroupMgno);
+	
+	/**
+	 * 새로운 파일그룹정보 생성
+	 * 
+	 * @param raonKFileGroupVo
+	 * @return
+	 */
+	int insertNewFileGroup(Map<String, Object> parameterMap) throws Exception;
+	
+	/**
+	 * 새로운 파일상세정보 생성
+	 * 
+	 * @param raonKFileVo
+	 * @return
+	 */
+	int insertNewFileDtl(Map<String, Object> parameterMap) throws Exception;
+	
+	/**
+	 * 새로운 파일정보 생성시 기존 파일상세정보 삭제
+	 * 
+	 * @param raonKFileVo
+	 * @return
+	 */
+	int deleteOldFileDtl(Map<String, Object> parameterMap) throws Exception;
+	
 }

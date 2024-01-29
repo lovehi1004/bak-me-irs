@@ -36,8 +36,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @Entity
-@Table(name = "IRSUSER.JWT_USER_BSC")
-@org.hibernate.annotations.Table(comment = "JWT사용자", appliesTo = "IRSUSER.JWT_USER_BSC")
+@Table(name = "JWT_USER_BSC")
+@org.hibernate.annotations.Table(comment = "JWT사용자", appliesTo = "JWT_USER_BSC")
 @NoArgsConstructor
 @AllArgsConstructor
 public class TableUser implements UserDetails {
@@ -66,7 +66,7 @@ public class TableUser implements UserDetails {
     
     @Comment("JWT역할명")
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "IRSUSER.JWT_USER_ROLE_BSC", joinColumns = @JoinColumn(name = "LGN_ID"))
+    @CollectionTable(name = "JWT_USER_ROLE_BSC", joinColumns = @JoinColumn(name = "LGN_ID"))
     @Column(name = "JWT_ROLE_NM")
     @Builder.Default
     private List<String> roles = new ArrayList<>();

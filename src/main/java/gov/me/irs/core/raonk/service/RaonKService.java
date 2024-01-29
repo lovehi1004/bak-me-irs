@@ -4,9 +4,13 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -162,6 +166,8 @@ public class RaonKService {
 	@Transactional(rollbackFor = Exception.class)
 	public boolean saveFile(Map<String, Object> dsSendFileGroupDetail, List<Map<String, Object>> dsFileDetail) throws Exception {
 		
+		/* 프로파일 */
+		String profiles = System.getProperty("spring.profiles.active");
 		
 		/* 필수 파라미터 추출 */
 		String fileGroupMgno = (String) dsSendFileGroupDetail.get("fileGroupMgno");
@@ -209,9 +215,30 @@ public class RaonKService {
 				File file = new File(realPath);
 				if(!file.exists()) {
 					file.mkdirs();
+					
+					// 폴더 권한 추가
+					Path folderPath = Paths.get(realPath);
+					
+					/* 리눅스 전용 */
+					if(!ObjectUtils.isEmpty(profiles) && (Const.PROFILES.DEV.equals(profiles) || Const.PROFILES.PRD.equals(profiles))) {
+						// 대상 파일에 대한 "others"에 대한 읽기 권한 추가
+						Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
+						permissions.add(PosixFilePermission.OTHERS_READ);
+						permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+						Files.setPosixFilePermissions(folderPath, permissions);
+					}
+					
 				}
-				
+		        
 				Files.move(oldPath, newPath);
+				
+				/* 리눅스 전용 */
+				if(!ObjectUtils.isEmpty(profiles) && (Const.PROFILES.DEV.equals(profiles) || Const.PROFILES.PRD.equals(profiles))) {
+					// 대상 파일에 대한 "others"에 대한 읽기 권한 추가
+					Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(newPath);
+					permissions.add(PosixFilePermission.OTHERS_READ);
+					Files.setPosixFilePermissions(newPath, permissions);
+				}
 				
 				/* 이동할 경로 */
 				currentRaonKFileVo.setFilePath(realPath);
@@ -238,6 +265,9 @@ public class RaonKService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public String saveCloneFile(String sourceFileGroupMgno) throws Exception {
+		
+		/* 프로파일 */
+		String profiles = System.getProperty("spring.profiles.active");
 		
 		/* 1. 세션정보 확인 하기 */
 		String sessionUserId = "SYSTEM";				// 비로그인 상태 Default 설정
@@ -272,6 +302,15 @@ public class RaonKService {
 			
 			Files.copy(oldPath, newPath);
 			
+	        
+			/* 리눅스 전용 */
+			if(!ObjectUtils.isEmpty(profiles) && (Const.PROFILES.DEV.equals(profiles) || Const.PROFILES.PRD.equals(profiles))) {
+				// 대상 파일에 대한 "others"에 대한 읽기 권한 추가
+				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(newPath);
+				permissions.add(PosixFilePermission.OTHERS_READ);
+				Files.setPosixFilePermissions(newPath, permissions);
+			}
+			
 			raonKMapper.updateCloneFileNm(raonKFileVo);
 			
 			fileMgnoArray.add(raonKFileVo.getFileMgno());
@@ -279,6 +318,66 @@ public class RaonKService {
 		}
 		
 		return fileGroupMgno;
+	}
+	
+	/**
+	 * 지정된 파일정보 파일그룹일련번호 채번 후 생성된 파일그룹일련번호 반환받기
+	 * 
+	 * @param fileGroupMgno
+	 * @param fileMgno
+	 * @param saveFlag - 최종저장처리 여부
+	 * @param rgtrId
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public RaonKFileVo copyToNewFile(String fileGroupMgno, String fileMgno, boolean saveFlag, String rgtrId) throws Exception {
+		
+		/* 1. 파일그룹일련번호 채번 */
+		String newFileGroupMgno = raonKMapper.selectFileGroupMgno();
+		
+		/* 2. 파일일련번호 채번 */
+		String newFileMgno = raonKMapper.selectFileMgno(newFileGroupMgno);
+		
+		/* 3. 새로운 파일정보 생성 */
+		Map<String, Object> parameterMap = new HashMap<String, Object>();
+		parameterMap.put("fileGroupMgno", fileGroupMgno);
+		parameterMap.put("fileMgno", fileMgno);
+		parameterMap.put("newFileGroupMgno", newFileGroupMgno);
+		parameterMap.put("newFileMgno", newFileMgno);
+		parameterMap.put("rgtrId", rgtrId);
+		raonKMapper.insertNewFileGroup(parameterMap);
+		
+		/* 4. 새로운 파일상세정보 생성 */
+		raonKMapper.insertNewFileDtl(parameterMap);
+		
+		/* 5. source 파일정보 삭제 */
+		raonKMapper.deleteOldFileDtl(parameterMap);
+		
+		/* 6. 최종저장 처리 */
+		if(saveFlag) {
+			log.debug("[최종저장처리][saveFlag][{}]", String.valueOf(saveFlag));
+			
+			/* ■■■■■■■■■■■■■■■■■■■■ 파일정보 최종저장처리 START ■■■■■■■■■■■■■■■■■■■■ */
+			Map<String, Object> dsSendFileGroupDetail = new HashMap<String, Object>();
+			dsSendFileGroupDetail.put("fileGroupMgno", newFileGroupMgno);
+			
+			Map<String, Object> dsFileDetailMap = new HashMap<String, Object>();
+			dsFileDetailMap.put("fileMgno", newFileMgno);
+			List<Map<String, Object>> dsFileDetail = Arrays.asList(dsFileDetailMap);
+			
+			this.saveFile(dsSendFileGroupDetail, dsFileDetail);
+			/* ■■■■■■■■■■■■■■■■■■■■ 파일정보 최종저장처리 END ■■■■■■■■■■■■■■■■■■■■ */
+		}
+		
+		
+		/* 1. 현재상태의 대상 파일 조회 */
+		RaonKFileVo paramVo = new RaonKFileVo();
+		paramVo.setFileGroupMgno(newFileGroupMgno);
+		paramVo.setFileMgno(newFileMgno);
+		RaonKFileVo newRaonKFileVo = raonKMapper.selectFileDtl(paramVo);
+		
+		return newRaonKFileVo;
 	}
 	
 	/**
@@ -306,7 +405,5 @@ public class RaonKService {
 	/**
 	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 참고 샘플 END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	 */
-	
-	
 	
 }

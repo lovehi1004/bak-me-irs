@@ -4,8 +4,8 @@ spring:
   datasource:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     url: jdbc:log4jdbc:postgresql://192.168.0.140:15432/postgres
-    username: experdba
-    password: experdba
+    username: girirs
+    password: rkacnrtkdjq24!@
     hikari:
       pool-name: irsHikari
       # 유휴 connection - 5개

@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import gov.me.irs.common.board.mapper.CommonBoardMapper;
+import gov.me.irs.core.config.util.UserSession;
+import gov.me.irs.core.constants.RoleConst;
 import gov.me.irs.core.raonk.service.RaonKService;
+import gov.me.irs.core.user.entity.TableUser;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,8 +50,8 @@ public class CommonBoardService {
 	 * @return
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public List<Map<String, Object>> selectBoardListLogin() {
-		return commonBoardMapper.selectBoardListLogin();
+	public List<Map<String, Object>> selectBoardListLogin(Map<String, Object>dsSrh) {
+		return commonBoardMapper.selectBoardListLogin(dsSrh);
 	}
 	
 	/**
@@ -112,5 +115,86 @@ public class CommonBoardService {
 		}
 		result = commonBoardMapper.updateBoardDtl(dsBbsInfo);
 		return result;
+	}
+	
+	/**
+	 * 위젯 -> 협정 조회
+	 * 
+	 * @param dsSrh
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> selectAgrCnt() {
+		return commonBoardMapper.selectAgrCnt();
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 방법론 
+	 * 
+	 * @param dsLgoinUsr
+	 * @return
+	 * @throws Exception 
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> selectUsrInfo() throws Exception {
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
+		
+		
+		String sUserId = tableUser.getUserId();
+		Map<String,Object> ds	 = new HashMap<String, Object>();
+		ds.put("sUserId", sUserId);
+		Map<String,Object> dsLoginUsrInfo = commonBoardMapper.selectUsrInfo(ds);
+		if(UserSession.isSuperUser() || UserSession.getRoleKey().equals(RoleConst.ROLE_DIRECTOR_KEY) || UserSession.getRoleKey().equals(RoleConst.ROLE_OUTSOURCING_KEY) ) {
+			return commonBoardMapper.selectMainMhdlgCnt();
+		}else {
+			return commonBoardMapper.selectMhdlgCnt(dsLoginUsrInfo);
+		}
+		
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 로그인 전 방법론
+	 * 
+	 * @param dsLgoinUsr
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> selectMainMhdlgCnt() {
+		return commonBoardMapper.selectMainMhdlgCnt();
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 사업
+	 * 
+	 * @param dsLgoinUsr
+	 * @return
+	 * @throws Exception 
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> selectBizCnt() throws Exception {
+		TableUser tableUser = UserSession.getSession();			/* 세션정보조회 */
+		
+		
+		String sUserId = tableUser.getUserId();
+		Map<String,Object> ds	 = new HashMap<String, Object>();
+		ds.put("sUserId", sUserId);
+		Map<String,Object> dsLoginUsrInfo = commonBoardMapper.selectUsrInfo(ds);
+		//전체관리자, 관장기관, 위탁기관
+		if(UserSession.isSuperUser() || UserSession.getRoleKey().equals(RoleConst.ROLE_DIRECTOR_KEY) || UserSession.getRoleKey().equals(RoleConst.ROLE_OUTSOURCING_KEY) ) { 
+			return commonBoardMapper.selectMainBizCnt();
+		}else {
+			return commonBoardMapper.selectBizCnt(dsLoginUsrInfo);
+		}
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 로그인 전 사업
+	 * 
+	 * @param dsLgoinUsr
+	 * @return
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public Map<String, Object> selectMainBizCnt() {
+		return commonBoardMapper.selectMainBizCnt();
 	}
 }

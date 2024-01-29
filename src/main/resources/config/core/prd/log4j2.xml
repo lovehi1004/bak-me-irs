@@ -61,11 +61,12 @@
 			com.nexacro.java.xapi.data.VariableList
 			com.nexacro.java.xapi.data.DataSetList
 			com.nexacro.java.xapi.tx.HttpPlatformResponse
+			com.nexacro.java.xapi.tx.PlatformRequest
 			com.nexacro.java.xapi.tx.PlatformResponse
 			com.nexacro.java.xapi.tx.impl.PlatformJsonDataSerializer
 		 -->
 		<Logger name="com.nexacro.uiadapter.spring.core" level="ERROR" />
-		<Logger name="com.nexacro.java.xapi" level="ERROR" />
+		<Logger name="com.nexacro.java.xapi" level="DEBUG" />
 		<!-- 넥사크로 로그 END -->
 		
 		<Logger name="com.raonwiz.kupload.util.CommonUtils" level="ERROR" />

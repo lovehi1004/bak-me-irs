@@ -15,7 +15,6 @@ public interface CommonBoardMapper {
 	 */
 	int selectBoardListCnt(Map<String,Object> dsSrh);
 	
-	
 	/**
 	 * 게시판(공지사항, 자료실, FAQ, 법령과 지침) 목록조회
 	 * @param dsSrh
@@ -27,7 +26,8 @@ public interface CommonBoardMapper {
 	 * 공지사항(로그인화면) 조회
 	 * @return
 	 */
-	List<Map<String, Object>> selectBoardListLogin();
+	List<Map<String, Object>> selectBoardListLogin(Map<String,Object> dsSrh);
+	
 	/**
 	 * 게시판(공지사항, 자료실, 법령과 지침) 메인화면 조회
 	 * @param dsSrh
@@ -62,4 +62,42 @@ public interface CommonBoardMapper {
 	 * @return
 	 */
 	int updateInqCnt(Map<String,Object> dsBbsInfo);
+	
+	/**
+	 * 위젯 -> 협정 조회
+	 * @param dsBbsInfo
+	 * @return
+	 */
+	Map<String, Object> selectAgrCnt();
+	
+	
+	Map<String, Object> selectUsrInfo(Map<String,Object> selectUsrInfo);
+	/**
+	 * 메인화면 위젯 -> 방법론
+	 * @param dsBbsInfo
+	 * @return
+	 */
+	Map<String, Object> selectMhdlgCnt(Map<String, Object> dsLoginUsrInfo);
+	
+	/**
+	 * 메인화면 위젯 -> 로그인 전 방법론
+	 * @param dsBbsInfo
+	 * @return
+	 */
+	Map<String, Object> selectMainMhdlgCnt();
+	
+	/**
+	 * 메인화면 위젯 -> 사업
+	 * @param dsBbsInfo
+	 * @return
+	 */
+	Map<String, Object> selectBizCnt(Map<String, Object> dsLoginUsrInfo);
+	
+	/**
+	 * 메인화면 위젯 -> 로그인 전 사업
+	 * @param dsBbsInfo
+	 * @return
+	 */
+	Map<String, Object> selectMainBizCnt();
+	
 }

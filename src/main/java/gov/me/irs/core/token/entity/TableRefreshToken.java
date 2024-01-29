@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Getter
-@Table(name = "IRSUSER.JWT_USER_REFRESH_TKN_BSC")
-@org.hibernate.annotations.Table(comment = "JWT사용자리프레시토큰", appliesTo = "IRSUSER.JWT_USER_REFRESH_TKN_BSC")
+@Table(name = "JWT_USER_REFRESH_TKN_BSC")
+@org.hibernate.annotations.Table(comment = "JWT사용자리프레시토큰", appliesTo = "JWT_USER_REFRESH_TKN_BSC")
 @NoArgsConstructor
 @AllArgsConstructor
 public class TableRefreshToken {

@@ -27,6 +27,7 @@
 									, SYS_CL_CD
 									, PTH
 									, MENU_PATH
+									, SORT_PATH
 									, CYC
 		) AS (
 			/* 기준점 */
@@ -43,8 +44,9 @@
 				 , M.SYS_CL_CD
 				 , ARRAY[M.MENU_MGNO::TEXT]  AS PTH
 				 , ARRAY[M.MENU_NM::TEXT]  AS MENU_PATH
+				 , ARRAY[LPAD(CAST(M.MENU_LVL AS TEXT), 2, '0') || LPAD(CAST(M.SORT_SEQO AS TEXT), 3, '0')] AS SORT_PATH
 				 , false
-			  FROM irsuser.MENU_BSC M
+			  FROM MENU_BSC M
 			 WHERE 1 = 1
 			<choose>
 				<when test="targetMenuMgno != null and !targetMenuMgno.equals('')"><!-- 기준점 지정 -->
@@ -75,8 +77,9 @@
 				 , M.SYS_CL_CD
 				 , ARRAY_APPEND( W.PTH, M.MENU_MGNO::TEXT) AS PTH
 				 , ARRAY_APPEND( W.MENU_PATH, M.MENU_NM::TEXT) AS MENU_PATH
+				 , ARRAY_APPEND( W.SORT_PATH, LPAD(CAST(M.MENU_LVL AS TEXT), 2, '0') || LPAD(CAST(M.SORT_SEQO AS TEXT), 3, '0')) AS SORT_PATH
 				 , M.MENU_MGNO = ANY(W.PTH)
-			  FROM irsuser.MENU_BSC M
+			  FROM MENU_BSC M
 			 INNER JOIN WITH_MENU_LIST W
 				ON M.UP_MENU_MGNO = W.MENU_MGNO
 			   AND M.SYS_CL_CD = #{sysClCd}

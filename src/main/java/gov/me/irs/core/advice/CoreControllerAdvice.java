@@ -1,6 +1,7 @@
 package gov.me.irs.core.advice;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -66,6 +67,9 @@ public class CoreControllerAdvice {
 		} else if(e instanceof AccessDeniedException) {			/* @PreAuthorize에 대한 예외처리 */
 			log.debug("[AccessDeniedException]");
 			jwtAuthEnum = JwtAuthEnum.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED;
+		} else if(e instanceof InvalidKeyException) {			/* RSA 예외처리 */
+			log.debug("[InvalidKeyException]");
+			jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
 		} else if(e instanceof MaxUploadSizeExceededException) {
 			log.debug("[MaxUploadSizeExceededException]");
 			jwtAuthEnum = JwtAuthEnum.MAX_UPLOAD_SIZE_EXCEEDED_EXCEPTION;
@@ -80,7 +84,11 @@ public class CoreControllerAdvice {
 		log.error("[@ExceptionHandler][Controller Fail]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]["+jwtAuthEnum.getCode()+"]["+e.getCause()+"]");
 		log.error("[@ExceptionHandler]", e);
 		
-		RequestDispatcher dispatcher = forwardRequest.getRequestDispatcher("/exception/common/" + jwtAuthEnum.getCode());
+		String forwardUrl = "/exception/common/" + jwtAuthEnum.getCode();
+		
+		log.debug("[forwardUrl][{}]", forwardUrl);
+		
+		RequestDispatcher dispatcher = forwardRequest.getRequestDispatcher(forwardUrl);
 		request.setAttribute("exception", jwtAuthEnum.getCode());
 		if(jwtAuthEnum == JwtAuthEnum.UNKNOWN_ERROR) {
 			request.setAttribute("cause", e.getCause());

@@ -8,11 +8,11 @@
 	<insert id="insertClientDtl" parameterType="gov.me.irs.core.client.vo.ClientVo">
 		<selectKey keyProperty="sn" resultType="int" order="BEFORE">
 			/* ClientMapper.insertClientDtl.selectKey */
-			SELECT COALESCE(MAX(SN), 0) + 1 FROM irsuser.USER_CNTN_DSCTN
+			SELECT COALESCE(MAX(SN), 0) + 1 FROM USER_CNTN_DSCTN
 		</selectKey>
 		/* ClientMapper.insertClientDtl */
 		INSERT
-		  INTO irsuser.USER_CNTN_DSCTN
+		  INTO USER_CNTN_DSCTN
 			 ( SN
 			 , USER_ID
 			 , USER_CL_CD
@@ -29,19 +29,19 @@
 			 , REG_DT
 			 )
 			 ( SELECT #{sn}
-				   , (SELECT USER_ID FROM irsuser.USER_BSC WHERE LGN_ID = #{username})
-				   , (SELECT USER_CL_CD FROM irsuser.USER_BSC WHERE LGN_ID = #{username})
-				   , #{username}
-				   , #{lgnScsYn}
-				   , #{ip}
-				   , #{browser}
-				   , #{os}
-				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMM')
-				   , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
-				   , TO_CHAR(CURRENT_TIMESTAMP, 'HHmmss')
-				   , 'N'
-				   , COALESCE((SELECT USER_ID FROM irsuser.USER_BSC WHERE LGN_ID = #{username}), 'SYSTEM')
-				   , CURRENT_TIMESTAMP
+			 		, (SELECT USER_ID FROM USER_BSC WHERE LGN_ID = #{username})
+			 		, (SELECT USER_CL_CD FROM USER_BSC WHERE LGN_ID = #{username})
+			 		, #{username}
+			 		, #{lgnScsYn}
+			 		, #{ip}
+			 		, #{browser}
+			 		, #{os}
+			 		, TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMM')
+			 		, TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
+			 		, TO_CHAR(CURRENT_TIMESTAMP, 'HH24mmss')
+			 		, 'N'
+			 		, COALESCE((SELECT USER_ID FROM USER_BSC WHERE LGN_ID = #{username}), 'SYSTEM')
+			 		, CURRENT_TIMESTAMP
 			 )
 	</insert>
 	

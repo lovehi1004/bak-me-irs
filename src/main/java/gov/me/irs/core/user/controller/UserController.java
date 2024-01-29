@@ -1,5 +1,6 @@
 package gov.me.irs.core.user.controller;
 
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,12 +13,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -37,7 +36,6 @@ import gov.me.irs.core.token.service.JwtService;
 import gov.me.irs.core.sign.exception.SignException;
 import gov.me.irs.core.user.entity.TableUser;
 import gov.me.irs.core.user.enumeration.RoleEnum;
-import gov.me.irs.core.user.enumeration.UserClCdEnum;
 import gov.me.irs.core.user.repository.UserRepository;
 import gov.me.irs.core.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -85,72 +83,107 @@ public class UserController {
 			, HttpServletRequest request
 			, HttpServletResponse response) throws Exception {
 		
-		String identifier = (String) requestMap.get(Const.CORE.KEY_USER_IDENTIFIER);
-		String password = (String) requestMap.get(Const.CORE.KEY_USER_PASSWORD);
-		
-		TableUser user = userRepository.findByLgnId(identifier);
-		
-		/* 1. 인증 예외처리 */
-		// 유저 없는경우 
-		if (user == null ) {
-			throw new SignException(JwtAuthEnum.NOT_FOUND_USER_ID.getCode(), new UsernameNotFoundException(identifier));
-		}
-		
-		// 비밀번호가 없는경우 
-		if (password == null ) {
-			throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(identifier));
-		}
-		
-		/* 2. 비밀번호 RSA 복호화 */
 		try {
-			password = RsaUtil.decryptRsa(session, password);
-		} catch (Exception e) {
-			throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
-		}
-
-		log.debug("[user][{}]", user);
-		log.debug("[param][{}][db][{}]", password, user.getPassword());
-		
-		// 비번 불일치
-		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(identifier));
-		}
-		
-		/**
-        // TODO - 기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료
-        if ("기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료") {
-            throw new AccountExpiredException("계정이 탈퇴 또는 만료되어 로그인이 불가능 합니다.");
-            throw new AccountExpiredException("인증 요청이 거부되었습니다. 관리자에게 문의하세요.");
-        }
-		 */
-		
-/* ######################################################################## */
-/*  여기까지 ---- login 서비스 내부 예외처리 로직 동일 하게 처리 할 것 - TODO */
-/* ######################################################################## */
-		
-		log.debug("[user.getRoles()]["+user.getRoles().size()+"]");
-		List<String> roles = new ArrayList<String>();
-		for (String roleName : user.getRoles()) {
-			log.debug("[roleName]["+roleName+"]");
-			RoleEnum roleEnum = RoleEnum.of(roleName);
-			roles.add(roleEnum.getCode());
-		}
-		
-		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		parameterMap.put("roles", roles);
-		List<Map<String, Object>> userRoleList = userService.selectRoleList(parameterMap);
-		
-		switch (RoleEnum.of(user.getUserClCd().getValue())) {
+			String identifier = (String) requestMap.get(Const.CORE.KEY_USER_IDENTIFIER);
+			String password = (String) requestMap.get(Const.CORE.KEY_USER_PASSWORD);
+			
+			TableUser user = userRepository.findByLgnId(identifier);
+			
+			/* 1. 인증 예외처리 */
+			// 유저 없는경우 
+			if (user == null ) {
+				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_ID.getCode(), new UsernameNotFoundException(identifier));
+			}
+			
+			// 비밀번호가 없는경우 
+			if (password == null ) {
+				throw new SignException(JwtAuthEnum.NOT_FOUND_USER_PWD.getCode(), new IllegalArgumentException(identifier));
+			}
+			
+			/* 2. 비밀번호 RSA 복호화 */
+			try {
+				password = RsaUtil.decryptRsa(session, password);
+			} catch (Exception e) {
+				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+			}
+			
+			/* 프로파일 */
+			String profiles = System.getProperty("spring.profiles.active");
+			if(!Const.PROFILES.PRD.equals(profiles)) {		/* 운영서버 출력방지 */
+				log.debug("[user][{}]", user);
+				log.debug("[param][{}][db][{}]", password, user.getPassword());
+			}
+			
+			// 비번 불일치
+			if (!passwordEncoder.matches(password, user.getPassword())) {
+				throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(identifier));
+			}
+			
+			/**
+			 * 예외 CASE 추가시 아래 참고
+			 * 
+			 * Ex.> - 기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료
+			 * 		if ("기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료") {
+			 * 			throw new AccountExpiredException("계정이 탈퇴 또는 만료되어 로그인이 불가능 합니다.");
+			 * 			throw new AccountExpiredException("인증 요청이 거부되었습니다. 관리자에게 문의하세요.");
+			 * 		}
+			 * 
+			 */
+			
+			log.debug("[user.getRoles()]["+user.getRoles().size()+"]");
+			List<String> roles = new ArrayList<String>();
+			for (String roleName : user.getRoles()) {
+				log.debug("[roleName]["+roleName+"]");
+				RoleEnum roleEnum = RoleEnum.of(roleName);
+				roles.add(roleEnum.getCode());
+			}
+			
+			Map<String, Object> parameterMap = new HashMap<String, Object>();
+			parameterMap.put("roles", roles);
+			List<Map<String, Object>> userRoleList = userService.selectRoleList(parameterMap);
+			
+			switch (RoleEnum.of(user.getUserClCd().getValue())) {
 			case DIRECTOR: case OUTSOURCING:		/* 관장기관, 위탁기관은 복수권한 보유 가능 */
-			break;
-		default:									/* 그외 권한은 무조건 1개의 권한, 첫번재 권한으로 보내준다. - 1개초과시 DB데이터 문제임 */
-			userRoleList = Arrays.asList(userRoleList.get(0));
-			break;
+				break;
+			default:									/* 그외 권한은 무조건 1개의 권한, 첫번재 권한으로 보내준다. - 1개초과시 DB데이터 문제임 */
+				userRoleList = Arrays.asList(userRoleList.get(0));
+				break;
+			}
+			
+			NexacroResult nexacroResult = new NexacroResult();
+			nexacroResult.addDataSet("userRoleList", userRoleList);
+			return nexacroResult;
+			
+		/* ■■■■■■■■■■ 로그인 실패 - 공통 예외처리 ■■■■■■■■■■ */
+		} catch(SignException e) {
+			HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;			/* default : 500 */
+			JwtAuthEnum jwtAuthEnum = JwtAuthEnum.UNKNOWN_ERROR;
+			
+			Throwable cause = e.getCause();
+			
+			if(cause instanceof UsernameNotFoundException) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.NOT_FOUND_USER_ID;
+			} else if(cause instanceof IllegalArgumentException) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.BAD_REQUEST;
+			} else if(cause instanceof BadCredentialsException) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.MISMATCH_USER_INFO;
+			} else if(cause instanceof SignException) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.of(e.getCode());
+			} else if(cause instanceof InvalidKeyException) {			/* RSA 예외처리 */
+				httpStatus = HttpStatus.BAD_REQUEST;
+				jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
+			}
+			
+			log.error("[SignException][Login Fail][e.getCode()]["+e.getCode()+"][][]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]["+e.getCause()+"]");
+			
+			NexacroResult nexacroResult = new NexacroResult();
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, cause));
+			return nexacroResult;
 		}
-		
-		NexacroResult nexacroResult = new NexacroResult();
-		nexacroResult.addDataSet("userRoleList", userRoleList);
-		return nexacroResult;
 	}
 	
 	/**
@@ -198,28 +231,31 @@ public class UserController {
 			try {
 				password = RsaUtil.decryptRsa(session, password);
 			} catch (Exception e) {
-				throw new SignException(JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode(), e);
+				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
 			}
 			
-			log.debug("[user][{}]", user);
-			log.debug("[param][{}][db][{}]", password, user.getPassword());
+			/* 프로파일 */
+			String profiles = System.getProperty("spring.profiles.active");
+			if(!Const.PROFILES.PRD.equals(profiles)) {		/* 운영서버 출력방지 */
+				log.debug("[user][{}]", user);
+				log.debug("[param][{}][db][{}]", password, user.getPassword());
+			}
+			
 			// 비번 불일치
 			if (!passwordEncoder.matches(password, user.getPassword())) {
 				throw new SignException(JwtAuthEnum.MISMATCH_USER_INFO.getCode(), new BadCredentialsException(identifier));
 			}
 			
 			/**
-	        // TODO - 기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료
-	        if ("기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료") {
-	            throw new AccountExpiredException("계정이 탈퇴 또는 만료되어 로그인이 불가능 합니다.");
-	            throw new AccountExpiredException("인증 요청이 거부되었습니다. 관리자에게 문의하세요.");
-	        }
+			 * 예외 CASE 추가시 아래 참고
+			 * 
+			 * Ex.> - 기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료
+			 * 		if ("기타 예외처리 - 1. 인증요청 거부, 2. 계정 탈퇴 또는 계정 만료") {
+			 * 			throw new AccountExpiredException("계정이 탈퇴 또는 만료되어 로그인이 불가능 합니다.");
+			 * 			throw new AccountExpiredException("인증 요청이 거부되었습니다. 관리자에게 문의하세요.");
+			 * 		}
+			 * 
 			 */
-			
-			/* ######################################################################## */
-			/*  여기까지 ---- login 서비스 내부 예외처리 로직 동일 하게 처리 할 것 - TODO */
-			/* ######################################################################## */
-			
 			
 			/* 선택된 권한정보 설정 */
 			if(!ObjectUtils.isEmpty(requestMap.get(Const.CORE.KEY_USER_ROLE))) {
@@ -355,82 +391,82 @@ public class UserController {
 		
 	}
 	
-	/*
-	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	 * TEST 구간 START
-	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	 */
-	/**
-	 * TEST - 계정 생성
-	 * 
-	 * @return
-	 */
-	@PostMapping("/join")
-	public ResponseEntity<?> join(){
-		log.info("가입 시도됨");
-		
-		TableUser user1 = this.testCreateNewUser("aaaaaa@gmail.com", "URS000000001", passwordEncoder.encode("1234"), UserClCdEnum.SUPER, Arrays.asList("ROLE_SUPER"));
-		
-		/* 관장기관, 사업수행장 권한 추가 */
-		TableUser user2 = TableUser.builder()
-				.lgnId("bbbbbb@gmail.com")
-				.userId("URS000000002")
-				.encptPswd(passwordEncoder.encode("1234"))
-				.userClCd(UserClCdEnum.DIRECTOR)
-				.roles(Arrays.asList("ROLE_DIRECTOR", "ROLE_DIRECTORBIZ")) // 최초 가입시 USER 로 설정
-				.build();
-		
-		/* 위탁기관, 사업수행장 권한 추가 */
-		TableUser user3 = TableUser.builder()
-				.lgnId("cccccc@gmail.com")
-				.userId("URS000000003")
-				.encptPswd(passwordEncoder.encode("1234"))
-				.userClCd(UserClCdEnum.OUTSOURCING)
-				.roles(Arrays.asList("ROLE_OUTSOURCING", "ROLE_OUTSOURCINGBIZ")) // 최초 가입시 USER 로 설정
-				.build();
-		
-		TableUser user4 = this.testCreateNewUser("dddddd@gmail.com", "URS000000004", passwordEncoder.encode("1234"), UserClCdEnum.BIZADMIN, Arrays.asList("ROLE_BIZADMIN"));
-		TableUser user5 = this.testCreateNewUser("eeeeee@gmail.com", "URS000000005", passwordEncoder.encode("1234"), UserClCdEnum.BIZREPRESENT, Arrays.asList("ROLE_BIZREPRESENT"));
-		TableUser user6 = this.testCreateNewUser("ffffff@gmail.com", "URS000000006", passwordEncoder.encode("1234"), UserClCdEnum.MOFA, Arrays.asList("ROLE_MOFA"));
-		TableUser user7 = this.testCreateNewUser("gggggg@gmail.com", "URS000000007", passwordEncoder.encode("1234"), UserClCdEnum.ORGAN, Arrays.asList("ROLE_ORGAN"));
-		TableUser user8 = this.testCreateNewUser("hhhhhh@gmail.com", "URS000000008", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVED, Arrays.asList("ROLE_UNAPPROVED"));
-		TableUser user9 = this.testCreateNewUser("gggggg@gmail.com", "URS000000009", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVEDOUTSOURCING, Arrays.asList("ROLE_UNAPPROVEDOUTSOURCING"));
-		
-		userRepository.save(user1);
-		userRepository.save(user2);
-		userRepository.save(user3);
-		userRepository.save(user4);
-		userRepository.save(user5);
-		userRepository.save(user6);
-		userRepository.save(user7);
-		userRepository.save(user8);
-		userRepository.save(user9);
-		
-		Map<String, Object> body = new HashMap<String, Object>();
-		return ResponseEntity.ok(body);
-		
-	}
-	
-	/**
-	 * ■■■■■■■■■■■■■■■■■■■■ TEST ■■■■■■■■■■■■■■■■■■■■
-	 * 새로운 사용자 생성
-	 * 
-	 * @return
-	 */
-	@Transactional(rollbackFor = Exception.class)
-	private final TableUser testCreateNewUser(String USER_LOGIN_ID, String USER_SEQ_ID, String PASSWORD, UserClCdEnum userClCd, List<String> roles) {
-		return TableUser.builder()
-				.lgnId(USER_LOGIN_ID)
-				.userId(USER_SEQ_ID)
-				.encptPswd(PASSWORD)
-				.userClCd(userClCd)
-				.roles(roles) // 최초 가입시 USER 로 설정
-				.build();
-	}
-	/*
-	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	 * TEST 구간 END
-	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	 */
+//	/*
+//	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	 * TEST 구간 START
+//	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	 */
+//	/**
+//	 * TEST - 계정 생성
+//	 * 
+//	 * @return
+//	 */
+//	@PostMapping("/join")
+//	public ResponseEntity<?> join(){
+//		log.info("가입 시도됨");
+//		
+//		TableUser user1 = this.testCreateNewUser("aaaaaa@gmail.com", "URS000000001", passwordEncoder.encode("1234"), UserClCdEnum.SUPER, Arrays.asList("ROLE_SUPER"));
+//		
+//		/* 관장기관, 사업수행장 권한 추가 */
+//		TableUser user2 = TableUser.builder()
+//				.lgnId("bbbbbb@gmail.com")
+//				.userId("URS000000002")
+//				.encptPswd(passwordEncoder.encode("1234"))
+//				.userClCd(UserClCdEnum.DIRECTOR)
+//				.roles(Arrays.asList("ROLE_DIRECTOR", "ROLE_DIRECTORBIZ")) // 최초 가입시 USER 로 설정
+//				.build();
+//		
+//		/* 위탁기관, 사업수행장 권한 추가 */
+//		TableUser user3 = TableUser.builder()
+//				.lgnId("cccccc@gmail.com")
+//				.userId("URS000000003")
+//				.encptPswd(passwordEncoder.encode("1234"))
+//				.userClCd(UserClCdEnum.OUTSOURCING)
+//				.roles(Arrays.asList("ROLE_OUTSOURCING", "ROLE_OUTSOURCINGBIZ")) // 최초 가입시 USER 로 설정
+//				.build();
+//		
+//		TableUser user4 = this.testCreateNewUser("dddddd@gmail.com", "URS000000004", passwordEncoder.encode("1234"), UserClCdEnum.BIZADMIN, Arrays.asList("ROLE_BIZADMIN"));
+//		TableUser user5 = this.testCreateNewUser("eeeeee@gmail.com", "URS000000005", passwordEncoder.encode("1234"), UserClCdEnum.BIZREPRESENT, Arrays.asList("ROLE_BIZREPRESENT"));
+//		TableUser user6 = this.testCreateNewUser("ffffff@gmail.com", "URS000000006", passwordEncoder.encode("1234"), UserClCdEnum.MOFA, Arrays.asList("ROLE_MOFA"));
+//		TableUser user7 = this.testCreateNewUser("gggggg@gmail.com", "URS000000007", passwordEncoder.encode("1234"), UserClCdEnum.ORGAN, Arrays.asList("ROLE_ORGAN"));
+//		TableUser user8 = this.testCreateNewUser("hhhhhh@gmail.com", "URS000000008", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVED, Arrays.asList("ROLE_UNAPPROVED"));
+//		TableUser user9 = this.testCreateNewUser("gggggg@gmail.com", "URS000000009", passwordEncoder.encode("1234"), UserClCdEnum.UNAPPROVEDOUTSOURCING, Arrays.asList("ROLE_UNAPPROVEDOUTSOURCING"));
+//		
+//		userRepository.save(user1);
+//		userRepository.save(user2);
+//		userRepository.save(user3);
+//		userRepository.save(user4);
+//		userRepository.save(user5);
+//		userRepository.save(user6);
+//		userRepository.save(user7);
+//		userRepository.save(user8);
+//		userRepository.save(user9);
+//		
+//		Map<String, Object> body = new HashMap<String, Object>();
+//		return ResponseEntity.ok(body);
+//		
+//	}
+//	
+//	/**
+//	 * ■■■■■■■■■■■■■■■■■■■■ TEST ■■■■■■■■■■■■■■■■■■■■
+//	 * 새로운 사용자 생성
+//	 * 
+//	 * @return
+//	 */
+//	@Transactional(rollbackFor = Exception.class)
+//	private final TableUser testCreateNewUser(String USER_LOGIN_ID, String USER_SEQ_ID, String PASSWORD, UserClCdEnum userClCd, List<String> roles) {
+//		return TableUser.builder()
+//				.lgnId(USER_LOGIN_ID)
+//				.userId(USER_SEQ_ID)
+//				.encptPswd(PASSWORD)
+//				.userClCd(userClCd)
+//				.roles(roles) // 최초 가입시 USER 로 설정
+//				.build();
+//	}
+//	/*
+//	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	 * TEST 구간 END
+//	 * ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+//	 */
 	
 }

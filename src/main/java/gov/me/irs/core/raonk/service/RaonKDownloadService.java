@@ -16,6 +16,7 @@ import com.nexacro.java.xapi.data.DataSet;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.file.vo.RaonKFileDownloadVo;
 import gov.me.irs.common.file.vo.RaonKFileVo;
+import gov.me.irs.common.util.DataSetUtil;
 import gov.me.irs.common.util.DateUtil;
 import gov.me.irs.common.util.RaonKFileUtil;
 import gov.me.irs.core.raonk.mapper.RaonKMapper;
@@ -35,6 +36,8 @@ public class RaonKDownloadService {
 	
 	private final RaonKFileUtil raonKFileUtil;
 	
+	private final DataSetUtil dataSetUtil;
+	
 	private final RaonKMapper raonKMapper;
 	
 	/**
@@ -50,23 +53,8 @@ public class RaonKDownloadService {
 	public RaonKFileDownloadVo getDownloadVo(HttpServletRequest request, String inputDsName, String downloadArchiveFileNm) throws Exception {
 		
 		log.debug("[전체 다운로드][파일압축하기 - START]");
-		/* 넥사크로 예제 구간 START */
-		//파일정보를 담고있는 XML문자열(Dataset 의 saveXML())
-		String fileInfoXml = request.getParameter(inputDsName);
 		
-		DataSet dsFileInfo = null;
-		
-		//파일정보 Dataset saveXML 문자열
-		if(fileInfoXml != null) {
-			
-			log.debug("■■■■■■■■■■■ [fileInfoXml][{}]", fileInfoXml);
-			
-			dsFileInfo = new DataSet(inputDsName);
-			fileInfoXml = fileInfoXml.replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&gt;", ">");
-			
-			dsFileInfo.loadXml(fileInfoXml);
-		}
-		/* 넥사크로 예제 구간 END */
+		DataSet dsFileInfo = dataSetUtil.getDataSet(request, inputDsName);
 		
 		List<File> subArchiveFileList = new ArrayList<File>();
 		
@@ -145,23 +133,8 @@ public class RaonKDownloadService {
 	public RaonKFileDownloadVo getSelectedDownloadVo(HttpServletRequest request, String inputDsName, String downloadArchiveFileNm) throws Exception {
 		
 		log.debug("[전체 다운로드][파일압축하기 - START]");
-		/* 넥사크로 예제 구간 START */
-		//파일정보를 담고있는 XML문자열(Dataset 의 saveXML())
-		String fileInfoXml = request.getParameter(inputDsName);
 		
-		DataSet dsFileInfo = null;
-		
-		//파일정보 Dataset saveXML 문자열
-		if(fileInfoXml != null) {
-			
-			log.debug("■■■■■■■■■■■ [fileInfoXml][{}]", fileInfoXml);
-			
-			dsFileInfo = new DataSet(inputDsName);
-			fileInfoXml = fileInfoXml.replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&gt;", ">");
-			
-			dsFileInfo.loadXml(fileInfoXml);
-		}
-		/* 넥사크로 예제 구간 END */
+		DataSet dsFileInfo = dataSetUtil.getDataSet(request, inputDsName);
 		
 		String resultFileName = StringUtils.EMPTY;
 

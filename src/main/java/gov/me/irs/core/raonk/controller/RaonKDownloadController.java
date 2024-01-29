@@ -74,7 +74,7 @@ public class RaonKDownloadController {
 		}
 		
 		NexacroFileResult nexacroFileResult = new NexacroFileResult(file);
-		nexacroFileResult.setOriginalName(downloadFileNm);
+		nexacroFileResult.setOriginalName(downloadFileNm.replace(" ", "_"));
 		nexacroFileResult.setContentType(contentType);
 		return nexacroFileResult;
 	}
@@ -110,11 +110,13 @@ public class RaonKDownloadController {
 				file = fileDownloadVo.getArchiveFile();
 				downloadFileNm = fileDownloadVo.getDownloadFileNm();
 				contentType = fileDownloadVo.getContentType();
+				log.debug(file.getName());
+				
 			}
 		}
 		
 		NexacroFileResult nexacroFileResult = new NexacroFileResult(file);
-		nexacroFileResult.setOriginalName(downloadFileNm);
+		nexacroFileResult.setOriginalName(downloadFileNm.replace(" ", "_"));
 		nexacroFileResult.setContentType(contentType);
 		return nexacroFileResult;
 	}

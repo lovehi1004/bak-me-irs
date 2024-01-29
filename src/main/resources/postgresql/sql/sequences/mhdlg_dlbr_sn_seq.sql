@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.mhdlg_dlbr_sn_seq
+CREATE SEQUENCE mhdlg_dlbr_sn_seq
 /******************************************************************************
-    프로그램명 : irsuser.mhdlg_dlbr_sn_seq 
+    프로그램명 : mhdlg_dlbr_sn_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.mhdlg_dlbr_sn_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.MHDLG_DLBR_SN_SEQ')
+		▶ SELECT NEXTVAL('MHDLG_DLBR_SN_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.mhdlg_dlbr_sn_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.mhdlg_dlbr_sn_seq IS '방법론심의상세 심의일련번호 시퀀스';
+COMMENT ON SEQUENCE mhdlg_dlbr_sn_seq IS '방법론심의상세 심의일련번호 시퀀스';

@@ -8,6 +8,12 @@ package gov.me.irs.common.constants;
  */
 public final class Const {
 	
+	public final static class PROFILES {
+		
+		public final static String LOCAL = "local";
+		public final static String DEV = "dev";
+		public final static String PRD = "prd";
+	}
 	/**
 	 * 쿠키
 	 * 
@@ -171,6 +177,7 @@ public final class Const {
 	public final static class NUMERIC {
 		public final static int EMPTY_LIST = 0;
 		public final static int ZERO = 0;
+		public final static int ONE = 1;
 	}
 	
 	/**

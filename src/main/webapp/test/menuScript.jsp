@@ -349,7 +349,7 @@ ddd|||444|||라라라|||ccc|||400</textarea>
 	<hr/>
 	<button data-link="convert" style="padding: 3px 5px; cursor: pointer;">변환하기 - 구분자 |||, 엔터</button>
 	<hr/>
-	테이블명 : <input id="tableName" type="text" value="irsuser.MENU_BSC"/>
+	테이블명 : <input id="tableName" type="text" value="MENU_BSC"/>
 	<hr/>
 	<div class="container">
 	

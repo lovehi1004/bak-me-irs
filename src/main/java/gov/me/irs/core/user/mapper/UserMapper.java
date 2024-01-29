@@ -79,4 +79,22 @@ public interface UserMapper {
 	 */
 	int insertUser(Map<String, Object> requestMap);
 	
+	/**
+	 * 로그인 아이디 중복 검색 체크
+	 * 
+	 * @param requestMap
+	 * @return
+	 */
+	Map<String, Object> selectLoginIdCnt(Map<String, Object> requestMap);
+	
+	/**
+	 * 사용자 계정상태변경 수정하기
+	 * 사용자 휴대폰번호 수정하기
+	 * 사용자 비밀번호 수정하기
+	 * 
+	 * @param requestMap
+	 * @return
+	 */
+	int updateUser(Map<String, Object> requestMap);
+	
 }

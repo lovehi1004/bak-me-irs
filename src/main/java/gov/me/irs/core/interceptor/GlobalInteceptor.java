@@ -1,5 +1,6 @@
 package gov.me.irs.core.interceptor;
 
+import java.security.InvalidKeyException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +74,13 @@ public class GlobalInteceptor implements HandlerInterceptor {
 				request.setAttribute("exception", jwtAuthEnum.getCode());
 				dispatcher.forward(request, response);
 				
+			} else if(ex instanceof InvalidKeyException) {		/* RSA 예외처리 */
+				
+				JwtAuthEnum jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
+				
+				RequestDispatcher dispatcher = request.getRequestDispatcher("/exception/common/" + jwtAuthEnum.getCode());
+				request.setAttribute("exception", jwtAuthEnum.getCode());
+				dispatcher.forward(request, response);
 			} else {
 				JwtAuthEnum jwtAuthEnum = JwtAuthEnum.UNKNOWN_ERROR;
 				

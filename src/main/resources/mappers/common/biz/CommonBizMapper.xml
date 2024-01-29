@@ -9,11 +9,11 @@
 		SELECT 	
 			 B.BZENT_NM AS BF_INST_CD
 		    ,'' AS AF_INST_CD
-		FROM IRSUSER.IRB_DTL A
-		INNER JOIN IRSUSER.INST_BSC B
-		ON A.CMPTNC_INST_MNG_NO = B.INST_MGNO 
+		FROM IRB_DTL A
+		INNER JOIN INST_BSC B
+		ON A.CMPTNC_INST_MGNO = B.INST_MGNO 
 		WHERE 1=1
-		AND A.BIZ_MNG_NO = #{mngNo}
+		AND A.BIZ_MGNO = #{mngNo}
 		AND A.BIZ_DGR = CAST(#{dgr} AS NUMERIC)
 	</select>
 	
@@ -21,8 +21,8 @@
 		SELECT 	
 			 B.BZENT_NM AS BF_INST_CD
 			,'' AS AF_INST_CD
-		FROM IRSUSER.MHDLG_DTL A
-		INNER JOIN IRSUSER.INST_BSC B
+		FROM MHDLG_DTL A
+		INNER JOIN INST_BSC B
 		ON A.CMPTNC_INST_NO = B.INST_MGNO 
 		WHERE 1=1
 		AND A.MHDLG_MGNO = #{mngNo}
@@ -43,8 +43,8 @@
 			,B.INST_CLSF_CD
 			,A.UP_INST_MGNO AS USR_UP_INST_MGNO
 			,B.UP_INST_MGNO 
-		FROM IRSUSER.USER_BSC A
-		INNER JOIN IRSUSER.INST_BSC B
+		FROM USER_BSC A
+		INNER JOIN INST_BSC B
 		ON A.INST_MGNO = B.INST_MGNO
 		WHERE 1=1
 	<choose>
@@ -60,17 +60,27 @@
 	</select>
 	
 	<update id="updateBizInst" parameterType="map">
-		UPDATE IRSUSER.IRB_DTL SET
-			 CMPTNC_INST_MNG_NO = #{afInstCd}
+		UPDATE IRB_DTL SET
+			 CMPTNC_INST_MGNO = #{afInstCd}
 			,MDFR_ID = #{auth.sUserId} 
 			,MDFCN_DT = CURRENT_TIMESTAMP 	
 		WHERE 1=1
-		AND BIZ_MNG_NO = #{mngNo}
-		AND BIZ_DGR = CAST(#{dgr} AS NUMERIC)
+		AND BIZ_MGNO = #{mngNo}
+		AND BIZ_DGR <![CDATA[>=]]> CAST(#{dgr} AS NUMERIC)
+	</update>
+	
+	<update id="updateBizScsnInst" parameterType="map">
+		UPDATE IRB_DTL SET
+			 SCSN_INST_MGNO = #{afInstCd}
+			,MDFR_ID = #{auth.sUserId} 
+			,MDFCN_DT = CURRENT_TIMESTAMP 	
+		WHERE 1=1
+		AND BIZ_MGNO = #{mngNo}
+		AND BIZ_DGR <![CDATA[>=]]> CAST(#{dgr} AS NUMERIC)
 	</update>
 	
 	<update id="updateMhdInst" parameterType="map">
-		UPDATE IRSUSER.MHDLG_DTL SET
+		UPDATE MHDLG_DTL SET
 			 CMPTNC_INST_NO = #{afInstCd}
 			,MDFR_ID = #{auth.sUserId} 
 			,MDFCN_DT = CURRENT_TIMESTAMP 	
@@ -86,15 +96,15 @@
 			,INST_MGNO
 			,INST_CLSF_CD
 			,UP_INST_MGNO 
-		FROM IRSUSER.INST_BSC
+		FROM INST_BSC
 		WHERE 1=1
-		AND INST_MGNO = #{auth.sUserId}
+		AND INST_MGNO = #{afInstCd}
 		AND DEL_YN = 'N'
 	</select>
 	
 	<insert id="insertIrbHstry" parameterType="map">
-		INSERT INTO IRSUSER.IRB_HSTRY (
-			 BIZ_MNG_NO
+		INSERT INTO IRB_HSTRY (
+			 BIZ_MGNO
 			,BIZ_DGR
 			,HSTRY_TYPE_CD
 			,HSTRY_RSLT_CD
@@ -117,7 +127,7 @@
 	</insert>
 	
 	<insert id="insertMhdHstry" parameterType="map">
-		INSERT INTO IRSUSER.MHDLG_HSTRY (
+		INSERT INTO MHDLG_HSTRY (
 			 MHDLG_MGNO
 			,MHDLG_DGR
 			,HSTRY_TYPE_CD
@@ -143,9 +153,9 @@
 	<select id="selectBizHstryListCnt" resultType="int" parameterType="map">
 		SELECT
 			COUNT(*) AS CNT
-		FROM IRSUSER.IRB_HSTRY  
+		FROM IRB_HSTRY  
 		WHERE 1=1		
-		AND BIZ_MNG_NO = #{mngNo}
+		AND BIZ_MGNO = #{mngNo}
 		<if test="day != null and !day.equals('')">
 		AND HSTRY_YMD = #{day}
 		</if>
@@ -154,7 +164,7 @@
 	<select id="selectMhdHstryListCnt" resultType="int" parameterType="map">
 		SELECT
 			COUNT(*) AS CNT
-		FROM IRSUSER.MHDLG_HSTRY
+		FROM MHDLG_HSTRY
 		WHERE 1=1		
 		AND MHDLG_MGNO = #{mngNo}
 		<if test="day != null and !day.equals('')">
@@ -165,22 +175,22 @@
 	<select id="selectAgrHstryListCnt" resultType="int" parameterType="map">
 		SELECT
 			COUNT(*) AS CNT
-		FROM IRSUSER.AGREE_STIPL_HSTRY
+		FROM AGR_STIPL_HSTRY
 		WHERE 1=1		
 		AND CNCLD_MGNO = #{mngNo}
 		<if test="day != null and !day.equals('')">
-		AND HSTRY_YMD = #{day}
+		AND TO_CHAR(HSTRY_DT,'yyyyMMdd') =  #{day}
 		</if>
 	</select>
 	
 	<select id="selectCnsHstryListCnt" resultType="int" parameterType="map">
 		SELECT
 			COUNT(*) AS CNT
-		FROM IRSUSER.CNSLTNGRP_HSTRY
+		FROM CNSLTNGRP_HSTRY
 		WHERE 1=1		
 		AND CNSLTNGRP_MGNO = #{mngNo}
 		<if test="day != null and !day.equals('')">
-		AND HSTRY_YMD = #{day}
+		AND TO_CHAR(HSTRY_DT,'yyyyMMdd') =  #{day}
 		</if>
 	</select>
 	
@@ -188,12 +198,12 @@
 		SELECT
 			 (COUNT(*) OVER()) - (U.RN-1) AS HSTRY_SN
 			,U.REG_DT
-			,(SELECT IRSUSER.FN_GET_CODENM('BIZ_GBN_CD', DGR_REG_RSN_CD) FROM IRSUSER.IRB_DTL WHERE BIZ_MNG_NO = U.BIZ_MNG_NO AND BIZ_DGR = U.BIZ_DGR) AS DGR_REG_RSN_CD_NM
+			,(SELECT FN_GET_CODENM('BIZ_GBN_CD', DGR_REG_RSN_CD) FROM IRB_DTL WHERE BIZ_MGNO = U.BIZ_MGNO AND BIZ_DGR = U.BIZ_DGR) AS DGR_REG_RSN_CD_NM
 			,U.HSTRY_TYPE_CD
 			,U.HSTRY_RSLT_CD
 			,U.HSTRY_DTL_RSN
-			,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
-			,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
+			,FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+			,FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
 			,U.LOG_NM
 		FROM
 		(
@@ -204,25 +214,25 @@
 			(
 				SELECT
 					 T.HSTRY_SN
-					,T.BIZ_MNG_NO
+					,T.BIZ_MGNO
 					,T.BIZ_DGR
 					,T.REG_DT
 					,T.HSTRY_TYPE_CD
 					,T.HSTRY_RSLT_CD
 					,T.HSTRY_DTL_RSN
-					,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
-					,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', T.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
+					,FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+					,FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', T.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
 					,(
 						SELECT B.BZENT_NM || '(' || A.FLNM || ')'
-						FROM IRSUSER.USER_BSC A
-						INNER JOIN IRSUSER.INST_BSC B
+						FROM USER_BSC A
+						INNER JOIN INST_BSC B
 						ON A.INST_MGNO = B.INST_MGNO 
 						WHERE 1=1
 						AND USER_ID = T.RGTR_ID
 					) AS LOG_NM 
-				FROM IRSUSER.IRB_HSTRY T
+				FROM IRB_HSTRY T
 				WHERE 1=1
-				AND T.BIZ_MNG_NO = #{mngNo}
+				AND T.BIZ_MGNO = #{mngNo}
 				<if test="day != null and !day.equals('')">
 				AND T.HSTRY_YMD = #{day}
 				</if>
@@ -241,8 +251,8 @@
 			,U.HSTRY_TYPE_CD
 			,U.HSTRY_RSLT_CD
 			,U.HSTRY_DTL_RSN
-			,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
-			,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
+			,FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+			,FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
 			,U.LOG_NM
 		FROM
 		(
@@ -257,17 +267,17 @@
 					,T.HSTRY_TYPE_CD
 					,T.HSTRY_RSLT_CD
 					,T.HSTRY_DTL_RSN
-					,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
-					,IRSUSER.FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', T.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
+					,FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+					,FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', T.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
 					,(
 						SELECT B.BZENT_NM || '(' || A.FLNM || ')'
-						FROM IRSUSER.USER_BSC A
-						INNER JOIN IRSUSER.INST_BSC B
+						FROM USER_BSC A
+						INNER JOIN INST_BSC B
 						ON A.INST_MGNO = B.INST_MGNO 
 						WHERE 1=1
 						AND USER_ID = T.RGTR_ID
 					) AS LOG_NM 
-				FROM IRSUSER.MHDLG_HSTRY T
+				FROM MHDLG_HSTRY T
 				WHERE 1=1
 				AND T.MHDLG_MGNO = #{mngNo}
 				<if test="day != null and !day.equals('')">
@@ -286,8 +296,8 @@
 			,U.REG_DT
 			,'' AS DGR_REG_RSN_CD_NM
 			,U.HSTRY_TYPE_CD
-			,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) || '됨' AS HSTRY_RSLT_CD_NM 
-			,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+			,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) || '됨' AS HSTRY_RSLT_CD_NM 
+			,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
 			,U.LOG_NM
 		FROM
 		(
@@ -300,21 +310,21 @@
 					 T.HSTRY_SN
 					,T.REG_DT
 					,T.HSTRY_TYPE_CD
-					,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_RSLT_CD_NM
-					,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+					,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_RSLT_CD_NM
+					,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
 					,(
 						SELECT B.BZENT_NM || '(' || A.FLNM || ')'
-						FROM IRSUSER.USER_BSC A
-						INNER JOIN IRSUSER.INST_BSC B
+						FROM USER_BSC A
+						INNER JOIN INST_BSC B
 						ON A.INST_MGNO = B.INST_MGNO 
 						WHERE 1=1
 						AND USER_ID = T.RGTR_ID
 					) AS LOG_NM 
-				FROM IRSUSER.AGREE_STIPL_HSTRY T
+				FROM AGR_STIPL_HSTRY T
 				WHERE 1=1
 				AND T.CNCLD_MGNO = #{mngNo}
 				<if test="day != null and !day.equals('')">
-				AND T.HSTRY_YMD = #{day}
+				AND TO_CHAR(T.HSTRY_DT,'yyyyMMdd') =  #{day}
 				</if>
 				ORDER BY T.HSTRY_SN DESC
 			) V
@@ -326,11 +336,11 @@
 	<select id="selectCnsHstryList" resultType="egovMap" parameterType="map">
 		SELECT
 			 (COUNT(*) OVER()) - (U.RN-1) AS HSTRY_SN
-			,U.REG_DT
+			, TO_CHAR(U.REG_DT, 'YYYY-MM-DD HH24:MI') as REG_DT
 			,'' AS DGR_REG_RSN_CD_NM
 			,U.HSTRY_TYPE_CD
-			,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) || '됨' AS HSTRY_RSLT_CD_NM 
-			,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+			,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) || '됨' AS HSTRY_RSLT_CD_NM 
+			,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
 			,U.LOG_NM 
 		FROM
 		(
@@ -343,21 +353,21 @@
 					 T.HSTRY_SN
 					,T.REG_DT
 					,T.HSTRY_TYPE_CD
-					,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_RSLT_CD_NM
-					,IRSUSER.FN_GET_CODENM('AGREE_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+					,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_RSLT_CD_NM
+					,FN_GET_CODENM('AGR_HSTRY_TYPE_CD', T.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
 					,(
 						SELECT B.BZENT_NM || '(' || A.FLNM || ')'
-						FROM IRSUSER.USER_BSC A
-						INNER JOIN IRSUSER.INST_BSC B
+						FROM USER_BSC A
+						INNER JOIN INST_BSC B
 						ON A.INST_MGNO = B.INST_MGNO 
 						WHERE 1=1
 						AND USER_ID = T.RGTR_ID
 					) AS LOG_NM 
-				FROM IRSUSER.CNSLTNGRP_HSTRY T
+				FROM CNSLTNGRP_HSTRY T
 				WHERE 1=1
 				AND T.CNSLTNGRP_MGNO = #{mngNo}
 				<if test="day != null and !day.equals('')">
-				AND T.HSTRY_YMD = #{day}
+				AND TO_CHAR(T.HSTRY_DT,'yyyyMMdd') =  #{day} 
 				</if>
 				ORDER BY T.HSTRY_SN DESC
 			) V
@@ -370,7 +380,7 @@
 	<select id="selectPrvHstryListCnt" resultType="int" parameterType="map">
 		/* CommonBizMapper.selectPrvHstryListCnt */
 		SELECT COUNT(*) AS CNT
-		  FROM IRSUSER.INFO_PRVT_HSTRY
+		  FROM INFO_PRVT_HSTRY
 		 WHERE 1=1		
 		   AND PRVT_MGNO = #{mngNo}
 		   <if test="day != null and !day.equals('')">
@@ -384,9 +394,9 @@
 		     , U.REG_DT
 		     , '' AS DGR_REG_RSN_CD_NM
 		     , U.HSTRY_TYPE_CD
-		     , IRSUSER.FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
+		     , FN_GET_CODENM('BIZ_HSTRY_TYPE_CD', U.HSTRY_TYPE_CD) AS HSTRY_TYPE_CD_NM
 		     , U.HSTRY_RSLT_CD
-		     , IRSUSER.FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
+		     , FN_GET_CODENM('BIZ_HSTRY_RSLT_CD', U.HSTRY_RSLT_CD) AS HSTRY_RSLT_CD_NM
 		     , U.LOG_NM 
 		  FROM (
 			      SELECT ROW_NUMBER() OVER() AS RN
@@ -398,13 +408,13 @@
 							     , T.HSTRY_TYPE_CD
 								 , (
 									  SELECT B.BZENT_NM || '(' || A.FLNM || ')'
-									    FROM IRSUSER.USER_BSC A
-									   INNER JOIN IRSUSER.INST_BSC B
+									    FROM USER_BSC A
+									   INNER JOIN INST_BSC B
 									      ON A.INST_MGNO = B.INST_MGNO 
 									   WHERE 1=1
 									     AND USER_ID = T.RGTR_ID
 								   ) AS LOG_NM 
-							    FROM IRSUSER.INFO_PRVT_HSTRY T
+							    FROM INFO_PRVT_HSTRY T
 							   WHERE 1=1
 							     AND T.PRVT_MGNO = #{mngNo}
 							     <if test="day != null and !day.equals('')">

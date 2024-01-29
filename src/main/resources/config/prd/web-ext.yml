@@ -18,7 +18,8 @@ sol.sn3hcv:
 
 # juso api address
 juso:
-  api-key: 운영서버용승인키
+  # 임시로 개발서버 승인키 설정 - 20240126083800
+  api-key: devU01TX0FVVEgyMDI0MDExODExMDIyODExNDQ0NTM=
   addr-link-api: https://business.juso.go.kr/addrlink/addrLinkApi.do
   addr-link-api-domian: https://business.juso.go.kr
   

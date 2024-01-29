@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.bbs_sn_seq
+CREATE SEQUENCE bbs_sn_seq
 /******************************************************************************
-    프로그램명 : irsuser.bbs_sn_seq 
+    프로그램명 : bbs_sn_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.bbs_sn_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.BBS_SN_SEQ')
+		▶ SELECT NEXTVAL('BBS_SN_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.bbs_sn_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.bbs_sn_seq IS '공통게시판기본 게시판일련번호 시퀀스';
+COMMENT ON SEQUENCE bbs_sn_seq IS '공통게시판기본 게시판일련번호 시퀀스';

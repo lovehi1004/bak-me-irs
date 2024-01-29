@@ -9,7 +9,7 @@
 		/* UserMapper.selectRoleList */
 		SELECT R.ROLE_ID_MGNO						/* 역할ID관리번호 */
 			 , R.ROLE_NM							/* 역할명 */
-		  FROM irsuser.ROLE_BSC R
+		  FROM ROLE_BSC R
 		 WHERE R.DEL_YN = 'N'
 		   AND R.ROLE_ID_MGNO IN
 			<foreach item="item" index="index" collection="roles" open="(" close=")" separator=",">
@@ -27,7 +27,7 @@
 			 , PSWD								/* 비밀번호 */
 			 , USER_CL_CD						/* 사용자구분코드 */
 			 , FLNM								/* 성명 */
-		  FROM irsuser.USER_BSC
+		  FROM USER_BSC
 		 WHERE DEL_YN = 'N'
 		   AND USER_ID = #{userId}
 	</select>
@@ -35,7 +35,7 @@
 	<!-- 사용자 권한정보 삭제 -->
 	<update id="deleteUserRole" parameterType="map">
 		/* UserMapper.deleteUserRole */
-		UPDATE irsuser.USER_ROLE_DTL
+		UPDATE USER_ROLE_DTL
 		   SET DEL_YN = 'Y'
 		     , MDFR_ID = #{sUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
@@ -47,11 +47,11 @@
 	<insert id="insertUserRole" parameterType="map">
 		<selectKey keyProperty="userRoleSn" resultType="int" order="BEFORE">
 			/* UserMapper.insertUserRole.selectKey */
-			SELECT COALESCE(MAX(USER_ROLE_SN), 0) + 1 FROM irsuser.USER_ROLE_DTL
+			SELECT COALESCE(MAX(USER_ROLE_SN), 0) + 1 FROM USER_ROLE_DTL
 		</selectKey>
 		/* UrmMapper.insertUserRole */
 		INSERT
-		  INTO irsuser.USER_ROLE_DTL
+		  INTO USER_ROLE_DTL
 		     ( USER_ID
 		     , ROLE_ID_MGNO
 		     , USER_ROLE_SN
@@ -70,7 +70,7 @@
 	<!-- 사용자 권한정보 변경 -->
 	<update id="updateUserRole" parameterType="map">
 		/* UserMapper.updateUserRole */
-		UPDATE irsuser.USER_ROLE_DTL
+		UPDATE USER_ROLE_DTL
 		   SET ROLE_ID_MGNO = #{newRoleIdMgno}
 		     , MDFR_ID = #{sUserId}
 		     , MDFCN_DT = CURRENT_TIMESTAMP
@@ -82,7 +82,7 @@
 	<!-- 사용자 로그인실패건수 저장 -->
 	<update id="updateUserLgnFailCnt" parameterType="gov.me.irs.core.client.vo.ClientVo">
 		/* UserMapper.updateUserLgnFailCnt */
-		UPDATE irsuser.USER_BSC
+		UPDATE USER_BSC
 		<if test='lgnScsYn != null and lgnScsYn.equals("Y")'><!-- 로그인성공시 실패건수 0 으로 UPDATE 처리 -->
 		   SET LGN_FAIL_CNT = 0
 		     , LGN_SCS_CNT = LGN_SCS_CNT + 1				/* 로그인성공횟수 */
@@ -97,7 +97,7 @@
 		 WHERE DEL_YN = 'N'
 		   AND USER_ID = (
 		   		SELECT U.USER_ID
-		   		  FROM irsuser.USER_BSC U
+		   		  FROM USER_BSC U
 		   		 WHERE U.LGN_ID = #{username}
 		   )
 	</update>
@@ -111,21 +111,15 @@
 						   , '0'
 					   )
 			   )
-		FROM irsuser.USER_BSC
-		WHERE LENGTH(USER_ID) = 10
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
-		<!-- TODO - 로그인ID가 이메일인 aaaaaa@gmail.com ~ hhhhhh@gmail.com 테스트데이터 삭제 이후 WHERE구문 제거 할 것 - 20231106131200 -->
+		FROM USER_BSC
 	</select>
 	
-	<!-- 사용자정보 생성 [USER_BSC] -->
+	<!-- 사용자정보 생성 [USER_BSC] - 미승인상태 사용자 생성 -->
+	<!-- 사용자관리에서 관리자직권으로 생성시 권한부여시점에 승인상태로 UPDATE처리 -->
 	<insert id="insertUser" parameterType="map">
 		/* UserMapper.insertUser */
 		INSERT
-		  INTO irsuser.USER_BSC
+		  INTO USER_BSC
 			 ( USER_ID                  /* 사용자ID */
 			 , INST_MGNO                /* 기관관리번호 */
 			 , USER_CL_CD               /* 사용자구분코드 */
@@ -146,23 +140,7 @@
 			 , EML_ID                   /* 이메일ID */
 			 , EML_ADDR                 /* 이메일주소 */
 			 , SMS_NTI_YN               /* sms알림여부 */
-			 , ACNT_RPRSV_YN            /* 계정대표자여부 */
 			 , ACNT_STTS_CL_CD          /* 계정상태구분코드 */
-	<if test='aprvYn != null and aprvYn.equals("")'>
-		<if test='aprvYn.equals("Y")'><!-- 승인처리여부 : 전체관리자가 사용자관리 메뉴에서 사용자등록시 발생함 -->
-			 , APRV_YMD
-		</if>
-	</if>
-			 , MHDLG_NTI_YN             /* 방법론알림여부 */
-			 , IRB_NTI_YN               /* 국제감축사업알림여부 */
-			 , RTADTI_SCSN_NTI_YN       /* 권리의무승계알림여부 */
-			 , IRP_NTI_YN               /* 국제감축실적알림여부 */
-			 , BFR_NTI_YN               /* 이전알림여부 */
-			 , DLNG_NTI_YN              /* 거래알림여부 */
-			 , SWOV_NTI_YN              /* 전환알림여부 */
-			 , RTRCN_NTI_YN             /* 취소알림여부 */
-			 , DSPS_NTI_YN              /* 처분알림여부 */
-			 , INFO_PRVT_NTI_YN         /* 정보비공개알림여부 */
 			 , DEL_YN                   /* 삭제여부 */
 			 , RGTR_ID                  /* 등록자ID */
 			 , REG_DT                   /* 등록일시 */
@@ -191,41 +169,49 @@
 			 , #{emlId}
 			 , #{emlAddr}
 			 , #{smsNtiYn}
-			 , #{acntRprsvYn}
-			 , #{acntSttsClCd}		/* [ASC0001|ASC0002|...] [미승인|승인|...] */
-	<if test='aprvYn != null and aprvYn.equals("")'>
-		<if test='aprvYn.equals("Y")'><!-- 승인처리여부 : 전체관리자가 사용자관리 메뉴에서 사용자등록시 발생함 -->
-			 , TO_CHAR(CURRENT_TIMESTAMP, 'yyyyMMdd')
-		</if>
-	</if>
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
-			 , 'N'
+			 , 'ASC0001'
 			 , 'N'
 			 , #{sUserId}
 			 , CURRENT_TIMESTAMP
-<choose>
-	<when test='sameInstMgnoYn != null and sameInstMgnoYn.equals("")'>
-		<if test='sameInstMgnoYn.equals("Y")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
-			 , #{instMgno}
-		</if>
-		<if test='sameInstMgnoYn.equals("N")'><!-- instMgno, upInstMgno 컬럼값이 동일하게 저장되어야 하는지에 대한 상태값 -->
 			 , #{upInstMgno}
-		</if>
-	</when>
-	<otherwise>
-			 , #{upInstMgno}
-	</otherwise>
-</choose>
 			 , 0
 			 , 0
 			 )
 	</insert>
+	
+	<!-- 로그인 아이디 중복 검색 체크 -->
+	<select id="selectLoginIdCnt" resultType="egovMap" parameterType="map">
+		/* UserMapper.selectLoginIdCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{lgnId} as LGN_ID
+		  FROM USER_BSC
+		 WHERE LGN_ID = #{lgnId}
+	</select>
+	
+	<!-- 사용자 계정상태변경 수정하기 -->
+	<!-- 사용자 휴대폰번호 수정하기 -->
+	<!-- 사용자 비밀번호 수정하기 -->
+	<!-- 정보관리 계정담당자 계정상태 수정하기 -->
+	<!-- 정보관리 계정담당자 계정구분 수정하기 -->
+	<update id="updateUser" parameterType="map">
+		/* UserMapper.updateUser */
+		UPDATE USER_BSC
+		   SET MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		<if test='type.equals("acntSttsClCd")'><!-- 계정상태변경 수정하기 -->
+		     , ACNT_STTS_CL_CD = #{acntSttsClCd}
+		</if>
+		<if test='type.equals("userClCd")'><!-- 계정구분 수정하기 -->
+		     , USER_CL_CD = #{userClCd}
+		</if>
+		<if test='type.equals("hdpon")'><!-- 휴대폰번호 수정하기 -->
+		     , HDPON_DDD = #{hdponDdd}
+		     , HDPON_TLPNO = #{hdponTlpno}
+		     , HDPON_PHINO = #{hdponPhino}
+		</if>
+		<if test='type.equals("encptPswd")'><!-- 비밀번호 수정하기 -->
+		     , PSWD = #{encptPswd}
+		</if>
+		 WHERE USER_ID = #{userId}
+	</update>
 </mapper>

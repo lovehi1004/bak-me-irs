@@ -57,6 +57,7 @@ public final class JwtConst {
 		public final static int NOT_ACCEPTABLE = 9406;
 		
 		public final static int SESSION_INVALID = 9500;
+		public final static int RSA_INVALID = 9600;
 		
 		public final static int UNKNOWN_ERROR = 9998;
 		public final static int AUTHENTICATION_UNKNOWN_ERROR = 9999;
@@ -77,16 +78,16 @@ public final class JwtConst {
 		 * 		- 범위 : 4000 ~ 4999
 		 * 
 		 */
-		public final static int FILE_NOT_FOUND = 4998;			/* TODO -라온K 개발 완료 후 제거 대상 - 20231204111000 */
-		public final static int FILE_UNKNOWN_ERROR = 4999;		/* TODO -라온K 개발 완료 후 제거 대상 - 20231204111000 */
+		public final static int FILE_NOT_FOUND = 4998;
+		public final static int FILE_UNKNOWN_ERROR = 4999;
 	}
 	
 	public final static class AUTH_MESSAGE {
 		
-		public final static String AUTHENTICATION_ACCESS_UNKNOWN_ERROR = "Access Token이 존재하지 않습니다.";
-		public final static String AUTHENTICATION_REFRESH_UNKNOWN_ERROR = "Refresh Token이 존재하지 않습니다.";
-		public final static String AUTHENTICATION_EXPIRED_TOKEN = "만료된 Token입니다.";
-		public final static String AUTHENTICATION_REFRESH_UNSUPPORTED_TOKEN = "변조된 Token입니다.";
+		public final static String AUTHENTICATION_ACCESS_UNKNOWN_ERROR = "인증정보가 존재하지 않습니다.";			/* Access Token */
+		public final static String AUTHENTICATION_REFRESH_UNKNOWN_ERROR = "인증정보가 존재하지 않습니다.";			/* Refresh Token */
+		public final static String AUTHENTICATION_EXPIRED_TOKEN = "만료된 인증정보 입니다.";
+		public final static String AUTHENTICATION_REFRESH_UNSUPPORTED_TOKEN = "변조된 인증정보 입니다.";
 		
 		public final static String AUTHENTICATION_EXTRA_ERROR_8011 = "만료 에러";
 		public final static String AUTHENTICATION_EXTRA_ERROR_8012 = "변조 에러";
@@ -114,6 +115,7 @@ public final class JwtConst {
 		public final static String NOT_ACCEPTABLE = "허용되지 않는 요청입니다.";
 		
 		public final static String SESSION_INVALID = "올바른 인증정보가 아닙니다.";
+		public final static String RSA_INVALID = "서버정보가 업데이트 되었습니다. 다시 시도해 주세요.";			/* 서버 리스타트 후 서버에서 관리되는 RSA정보가 초기화 되었을 경우 화면에 표시되는 메세지 */
 		
 		public final static String UNKNOWN_ERROR = "처리중 오류가 발생하였습니다.";
 		public final static String AUTHENTICATION_UNKNOWN_ERROR = "인증 처리중 오류가 발생하였습니다.";
@@ -124,8 +126,8 @@ public final class JwtConst {
 		public final static String MAX_UPLOAD_SIZE_EXCEEDED_EXCEPTION = "파일업로드 최대 허용 크기를 초과하였습니다";
 		public final static String BAD_UPLOAD_REQUEST = "잘못된 파일업로드 요청입니다.";
 		
-		public final static String FILE_NOT_FOUND = "파일다운로드 대상 파일이 존재하지 않습니다.";			/* TODO -라온K 개발 완료 후 제거 대상 - 20231204111000 */
-		public final static String FILE_UNKNOWN_ERROR = "파일다운로드 처리중 오류가 발생하였습니다.";		/* TODO -라온K 개발 완료 후 제거 대상 - 20231204111000 */
+		public final static String FILE_NOT_FOUND = "파일다운로드 대상 파일이 존재하지 않습니다.";
+		public final static String FILE_UNKNOWN_ERROR = "파일다운로드 처리중 오류가 발생하였습니다.";
 
 	}
 	

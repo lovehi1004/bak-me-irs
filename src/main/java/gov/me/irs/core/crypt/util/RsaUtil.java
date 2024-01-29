@@ -82,14 +82,15 @@ public final class RsaUtil {
      * @throws Exception
      */
 	public final static String decryptRsa(HttpSession session, String securedValue) throws Exception {
+		
 		PrivateKey privateKey = (PrivateKey) session.getAttribute(RsaUtil.RSA_WEB_KEY);
 		
-        Cipher cipher = Cipher.getInstance(RSA_INSTANCE);
-        byte[] encryptedBytes = hexToByteArray(securedValue);
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-        String decryptedValue = new String(decryptedBytes, "UTF-8"); // 문자 인코딩 주의.
-        return decryptedValue;
+		Cipher cipher = Cipher.getInstance(RSA_INSTANCE);
+		byte[] encryptedBytes = hexToByteArray(securedValue);
+		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+		String decryptedValue = new String(decryptedBytes, "UTF-8"); // 문자 인코딩 주의.
+		return decryptedValue;
 	}
 	
 	/**

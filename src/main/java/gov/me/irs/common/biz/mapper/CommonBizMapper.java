@@ -41,6 +41,14 @@ public interface CommonBizMapper {
 	int updateBizInst(Map<String, Object> requestMap);
 	
 	/**
+	 * 사업 권리의무승계 관장기관 정보 변경
+	 * 
+	 * @param requestMap
+	 * @return
+	 */	
+	int updateBizScsnInst(Map<String, Object> requestMap);
+	
+	/**
 	 * 방법론 관장기관 정보 변경
 	 * 
 	 * @param requestMap

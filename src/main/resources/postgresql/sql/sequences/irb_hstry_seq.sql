@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.irb_hstry_seq
+CREATE SEQUENCE irb_hstry_seq
 /******************************************************************************
-    프로그램명 : irsuser.irb_hstry_seq 
+    프로그램명 : irb_hstry_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.irb_hstry_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.IRB_HSTRY_SEQ')
+		▶ SELECT NEXTVAL('IRB_HSTRY_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.irb_hstry_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.irb_hstry_seq IS '국제감축사업이력 이력일련번호 시퀀스';
+COMMENT ON SEQUENCE irb_hstry_seq IS '국제감축사업이력 이력일련번호 시퀀스';

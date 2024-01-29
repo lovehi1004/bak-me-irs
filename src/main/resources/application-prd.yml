@@ -3,9 +3,9 @@
 spring:
   datasource:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    url: jdbc:log4jdbc:postgresql://아이피:포트/디비이름
-    username: 유저
-    password: 패스워드
+    url: ENC(3j1QNdwp8YDDKIerIRMD40I0NzaBA8gEqrBNSwBU952fucn+wsZjTv7+M8gqnx+cXopKSghKMixxtEjhoC7t+g==)
+    username: ENC(0EsFFMcbg5J6blwaKygShA==)
+    password: ENC(AIx6awkAbiAZyPaRapcmYAzx90iZjzrk)
     hikari:
       pool-name: irsHikari
       # 유휴 connection - 5개
@@ -22,5 +22,4 @@ spring:
 
 ##########################################################################################
 --- # jasypt
-jasypt.encryptor.password: jasypt패스워드
-    
+jasypt.encryptor.password: 1234567890QWERTYUIOPASDFGHJKLZXCVBNM30987654321

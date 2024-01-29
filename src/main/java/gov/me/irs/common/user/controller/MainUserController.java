@@ -33,14 +33,14 @@ public class MainUserController {
 	 * @return
 	 */
 	@PostMapping("/common/main/user/checkLoginId.irs")
-	public NexacroResult checkLoginId(@ParamDataSet(name = "dsCheckUserInfo") Map<String, Object> dsCheckUserInfo) {
+	public NexacroResult checkLoginId(@ParamDataSet(name = "dsCheckInfo") Map<String, Object> dsCheckInfo) {
 		log.debug("[■■■■■■■■■■▶][invoked!][{}]", new Object() {}.getClass().getEnclosingMethod().getName());
 
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		Map<String, Object> resultMap = mainUserService.selectLoginIdCnt(dsCheckUserInfo);
+		Map<String, Object> resultMap = mainUserService.selectLoginIdCnt(dsCheckInfo);
 		
-		nexacroResult.addDataSet("dsCheckUserInfo", resultMap);
+		nexacroResult.addDataSet("dsCheckInfo", resultMap);
 		
 		return nexacroResult;
 	}
@@ -50,22 +50,11 @@ public class MainUserController {
 	 * 
 	 * @param dsInstInfo - 사업체정보
 	 * @param dsUserInfo - 사용자정보
-	 * @param dsInstInfoFile - 첨부파일정보
 	 * @return
 	 * @throws Exception
 	 */
-	/**
-	 * 메인 > 사용자 > 회원가입 > 회원가입신청
-	 * 
-	 * @param dsInstInfo - 사업체정보
-	 * @param dsUserInfo - 사용자정보
-	 * @param dsInstInfoFile - 사업체정보 > 첨부파일정보
-	 * @param dsBrdocFlmnoFile - 공통파일정보
-	 * @return
-	 * @throws Exception
-	 */
-	@PostMapping("/common/main/user/insertUser.irs")
-	public NexacroResult insertUser(@ParamDataSet(name = "dsInstInfo") Map<String, Object> dsInstInfo
+	@PostMapping("/common/main/user/insertAply.irs")
+	public NexacroResult insertAply(@ParamDataSet(name = "dsInstInfo") Map<String, Object> dsInstInfo
 			, @ParamDataSet(name = "dsUserInfo") Map<String, Object> dsUserInfo
 			, @ParamDataSet(name = "dsInstInfoFile") Map<String, Object> dsInstInfoFile
 			, @ParamDataSet(name = "dsBrdocFlmnoFile") List<Map<String, Object>> dsBrdocFlmnoFile) throws Exception {
@@ -78,7 +67,26 @@ public class MainUserController {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		mainUserService.insertUser(dsInstInfo, dsUserInfo, dsInstInfoFile, dsBrdocFlmnoFile);
+		mainUserService.insertAply(dsInstInfo, dsUserInfo, dsInstInfoFile, dsBrdocFlmnoFile);
+
+		
+		return nexacroResult;
+	}
+	
+	/**
+	 * 메인 > 사용자 > 아이디/비밀번호 찾기
+	 * 
+	 * @param dsSrh
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping("/common/main/user/find.irs")
+	public NexacroResult find(@ParamDataSet(name = "dsSrh") Map<String, Object> dsSrh) throws Exception{
+		NexacroResult nexacroResult = new NexacroResult();
+		
+		Map<String, Object> resultMap = mainUserService.find(dsSrh);
+		
+		nexacroResult.addDataSet("dsResult", resultMap);
 		
 		return nexacroResult;
 	}

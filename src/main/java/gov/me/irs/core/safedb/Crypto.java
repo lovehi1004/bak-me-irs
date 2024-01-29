@@ -1,11 +1,14 @@
 package gov.me.irs.core.safedb;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Component;
 
 import com.initech.safedb.SimpleSafeDB;
 import com.initech.safedb.sdk.exception.SafeDBSDKException;
 
 import gov.me.irs.core.config.property.SafeDBProperties;
+import gov.me.irs.core.crypt.util.RsaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 public final class Crypto {
 	
 	private final SafeDBProperties p;
+	
+	private final HttpSession session;
 	
 	/**
 	 * 암호화
@@ -107,5 +112,19 @@ public final class Crypto {
 	 */
 	public String encryptSHA(String plainData) throws SafeDBSDKException {
 		return this.encrypt(p.oneWayName, plainData);
+	}
+	
+	/**
+	 * 단방향 암호화 - SHA256
+	 * 
+	 * @param plainData
+	 * @return
+	 * @throws Exception 
+	 * @throws SafeDBSDKException
+	 */
+	public String encryptRsaToSHA(String plainRsa) throws Exception {
+		/* 2. 비밀번호 RSA 복호화 */
+		String plainData = RsaUtil.decryptRsa(session, plainRsa);
+		return this.encryptSHA(plainData);
 	}
 }

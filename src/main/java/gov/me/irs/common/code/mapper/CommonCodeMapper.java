@@ -30,7 +30,7 @@ public interface CommonCodeMapper {
 	 * @param requestMap
 	 * @return
 	 */
-	List<Map<String, Object>> selectBizDtlsFldList();
+	List<Map<String, Object>> selectBizDtlFldList();
 	
 	/**
 	 * [공통] 사업 세부분야 조회

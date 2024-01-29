@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.msg_dtl_hstry_seq
+CREATE SEQUENCE msg_dtl_hstry_seq
 /******************************************************************************
-    프로그램명 : irsuser.msg_dtl_hstry_seq 
+    프로그램명 : msg_dtl_hstry_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.msg_dtl_hstry_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.MSG_DTL_HSTRY_SEQ')
+		▶ SELECT NEXTVAL('MSG_DTL_HSTRY_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.msg_dtl_hstry_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.msg_dtl_hstry_seq IS '메세지상세이력 이력일련번호 시퀀스';
+COMMENT ON SEQUENCE msg_dtl_hstry_seq IS '메세지상세이력 이력일련번호 시퀀스';

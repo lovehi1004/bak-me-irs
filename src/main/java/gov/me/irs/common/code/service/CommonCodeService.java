@@ -76,8 +76,8 @@ public class CommonCodeService {
 	 * @return
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public List<Map<String, Object>> selectBizDtlsFldList() {
-		return commonCodeMapper.selectBizDtlsFldList();
+	public List<Map<String, Object>> selectBizDtlFldList() {
+		return commonCodeMapper.selectBizDtlFldList();
 	}
 	
 	/**

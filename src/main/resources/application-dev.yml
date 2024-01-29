@@ -3,9 +3,13 @@
 spring:
   datasource:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    url: ENC(Sb2I3TheMFFLL6gNQhGlb13vji7bX7vJFjjcn43ttHySRrZLywLpKxF4pKbX864wuHVMDDKIPkFySsADJxY1gg==)
-    username: ENC(M844TzV46J5wj5Ew/r4ic/3MR1nVKzZ4)
-    password: ENC(+cbQdTVbVm7yVC7UWfy+WoPQ9S11OF0P)
+    # jdbc:log4jdbc:postgresql://127.0.0.1:15432/postgres
+    url: ENC(mXC8GElHIxRrSxv/1vk9Nl61oXiRa/fWywB1WQdxGcLzSK4tZCfVKMAZWBLYFncfeIqhLunBXn7XXVZbi/typw==)
+    # username : girirs
+    # username: ENC(5rXPK8Q2mzZXv8TFCm79VA==)
+    # username : devgirirs
+    username: ENC(XklR2sthimLQStiQ6EfQD69bBPvRFNnr)
+    password: ENC(oWBsc9H2AiE9ONt0bB3jHkBxaaFNX+AC)
     hikari:
       pool-name: irsHikari
       # 유휴 connection - 5개

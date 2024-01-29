@@ -41,8 +41,8 @@ public class CommonCodeController {
 			
 			if(srhCd.equals("dsBizFldCd")) {
 				nexacroResult.addDataSet("dsBizFldCd", commonCodeService.selectBizFldList());			//사업분야 조회		
-			}else if(srhCd.equals("dsBizDtlsFldCd")) {
-				nexacroResult.addDataSet("dsBizDtlsFldCd", commonCodeService.selectBizDtlsFldList());	//사업 세부분야 조회
+			}else if(srhCd.equals("dsBizDtlFldCd")) {
+				nexacroResult.addDataSet("dsBizDtlFldCd", commonCodeService.selectBizDtlFldList());	//사업 세부분야 조회
 			}else if(srhCd.equals("dsInstCd")) {
 				nexacroResult.addDataSet("dsInstCd", commonCodeService.selectMnofcCdList());		//관장기관 조회 
 			}else if(srhCd.equals("dsNtnCd")) {

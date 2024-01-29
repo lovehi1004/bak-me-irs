@@ -100,19 +100,6 @@ public class SecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain nexacroFilterChain(HttpSecurity http) throws Exception {
-		
-		
-		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
-		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
-		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
-		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
-		log.debug("[비밀번호암호화 테스트][1234][{}]", crypto.encryptSHA("1234"));
-		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
-		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
-		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
-		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
-		log.debug("[비밀번호암호화 테스트][ictway12!][{}]", crypto.encryptSHA("ictway12!"));
-		
 		log.info("Spring Security START !");
 		
 		http.csrf().disable();
@@ -151,6 +138,8 @@ public class SecurityConfig {
                 .antMatchers("/common/initial/selectGroupCodeList.irs").permitAll()			/* URL고정 - [모두허용] - 그롭코드 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
                 .antMatchers("/common/initial/selectCodeList.irs").permitAll()				/* URL고정 - [모두허용] - 코드상세 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
                 .antMatchers("/common/initial/selectErrorMessegeList.irs").permitAll()		/* URL고정 - [모두허용] - 오류메세지 목록 조회, 넥사크로에서 주로 사용하는 load 대상 초기데이터 */
+                
+                .antMatchers("/common/main/**").permitAll()									/* URL고정 - [모두허용] - [사용자] 메인 > 회원가입 관련 */
                 
                 .antMatchers("/common/pop/**").permitAll()									/* URL고정 - [모두허용] - [사용자] 공통 */
                 

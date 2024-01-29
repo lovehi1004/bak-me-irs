@@ -1,6 +1,6 @@
-CREATE SEQUENCE irsuser.com_file_group_bsc_seq
+CREATE SEQUENCE com_file_group_bsc_seq
 /******************************************************************************
-    프로그램명 : irsuser.com_file_group_bsc_seq 
+    프로그램명 : com_file_group_bsc_seq 
       수행목적 : 시쿼스 조회 후 반환한다.
       수행결과 : 시쿼스 반환
  ------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ CREATE SEQUENCE irsuser.com_file_group_bsc_seq
  ------------------------------------------------------------------------------
 	Ex.> 예시     
 	1. 시퀀스 조회
-		▶ SELECT NEXTVAL('IRSUSER.COM_FILE_GROUP_BSC_SEQ')
+		▶ SELECT NEXTVAL('COM_FILE_GROUP_BSC_SEQ')
  ******************************************************************************/
 	INCREMENT BY 1
 	MINVALUE 1
@@ -19,4 +19,4 @@ CREATE SEQUENCE irsuser.com_file_group_bsc_seq
 	CACHE 1
 	NO CYCLE;
 	
-COMMENT ON SEQUENCE irsuser.com_file_group_bsc_seq IS '파일그룹관리번호 시퀀스';	
+COMMENT ON SEQUENCE com_file_group_bsc_seq IS '파일그룹관리번호 시퀀스';	

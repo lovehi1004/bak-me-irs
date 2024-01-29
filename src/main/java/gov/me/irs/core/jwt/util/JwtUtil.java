@@ -1,5 +1,7 @@
 package gov.me.irs.core.jwt.util;
 
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 
 import gov.me.irs.core.user.enumeration.RoleEnum;
@@ -46,5 +48,17 @@ public final class JwtUtil {
 		return roleEnum;
 		
 	}
+	
+	/**
+	 * 임시 비밀번호 발급하기
+	 * 	- 15자리
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String getTemporaryPassword() throws Exception {
+		return UUID.randomUUID().toString().replace("-", "").substring(0, 15);
+	}
+	
 	
 }

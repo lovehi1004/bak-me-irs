@@ -22,7 +22,6 @@ public class CommonBoardController {
 
 	private final CommonBoardService commonBoardService;
 	
-	
 	/**
 	 * [공통] 게시판(공지사항, 자료실, FAQ, 법령과 지침) 조회
 	 *
@@ -60,11 +59,11 @@ public class CommonBoardController {
 	 * @return
 	 */
 	@PostMapping("/common/board/selectBoardListLogin.irs")
-	public NexacroResult selectBoardListLogin(){
+	public NexacroResult selectBoardListLogin(@ParamDataSet(name = "dsSrh") Map<String, Object> dsSrh){
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		nexacroResult.addDataSet("dsList", commonBoardService.selectBoardListLogin());
+		nexacroResult.addDataSet("dsList", commonBoardService.selectBoardListLogin(dsSrh));
 		
 		return nexacroResult;
 	}
@@ -167,4 +166,85 @@ public class CommonBoardController {
 		return nexacroResult;
 	}
 	
+	/**
+	 * [공통] 메인화면 위젯 -> 협정
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/common/board/selectAgrCnt.irs")
+	public NexacroResult selectAgrCnt() throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsAgrCnt", commonBoardService.selectAgrCnt());
+		return nexacroResult;
+	}
+	
+	/**
+	 * [공통] 로그인 전 위젯 -> 협정
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/common/board/selectMainAgrCnt.irs")
+	public NexacroResult selectMainAgrCnt() throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsAgrCnt", commonBoardService.selectAgrCnt());
+		return nexacroResult;
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 방법론
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/biz/board/selectMhdlgCnt.irs")
+	public NexacroResult selectMhdlgCnt() throws Exception {
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsMhdlgCnt", commonBoardService.selectUsrInfo());
+		return nexacroResult;
+	}
+	
+	/**
+	 * [공통] 로그인 전 위젯 -> 방법론
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/common/board/selectMainMhdlgCnt.irs")
+	public NexacroResult selectMainMhdlgCnt() throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsMhdlgCnt", commonBoardService.selectMainMhdlgCnt());
+		return nexacroResult;
+	}
+	
+	/**
+	 * 메인화면 위젯 -> 사업
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/biz/board/selectBizCnt.irs")
+	public NexacroResult selectBizCnt() throws Exception {
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsBizCnt", commonBoardService.selectBizCnt());
+		return nexacroResult;
+	}
+	
+	/**
+	 * [공통] 로그인 전 위젯 -> 사업
+	 *
+	 * @param requestMap
+	 * @return
+	 */
+	@PostMapping("/common/board/selectMainBizCnt.irs")
+	public NexacroResult selectMainBizCnt() throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		nexacroResult.addDataSet("dsBizCnt", commonBoardService.selectMainBizCnt());
+		return nexacroResult;
+	}
 }

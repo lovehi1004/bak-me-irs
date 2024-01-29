@@ -115,7 +115,7 @@ public class CommonBizService {
 			log.debug(">>> menu : " + menu);
 			
 			// 사업인 경우
-			if("BIZ".equals(menu)) {
+			if("BIZ".equals(menu) || "SCSN".equals(menu)) {
 				dsInfo = commonBizMapper.selectBizInstInfo(dsSrh);
 			}
 			// 방법론인 경우
@@ -156,6 +156,31 @@ public class CommonBizService {
 					
 					// 관장기관 코드 업데이트
 					commonBizMapper.updateBizInst(dsSrh);
+					
+					Map<String, Object> map = commonBizMapper.selectInstMgno(dsSrh);
+					
+					String bzentNm = "";
+					if(map != null) {
+						bzentNm = map.get("bzentNm")==null?"":(String)map.get("bzentNm");
+					}
+					
+					// 이력 기록
+					Map<String, Object> hstryMap = new HashMap<String, Object>();
+					hstryMap.put("bizMngNo", mngNo);
+					hstryMap.put("bizDgr", dgr);
+					hstryMap.put("hstryTypeCd", "BHT0001");		// 관장기관 지정
+					hstryMap.put("hstryRsltCd", "");			// 
+					hstryMap.put("hstryDtlRsn", bzentNm);	// 관장기관 명칭 지정
+					hstryMap = this.setSqlMap(authMap, hstryMap);
+					
+					commonBizMapper.insertIrbHstry(hstryMap);
+					
+				}
+				// 사업 - 권리의무승계인 경우
+				else if("SCSN".equals(menu)) {
+					
+					// 관장기관 코드 업데이트
+					commonBizMapper.updateBizScsnInst(dsSrh);
 					
 					Map<String, Object> map = commonBizMapper.selectInstMgno(dsSrh);
 					

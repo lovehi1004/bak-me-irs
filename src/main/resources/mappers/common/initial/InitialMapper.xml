@@ -11,16 +11,18 @@
 			 , U.UP_INST_MGNO						/* 사용자기본 - 상위기관관리번호 */
 			 , U.INST_MGNO							/* 사용자기본 - 기관관리번호 */
 			 , U.USER_CL_CD							/* 사용자기본 - 사용자구분코드 */
-			 , irsuser.fn_get_codenm('USER_CL_CD', U.USER_CL_CD)              AS USER_CL_CD_NM					/* 사용자구분코드명 */
+			 , fn_get_codenm('USER_CL_CD', U.USER_CL_CD)              AS USER_CL_CD_NM					/* 사용자구분코드명 */
 			 , U.FLNM								/* 사용자기본 - 성명 */
 			 , U.DEPT_NM							/* 사용자기본 - 부서명 */
 			 , U.JBPS_NM							/* 사용자기본 - 직위명 */
 			 , U.TEL_DDD							/* 사용자기본 - 전화지역번호 */
 			 , U.TEL_TLPNO							/* 사용자기본 - 전화국번호 */
 			 , U.TEL_PHINO							/* 사용자기본 - 전화개별번호 */
-			 , U.ACNT_RPRSV_YN						/* 사용자기본 - 계정대표자여부 */
+			 , CASE WHEN U.USER_CL_CD = 'UCC0005' THEN 'Y'
+			 		ELSE 'N'
+			   END AS ACNT_RPRSV_YN					/* 사용자기본 - 계정대표자여부 */
 			 , I.INST_CLSF_CD						/* 기관기본 - 기관분류코드 */
-			 , I.INST_DTLS_CLSF_CD					/* 기관기본 - 기관세부분류코드 */
+			 , I.INST_DTL_CLSF_CD					/* 기관기본 - 기관세부분류코드 */
 			 , I.GOV_INST_YN						/* 기관기본 - 정부기관여부 */
 			 , I.BZENT_NM							/* 기관기본 - 사업체명 */
 			 , I.BZENT_CL_CD						/* 기관기본 - 사업체구분코드 */
@@ -28,12 +30,12 @@
 			 , #{roleIdMgno} AS ROLE_ID_MGNO		/* 사용자접속 권한정보 */
 			 , ARRAY_TO_STRING((
 			 	SELECT ARRAY_AGG(RD.ROLE_ID_MGNO)
-			 	  FROM irsuser.USER_ROLE_DTL RD
+			 	  FROM USER_ROLE_DTL RD
 			 	 WHERE RD.USER_ID = #{userId}
 			 	   AND RD.DEL_YN = 'N'
 			 ), '|') AS ROLE_ID_MGNO_LIST			/* 권한목록 - 사용자에 할당된 모든 권한ID, 권한상시 전환시 사용 할 것 */
-		  FROM irsuser.USER_BSC U
-		 INNER JOIN irsuser.INST_BSC I
+		  FROM USER_BSC U
+		 INNER JOIN INST_BSC I
 		    ON I.INST_MGNO = U.INST_MGNO
 		   AND U.USER_ID = #{userId}
 		 WHERE U.DEL_YN = 'N'
@@ -66,16 +68,16 @@
 			 , ARRAY_TO_STRING(ARRAY_REMOVE(ARRAY_REMOVE(W.MENU_PATH, W.MENU_PATH[ARRAY_LENGTH(W.MENU_PATH, 1)]), W.MENU_PATH[1]), ' > ') AS MENU_PATH
 			 , REPLACE(REPLACE(W.MENU_NM, ' ', ''), '.', '') AS SRCH_MENU_NM
 		  FROM WITH_MENU_LIST W
-		 INNER JOIN irsuser.MENU_ROLE_DTL MR
+		 INNER JOIN MENU_ROLE_DTL MR
 		    ON MR.MENU_MGNO = W.MENU_MGNO
 		   AND MR.ROLE_ID_MGNO = #{roleKey}
 		   AND MR.DEL_YN = 'N'
-		 INNER JOIN irsuser.USER_ROLE_DTL UR
+		 INNER JOIN USER_ROLE_DTL UR
 		    ON UR.USER_ID = #{userId}
 		   AND UR.ROLE_ID_MGNO = MR.ROLE_ID_MGNO
 		   AND UR.DEL_YN = 'N'
 		 WHERE W.MENU_LVL > 0
-		 ORDER BY W.PTH
+		 ORDER BY W.SORT_PATH
 	</select>
 	
 	<!-- 그룹코드 목록 조회 -->
@@ -85,8 +87,8 @@
 			 , GC.GROUP_CD_ENG_NM				/* 그룹코드영문명 */
 			 , GC.GROUP_CD_KORN_NM				/* 그룹코드한글명 */
 			 , GC.CD_REG_LMT_CNT				/* 코드등록제한수 */
-			 , (SELECT COUNT(*) FROM irsuser.COM_CD_DTL CD WHERE CD.GROUP_CD_MGNO = GC.GROUP_CD_MGNO) AS CD_CNT			/* 코드건수 */
-		  FROM irsuser.COM_GROUP_CD_BSC GC
+			 , (SELECT COUNT(*) FROM COM_CD_DTL CD WHERE CD.GROUP_CD_MGNO = GC.GROUP_CD_MGNO) AS CD_CNT			/* 코드건수 */
+		  FROM COM_GROUP_CD_BSC GC
 		 WHERE 1 = 1
 		<if test="delYn != null and !delYn.equals('')">
 		   AND GC.DEL_YN = #{delYn}
@@ -102,8 +104,8 @@
 			 , CD.CD_ENG_NM					/* 코드영문명 */
 			 , CD.CD_KORN_NM				/* 코드한글명 */
 			 , CD.SORT_SEQO					/* 정렬순서 */	
-		  FROM irsuser.COM_GROUP_CD_BSC GC
-		 INNER JOIN irsuser.COM_CD_DTL CD
+		  FROM COM_GROUP_CD_BSC GC
+		 INNER JOIN COM_CD_DTL CD
 		    ON CD.GROUP_CD_MGNO = GC.GROUP_CD_MGNO
 		   AND GC.GROUP_CD_MGNO IN
 			<foreach item="item" index="index" collection="groupCodeSet" open="(" close=")" separator=",">
@@ -125,7 +127,7 @@
 			 , ERR_MSG_NM					/* 오류메시지명 */
 			 , INPT_CNT						/* 입력수 */	
 			 , USE_YN						/* 사용여부 */
-		  FROM irsuser.COM_ERR_MSG_BSC
+		  FROM COM_ERR_MSG_BSC
 		 WHERE 1 = 1
 		<if test="delYn != null and !delYn.equals('')">
 		   AND DEL_YN = #{delYn}

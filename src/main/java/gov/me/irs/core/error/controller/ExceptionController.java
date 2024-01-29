@@ -47,7 +47,7 @@ public class ExceptionController {
 	@RequestMapping("/exception/common/{exception}")
 	public NexacroResult exceptionCommon(@PathVariable("exception") int exception, HttpServletRequest request){
 		
-		log.error("▶▶▶▶▶▶▶▶▶▶ [exception][ Controller 공통 예외발생 ]");
+		log.error("▶▶▶▶▶▶▶▶▶▶ [exception][ Controller 공통 예외발생 ]["+(String.valueOf(exception))+"]");
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
@@ -66,6 +66,9 @@ public class ExceptionController {
 		} else if(exception == JwtAuthEnum.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED.getCode()) {
 			log.error("[AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED]");
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.FORBIDDEN, JwtAuthEnum.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED));
+		} else if(exception == JwtAuthEnum.RSA_INVALID.getCode()) {				/* RSA 예외처리 */
+			log.error("[RSA_INVALID]");
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.INTERNAL_SERVER_ERROR, JwtAuthEnum.RSA_INVALID));
 		} else {
 			Throwable cause = !ObjectUtils.isEmpty(request.getAttribute("cause")) ? (Throwable) request.getAttribute("cause") : null;
 			log.error("[ETC][cause]["+cause+"]");

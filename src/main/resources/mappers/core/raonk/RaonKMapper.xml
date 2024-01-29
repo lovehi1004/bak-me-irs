@@ -21,8 +21,8 @@
 			 , TO_CHAR(DTL.REG_DT, 'yyyy-MM-dd') AS REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irsuser.COM_FILE_GROUP_BSC GRP
-		 INNER JOIN irsuser.COM_FILE_DTL DTL
+		  FROM COM_FILE_GROUP_BSC GRP
+		 INNER JOIN COM_FILE_DTL DTL
 		    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
 		   AND GRP.FILE_GROUP_MGNO = #{fileGroupMgno}
 		   AND GRP.DEL_YN = 'N'
@@ -73,8 +73,8 @@
 					 , X.SORT_NO
 					 , COUNT(*) OVER(PARTITION BY DTL.ORGNL_FILE_NM) AS FILE_CNT
 					 , ROW_NUMBER() OVER(PARTITION BY DTL.ORGNL_FILE_NM) AS RN
-				  FROM irsuser.COM_FILE_GROUP_BSC GRP
-				 INNER JOIN irsuser.COM_FILE_DTL DTL
+				  FROM COM_FILE_GROUP_BSC GRP
+				 INNER JOIN COM_FILE_DTL DTL
 				    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
 				   AND GRP.DEL_YN = 'N'
 				 INNER JOIN (
@@ -93,15 +93,34 @@
 		 ORDER BY U.SORT_NO
 	</select>
 	
+	<!-- 파일그룹일련번호 채번 -->
+	<select id="selectFileGroupMgno" resultType="string">
+		/* RaonKMapper.selectFileGroupMgno */
+		SELECT TO_CHAR(CURRENT_TIMESTAMP, 'yy') || LPAD(CAST(NEXTVAL('COM_FILE_GROUP_BSC_SEQ') AS TEXT), 10 - 2, '0')
+	</select>
+	
+	<!-- 파일일련번호 채번 -->
+	<select id="selectFileMgno" resultType="string" parameterType="string">
+		/* RaonKMapper.selectFileMgno */
+		SELECT CONCAT( 'FD'
+					 , LPAD( CAST(CAST(COALESCE(MAX(SUBSTRING(FILE_MGNO, (2 + 1), 10)), '0') AS INTEGER) + 1 AS TEXT)
+						   , 10 - 2
+						   , '0'
+					   )
+			   )
+		FROM COM_FILE_DTL
+	   WHERE FILE_GROUP_MGNO = #{value}
+	</select>
+	
 	<!-- 파일그룹정보 생성 -->
 	<insert id="insertFileGroup" parameterType="gov.me.irs.common.file.vo.RaonKFileGroupVo">
 		<selectKey keyProperty="fileGroupMgno" resultType="string" order="BEFORE">
 			/* RaonKMapper.insertFileGroup.selectKey */
-			SELECT TO_CHAR(CURRENT_TIMESTAMP, 'yy') || LPAD(CAST(NEXTVAL('IRSUSER.COM_FILE_GROUP_BSC_SEQ') AS TEXT), 10 - 2, '0')
+			SELECT TO_CHAR(CURRENT_TIMESTAMP, 'yy') || LPAD(CAST(NEXTVAL('COM_FILE_GROUP_BSC_SEQ') AS TEXT), 10 - 2, '0')
 		</selectKey>
 		/* RaonKMapper.insertFileGroup */
 		INSERT
-		  INTO irsuser.COM_FILE_GROUP_BSC
+		  INTO COM_FILE_GROUP_BSC
 		  	 ( FILE_GROUP_MGNO
 			 , FILE_TYPE_CL_CD
 			 , MENU_MGNO
@@ -129,12 +148,12 @@
 							   , '0'
 						   )
 				   )
-			FROM irsuser.COM_FILE_DTL
+			FROM COM_FILE_DTL
 		   WHERE FILE_GROUP_MGNO = #{fileGroupMgno}
 		</selectKey>
 		/* RaonKMapper.insertFileDtl */
 		INSERT
-		  INTO irsuser.COM_FILE_DTL
+		  INTO COM_FILE_DTL
 		  	 ( FILE_GROUP_MGNO
 			 , FILE_MGNO
 			 , ORGNL_FILE_NM
@@ -165,7 +184,7 @@
 	<!-- 기존 파일 삭제 - UPDATE - DEL_YN = 'Y' 처리 -->
 	<update id="deleteFile" parameterType="gov.me.irs.common.file.vo.RaonKFileVo">
 		/* RaonKMapper.deleteFile */
-		UPDATE irsuser.COM_FILE_DTL
+		UPDATE COM_FILE_DTL
 		   SET DEL_YN = 'Y'
 			 , MDFR_ID = #{mdfrId}
 			 , MDFCN_DT = CURRENT_TIMESTAMP
@@ -189,8 +208,8 @@
 			 , TO_CHAR(DTL.REG_DT, 'yyyy-MM-dd') AS REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irsuser.COM_FILE_GROUP_BSC GRP
-		 INNER JOIN irsuser.COM_FILE_DTL DTL
+		  FROM COM_FILE_GROUP_BSC GRP
+		 INNER JOIN COM_FILE_DTL DTL
 		    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
 		   AND GRP.FILE_GROUP_MGNO = #{fileGroupMgno}
 		   AND GRP.DEL_YN = 'N'
@@ -200,7 +219,7 @@
 	<!-- 파일정보 최종저장처리 -->
 	<update id="saveFile" parameterType="gov.me.irs.common.file.vo.RaonKFileVo">
 		/* RaonKMapper.saveFile */
-		UPDATE irsuser.COM_FILE_DTL
+		UPDATE COM_FILE_DTL
 		   SET DEL_YN = 'N'
 			 , FILE_PATH = #{filePath}
 			 , MDFR_ID = #{mdfrId}
@@ -212,7 +231,7 @@
 	<!-- 다운로드수 UPDATE 처리 -->
 	<update id="updateDwldCount" parameterType="gov.me.irs.common.file.vo.RaonKFileVo">
 		/* RaonKMapper.updateDwldCount */
-		UPDATE irsuser.COM_FILE_DTL
+		UPDATE COM_FILE_DTL
 		   SET DWNLD_CNT = DWNLD_CNT + 1		<!-- 다운로드시에는 다운로드 수만 증가시칸다 -->
 		 WHERE FILE_GROUP_MGNO = #{fileGroupMgno}
 		   AND FILE_MGNO = #{fileMgno}
@@ -222,11 +241,11 @@
 	<insert id="insertCloneFileGroup" parameterType="gov.me.irs.common.file.vo.RaonKFileGroupVo">
 		<selectKey keyProperty="fileGroupMgno" resultType="string" order="BEFORE">
 			/* RaonKMapper.insertCloneFileGroup.selectKey */
-			SELECT TO_CHAR(CURRENT_TIMESTAMP, 'yy') || LPAD(CAST(NEXTVAL('IRSUSER.COM_FILE_GROUP_BSC_SEQ') AS TEXT), 10 - 2, '0')
+			SELECT TO_CHAR(CURRENT_TIMESTAMP, 'yy') || LPAD(CAST(NEXTVAL('COM_FILE_GROUP_BSC_SEQ') AS TEXT), 10 - 2, '0')
 		</selectKey>
 		/* RaonKMapper.insertCloneFileGroup */
 		INSERT
-		  INTO irsuser.COM_FILE_GROUP_BSC
+		  INTO COM_FILE_GROUP_BSC
 		  	 ( FILE_GROUP_MGNO
 			 , FILE_TYPE_CL_CD
 			 , MENU_MGNO
@@ -240,7 +259,7 @@
 			 , GRP.DEL_YN
 			 , #{rgtrId}
 			 , CURRENT_TIMESTAMP
-		  FROM irsuser.COM_FILE_GROUP_BSC GRP
+		  FROM COM_FILE_GROUP_BSC GRP
 		 WHERE GRP.FILE_GROUP_MGNO = #{sourceFileGroupMgno}
 	</insert>
 	
@@ -248,7 +267,7 @@
 	<insert id="insertCloneFileDtl" parameterType="gov.me.irs.common.file.vo.RaonKFileGroupVo">
 		/* RaonKMapper.insertCloneFileDtl */
 		INSERT
-		  INTO irsuser.COM_FILE_DTL
+		  INTO COM_FILE_DTL
 		  	 ( FILE_GROUP_MGNO
 			 , FILE_MGNO
 			 , ORGNL_FILE_NM
@@ -272,7 +291,7 @@
 			 , DTL.DEL_YN
 			 , #{rgtrId}
 			 , CURRENT_TIMESTAMP
-		  FROM irsuser.COM_FILE_DTL DTL
+		  FROM COM_FILE_DTL DTL
 		 WHERE DTL.FILE_GROUP_MGNO = #{sourceFileGroupMgno}
 		   AND DTL.DEL_YN = 'N'
 	</insert>
@@ -294,8 +313,8 @@
 			 , DTL.REG_DT
 			 , DTL.MDFR_ID
 			 , DTL.MDFCN_DT
-		  FROM irsuser.COM_FILE_GROUP_BSC GRP
-		 INNER JOIN irsuser.COM_FILE_DTL DTL
+		  FROM COM_FILE_GROUP_BSC GRP
+		 INNER JOIN COM_FILE_DTL DTL
 		    ON DTL.FILE_GROUP_MGNO = GRP.FILE_GROUP_MGNO
 		   AND GRP.FILE_GROUP_MGNO = #{fileGroupMgno}
 		   AND GRP.DEL_YN = 'N'
@@ -306,9 +325,76 @@
 	<!-- 차수 생성 전용 파일상세 물리파일명 수정하기 -->
 	<update id="updateCloneFileNm" parameterType="gov.me.irs.common.file.vo.RaonKFileVo">
 		/* RaonKMapper.updateCloneFileNm */
-		UPDATE irsuser.COM_FILE_DTL
+		UPDATE COM_FILE_DTL
 		   SET FILE_NM = #{cloneFileNm}
 		 WHERE FILE_GROUP_MGNO = #{fileGroupMgno}
 		   AND FILE_MGNO = #{fileMgno}
 	</update>
+	
+	
+	
+	
+	
+	<!-- 새로운 파일그룹정보 생성 -->
+	<insert id="insertNewFileGroup" parameterType="gov.me.irs.common.file.vo.RaonKFileGroupVo">
+		/* RaonKMapper.insertNewFileGroup */
+		INSERT
+		  INTO COM_FILE_GROUP_BSC
+		  	 ( FILE_GROUP_MGNO
+			 , FILE_TYPE_CL_CD
+			 , MENU_MGNO
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+		SELECT #{newFileGroupMgno}
+			 , GRP.FILE_TYPE_CL_CD
+			 , GRP.MENU_MGNO
+			 , GRP.DEL_YN
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+		  FROM COM_FILE_GROUP_BSC GRP
+		 WHERE GRP.FILE_GROUP_MGNO = #{fileGroupMgno}
+	</insert>
+	
+	<!-- 새로운 파일상세정보 생성 -->
+	<insert id="insertNewFileDtl" parameterType="gov.me.irs.common.file.vo.RaonKFileGroupVo">
+		/* RaonKMapper.insertNewFileDtl */
+		INSERT
+		  INTO COM_FILE_DTL
+		  	 ( FILE_GROUP_MGNO
+			 , FILE_MGNO
+			 , ORGNL_FILE_NM
+			 , FILE_PATH
+			 , FILE_NM
+			 , FILE_SZ
+			 , FILE_EXTN_NM
+			 , DWNLD_CNT
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+		SELECT #{newFileGroupMgno}
+			 , #{newFileMgno}
+			 , DTL.ORGNL_FILE_NM
+			 , DTL.FILE_PATH
+			 , DTL.FILE_NM
+			 , DTL.FILE_SZ
+			 , DTL.FILE_EXTN_NM
+			 , 0
+			 , DTL.DEL_YN
+			 , #{rgtrId}
+			 , CURRENT_TIMESTAMP
+		  FROM COM_FILE_DTL DTL
+		 WHERE DTL.FILE_GROUP_MGNO = #{fileGroupMgno}
+		   AND DTL.FILE_MGNO = #{fileMgno}
+		   AND DTL.DEL_YN = 'Y'			<!-- 임시상태이므로 Y로 설정 - 20240119135900 -->
+	</insert>
+	
+	<!-- 새로운 파일정보 생성시 기존 파일상세정보 삭제 -->
+	<update id="deleteOldFileDtl" parameterType="map">
+		/* RaonKMapper.deleteOldFileDtl */
+		DELETE FROM COM_FILE_DTL WHERE FILE_GROUP_MGNO = #{fileGroupMgno} AND FILE_MGNO = #{fileMgno}
+	</update>
+	
 </mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<license version="1.2">
+	<product>
+		<name>Nexacro N</name>
+		<version>21</version>
+		<function>Runtime,WebBrowser</function>
+	</product>
+	<customer>
+		<name>2023년_국제감축등록부시스템_구축(Trial)</name>
+		<developerCount>0</developerCount>
+		<rootDomain>0.0.0.0</rootDomain>
+		<targetPlatform>Windows,WindowsRT,macOS</targetPlatform>
+	</customer>
+	<date>
+		<activation>2023-12-01</activation>
+		<term unit="month">6</term>
+	</date>
+	<key>PE1WSSMJMRQ7RH4THUXT1QEEZDES1JKZ2</key>
+	<SignatureValue>Upn4YiY3n9icSofMzGnAWOhThxIdE3bNGHaqxgeHXOooZ8IVt8KbOktZVCFU7Wf7
+32j+IIk07PruhM4fT5n5wZIpkkO32bf6s8sV2Mh9LWPL6ZiYABPvy3KsSVQmomh+
+qkNWKOie7DR4Pk33KwDchHUTCXXvL657XKjXc9U7WVNTzmhZ10+3eEPq8x6FLKs2
+N6Gfw0w7bgfEEVugYYIfnrEqbTDqexmyua2pTOk4734OaZtCxvG0G83Tfa/+k9B8
+GpfmN+xY8pCBAttBVG/9g4yzFTdS/7XwCJYDGCoeal3+bmJI5/386UcQsAMxsd+K
+SI7cIY3LiNYkwyx1+WhfxQ==</SignatureValue>
+</license>
