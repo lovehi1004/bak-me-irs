@@ -97,4 +97,12 @@ public interface UserMapper {
 	 */
 	int updateUser(Map<String, Object> requestMap);
 	
+	/**
+	 * Top > 정보수정 - 사용자정보 정보수정하기
+	 * 
+	 * @param requestMap
+	 * @return
+	 */
+	int updateMyUserInfo(Map<String, Object> requestMap);
+	
 }

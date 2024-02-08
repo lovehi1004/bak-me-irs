@@ -21,7 +21,13 @@ import lombok.RequiredArgsConstructor;
 public class FirstService {
 	
 	private final FirstMapper firstMapper;
-
+	
+	/**
+	 * 테스트 목록조회
+	 * 
+	 * @param requestMap
+	 * @return
+	 */
 	@SuppressWarnings("unused")
 	@Transactional(rollbackFor = Exception.class)
 	public List<Map<String, Object>> selectFirstList(Map<String, Object> requestMap) {
@@ -39,6 +45,7 @@ public class FirstService {
 		vo2.setColumnTwo("컬럼02");
 		vo2.setColumnThree("컬럼03");
 		
+		/* 업무 로직 기입 */
 		return firstMapper.selectFirstList(requestMap);
 	}
 }

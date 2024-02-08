@@ -107,4 +107,20 @@ public class UserService {
 		
 		return userMapper.updateUser(requestMap);
 	}
+	
+	/**
+	 * Top > 정보수정 - 사용자정보 정보수정하기
+	 * 
+	 * @param requestMap
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public int updateMyUserInfo(Map<String, Object> requestMap) throws Exception {
+		/* 1. 세션정보 확인 하기 */
+		String sUserId = UserSession.getUserId();			/* 세션정보조회 */
+		requestMap.put("sUserId", sUserId);
+		
+		return userMapper.updateMyUserInfo(requestMap);
+	}
 }

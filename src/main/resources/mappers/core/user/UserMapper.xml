@@ -214,4 +214,41 @@
 		</if>
 		 WHERE USER_ID = #{userId}
 	</update>
+	
+	<!-- Top > 정보수정 - 사용자정보 정보수정하기 -->
+	<update id="updateMyUserInfo" parameterType="map">
+		/* UserMapper.updateMyUserInfo */
+		UPDATE USER_BSC
+		   SET MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		<if test="afterPassword != null and !afterPassword.equals('')">
+		     , PSWD = #{afterPassword}
+		</if>
+		<if test="afterDeptNm != null and !afterDeptNm.equals('')">
+		     , DEPT_NM = #{afterDeptNm}
+		</if>
+		<if test="afterJbpsNm != null and !afterJbpsNm.equals('')">
+		     , JBPS_NM = #{afterJbpsNm}
+		</if>
+		<if test="afterHdponDdd != null and !afterHdponDdd.equals('')">
+		     , HDPON_DDD = #{afterHdponDdd}
+		     , HDPON_TLPNO = #{afterHdponTlpno}
+		     , HDPON_PHINO = #{afterHdponPhino}
+		</if>
+		<if test="afterTelDdd != null and !afterTelDdd.equals('')">
+		     , TEL_DDD = #{afterTelDdd}
+		     , TEL_TLPNO = #{afterTelTlpno}
+		     , TEL_PHINO = #{afterTelPhino}
+		</if>
+		<if test="afterFaxDdd != null and !afterFaxDdd.equals('')">
+		     , FAX_DDD = #{afterFaxDdd}
+		     , FAX_TLPNO = #{afterFaxTlpno}
+		     , FAX_PHINO = #{afterFaxPhino}
+		</if>
+		<if test="afterEmlId != null and !afterEmlId.equals('')">
+		     , EML_ID = #{afterEmlId}
+		     , EML_ADDR = #{afterEmlAddr}
+		</if>
+		 WHERE USER_ID = #{userId}
+	</update>
 </mapper>

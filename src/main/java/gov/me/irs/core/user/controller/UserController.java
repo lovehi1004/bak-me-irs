@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -26,12 +27,12 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.client.service.ClientService;
-import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.config.util.CoreUtil;
 import gov.me.irs.core.crypt.util.RsaUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import gov.me.irs.core.token.JwtToken;
+import gov.me.irs.core.token.repository.RefreshTokenRepository;
 import gov.me.irs.core.token.service.JwtService;
 import gov.me.irs.core.sign.exception.SignException;
 import gov.me.irs.core.user.entity.TableUser;
@@ -66,7 +67,20 @@ public class UserController {
 	
 	private final UserService userService;
 	
-	private final JwtProperties jwtProperties;
+	private final RefreshTokenRepository refreshTokenRepository;
+	
+	@PostConstruct
+	public void deleteAllToken() {
+		
+		String profiles = System.getProperty("spring.profiles.active");
+		
+		if(Const.PROFILES.PRD.equals(profiles)) {
+			/* Token 정보 삭제 START */
+			refreshTokenRepository.deleteAll();
+			/* Token 정보 삭제 END */
+		}
+		
+	}
 	
 	/**
 	 * 로그인 선조회
@@ -348,10 +362,6 @@ public class UserController {
 			/* 7. 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.Y);
 			
-			/* 세션생성 */
-			session.setAttribute(Const.SESSION.KEY, identifier);
-			session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
-			
 			/* 9. 응답정보 설정 */
 			NexacroResult nexacroResult = new NexacroResult();
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.LOGIN));
@@ -382,7 +392,7 @@ public class UserController {
 			/* 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.N);
 			
-			log.error("[SignException][Login Fail][e.getCode()]["+e.getCode()+"][][]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]", e.getCause());
+			log.error("[SignException][Login Fail][e.getCode()]["+e.getCode()+"][][]["+e.getClass().getSimpleName()+"]["+e.getMessage()+"]["+e.getCause()+"]");
 			
 			NexacroResult nexacroResult = new NexacroResult();
 			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, cause));

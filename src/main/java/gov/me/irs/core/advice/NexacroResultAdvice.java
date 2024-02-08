@@ -64,10 +64,20 @@ public class NexacroResultAdvice {
 			String reissueToken = StringUtils.trimToEmpty(response.getHeader(JwtConst.JWT_HTTP_HEADER_REISSUE_TOKEN_KEY));
 			
 			CoreResponse coreResponse = (CoreResponse) dataSetsMap.get(Const.RESPONSE.KEY_COMMON);
-			coreResponse.setAccessToken(accessToken);
-			coreResponse.setRefreshToken(refreshToken);
-			coreResponse.setIssueToken(ObjectUtils.isEmpty(issueToken) ? Const.NEW.N : Const.NEW.Y);
-			coreResponse.setReissueToken(ObjectUtils.isEmpty(reissueToken) ? Const.NEW.N : Const.NEW.Y);
+			
+			/* 유효인증 체크 실패시에  */
+			if(JwtAuthEnum.SESSION_INVALID.getCode() == coreResponse.getCode()) {
+				coreResponse.setAccessToken(StringUtils.EMPTY);
+				coreResponse.setRefreshToken(StringUtils.EMPTY);
+				coreResponse.setIssueToken(Const.NEW.N);
+				coreResponse.setReissueToken(Const.NEW.N);
+			} else {
+				coreResponse.setAccessToken(accessToken);
+				coreResponse.setRefreshToken(refreshToken);
+				coreResponse.setIssueToken(ObjectUtils.isEmpty(issueToken) ? Const.NEW.N : Const.NEW.Y);
+				coreResponse.setReissueToken(ObjectUtils.isEmpty(reissueToken) ? Const.NEW.N : Const.NEW.Y);
+			}
+			
 			
 			log.debug("[Access Token정보][{}][Refresh Token정보][{}][Token 신규여부][{}][Token 재발급여부][{}]", accessToken, refreshToken, issueToken, reissueToken);
 			

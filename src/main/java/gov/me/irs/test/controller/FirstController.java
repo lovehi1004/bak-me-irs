@@ -1,12 +1,13 @@
 package gov.me.irs.test.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
+import com.nexacro.uiadapter.spring.core.data.NexacroResult;
+
 import org.springframework.stereotype.Controller;
 
 import gov.me.irs.test.service.FirstService;
@@ -28,20 +29,22 @@ public class FirstController {
 	
 	/**
 	 * 테스트 목록조회
-	 * @param requestMap
+	 * 
+	 * @param dsSrh
 	 * @return
+	 * @throws Exception
 	 */
 	@PostMapping("/test/selectFirstList.irs")
-	public ResponseEntity<?> test(@RequestBody Map<String, Object> requestMap){
-		Map<String, Object> body = new HashMap<String, Object>();
+	public NexacroResult selectFirstList(@ParamDataSet(name = "dsSrh") Map<String, Object> dsSrh) throws Exception {
+		NexacroResult nexacroResult = new NexacroResult();
 		
-		log.debug("[selectFirstList][{}]", "테스트");
+		log.debug("[selectFirstList][{}]", "로그 정의");
 		
 		/* 업무 로직 기입 */
-		List<Map<String, Object>> resultList = firstService.selectFirstList(requestMap);
-		body.put("resultList", resultList);
+		List<Map<String, Object>> dsList = firstService.selectFirstList(dsSrh);
 		
-		return ResponseEntity.ok(body);
+		nexacroResult.addDataSet("dsList", dsList);
+		return nexacroResult;
 	}
 	
 }

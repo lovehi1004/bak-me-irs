@@ -214,18 +214,20 @@ public class ExcelUtil {
 		int rowCount = 0;
 		int totalCellCount = -1;
 		/* merge 대상 시작 row index를 저장할 list */
-		List<Integer> mergeTargetRowIndexList = new ArrayList<Integer>();
+		List<Integer> mergeTargetHeaderRowIndexList = new ArrayList<Integer>();
+		List<Integer> mergeTargetBodyRowIndexList = new ArrayList<Integer>();
 		
 		/* ■■■■■■■■■■■■■■■■■■■■ 4. 헤더영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
 		/* 헤더 출력정보가 존재하면 */
 		if(headerMatrix != null) {
-			mergeTargetRowIndexList.add(rowCount);
+			mergeTargetHeaderRowIndexList.add(rowCount);
 			
 			for (int idx = 0; idx < matrixHeader.length; idx++) {
 				totalCellCount = 0;
 				
 				/* ■■■■■■■■■■■■■■■■■■■■ 5. row 생성 ■■■■■■■■■■■■■■■■■■■■ */
 				Row row = sheet.createRow(rowCount++);
+				int maxTimes = 1;
 				
 				for (int kdx = 0; kdx < matrixHeader[idx].length; kdx++) {
 					totalCellCount++;
@@ -235,7 +237,12 @@ public class ExcelUtil {
 					
 					String headerKey = matrixHeader[idx][kdx].getKey();
 					
-					cell.setCellStyle(this.getDefaultHeaderCellStyle(workbook, matrixHeader[idx][kdx].getAlign()));
+					int nTimes = headerKey.split("\\n").length;			/* 높이계산용 - 엔터값 갯수 */
+					if(nTimes >= maxTimes) {
+						maxTimes = nTimes;
+					}
+					
+					cell.setCellStyle(this.getDefaultHeaderCellStyle(workbook, row, maxTimes, matrixHeader[idx][kdx].getAlign()));
 					cell.setCellValue(headerKey);
 					
 				}
@@ -245,13 +252,14 @@ public class ExcelUtil {
 		/* ■■■■■■■■■■■■■■■■■■■■ 7. 바디영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
 		for (Map<String, Object> map : dataList) {
 			
-			mergeTargetRowIndexList.add(rowCount);
+			mergeTargetBodyRowIndexList.add(rowCount);
 			
 			for (int idx = 0; idx < matrixCell.length; idx++) {
 				totalCellCount = 0;
 				
 				/* ■■■■■■■■■■■■■■■■■■■■ 8. row 생성 ■■■■■■■■■■■■■■■■■■■■ */
 				Row row = sheet.createRow(rowCount++);
+				int maxTimes = 1;
 				
 				for (int kdx = 0; kdx < matrixCell[idx].length; kdx++) {
 					totalCellCount++;
@@ -265,11 +273,11 @@ public class ExcelUtil {
 						Object defaultValue = matrixCell[idx][kdx].getDefaultValue();
 						
 						if(defaultValue instanceof Integer) {
-							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-							cell.setCellValue((Integer) matrixCell[idx][kdx].getDefaultValue());
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+							cell.setCellValue((Integer) defaultValue);
 						} else {
-							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-							cell.setCellValue((String) matrixCell[idx][kdx].getDefaultValue());
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+							cell.setCellValue((String) defaultValue);
 						}
 						
 					/* 9-2. key가 존재하면 해당 Cell위치에 값 설정 */
@@ -278,15 +286,22 @@ public class ExcelUtil {
 						Object dataValue = map.get(matrixCell[idx][kdx].getKey());
 						
 						if(ObjectUtils.isEmpty(dataValue)) {			// null값 공백으로 처리
-							cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
 							cell.setCellValue(StringUtils.EMPTY);
 						} else {
 							if(matrixCell[idx][kdx].getType() == ExcelConst.INT) {
-								cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
 								cell.setCellValue((Integer) dataValue);
 							} else {
-								cell.setCellStyle(this.getDefaultCellStyle(workbook, matrixCell[idx][kdx].getAlign()));
-								cell.setCellValue(String.valueOf(dataValue));
+								String dataString = String.valueOf(dataValue);
+								
+								int nTimes = dataString.split("\\n").length;			/* 높이계산용 - 엔터값 갯수 */
+								if(nTimes >= maxTimes) {
+									maxTimes = nTimes;
+								}
+								
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, row, maxTimes, matrixCell[idx][kdx].getAlign()));
+								cell.setCellValue(dataString);
 							}
 						}
 						
@@ -312,19 +327,40 @@ public class ExcelUtil {
 			sheet.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, (matrixCell[0].length - 1)));
 		}
 		
-		/* ■■■■■■■■■■■■■■■■■■■■ 12. Merge 하기 ■■■■■■■■■■■■■■■■■■■■ */
-		List<RowSpan> rowSpanList = cellMatrix.getRowSpanList();
-		List<ColSpan> colSpanList = cellMatrix.getColSpanList();
+		/* ■■■■■■■■■■■■■■■■■■■■ 12-1. 헤더영역 Merge 하기 ■■■■■■■■■■■■■■■■■■■■ */
+		List<RowSpan> headerRowSpanList = headerMatrix.getRowSpanList();
+		List<ColSpan> headerColSpanList = headerMatrix.getColSpanList();
 		
-		for (int mergeTargetRowIndex : mergeTargetRowIndexList) {
-			for (RowSpan rowSpan : rowSpanList) {
+		for (int mergeTargetRowIndex : mergeTargetHeaderRowIndexList) {
+			for (RowSpan rowSpan : headerRowSpanList) {
 				sheet.addMergedRegion(new CellRangeAddress(
 						mergeTargetRowIndex + rowSpan.getStartRow(),
 						mergeTargetRowIndex + rowSpan.getEndRow(),
 						rowSpan.getStartCol(),
 						rowSpan.getEndCol()));
 			}
-			for (ColSpan colSpan : colSpanList) {
+			for (ColSpan colSpan : headerColSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + colSpan.getStartRow(),
+						mergeTargetRowIndex + colSpan.getEndRow(),
+						colSpan.getStartCol(),
+						colSpan.getEndCol()));
+			}
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 12-2. 바디영역 Merge 하기 ■■■■■■■■■■■■■■■■■■■■ */
+		List<RowSpan> bodyRowSpanList = cellMatrix.getRowSpanList();
+		List<ColSpan> bodyColSpanList = cellMatrix.getColSpanList();
+		
+		for (int mergeTargetRowIndex : mergeTargetBodyRowIndexList) {
+			for (RowSpan rowSpan : bodyRowSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + rowSpan.getStartRow(),
+						mergeTargetRowIndex + rowSpan.getEndRow(),
+						rowSpan.getStartCol(),
+						rowSpan.getEndCol()));
+			}
+			for (ColSpan colSpan : bodyColSpanList) {
 				sheet.addMergedRegion(new CellRangeAddress(
 						mergeTargetRowIndex + colSpan.getStartRow(),
 						mergeTargetRowIndex + colSpan.getEndRow(),
@@ -405,7 +441,7 @@ public class ExcelUtil {
 	 * @param workbook
 	 * @return
 	 */
-	private final CellStyle getDefaultHeaderCellStyle(Workbook workbook, short align) {
+	private final CellStyle getDefaultHeaderCellStyle(Workbook workbook, Row row, int nTimes, short align) {
 		CellStyle style = workbook.createCellStyle();
 		
 		/* 정렬 설정 */
@@ -425,9 +461,11 @@ public class ExcelUtil {
 		/* 폰트 설정 */
 		Font font = workbook.createFont();
 		font.setFontName("맑은 고딕");					/* font type */
-		font.setFontHeight((short)(11*20));				/* font size */
+		row.setHeightInPoints(nTimes * row.getSheet().getDefaultRowHeightInPoints());			/* height */
 		font.setBoldweight(Font.BOLDWEIGHT_NORMAL);		/* font weight - bold */
 		style.setFont(font);
+		
+		style.setWrapText(true);
 		
 		return style;
 	}
@@ -438,7 +476,7 @@ public class ExcelUtil {
 	 * @param workbook
 	 * @return
 	 */
-	private final CellStyle getDefaultCellStyle(Workbook workbook, short align) {
+	private final CellStyle getDefaultCellStyle(Workbook workbook, Row row, int nTimes, short align) {
 		CellStyle style = workbook.createCellStyle();
 		
 		/* 정렬 설정 */
@@ -454,7 +492,7 @@ public class ExcelUtil {
 		/* 폰트 설정 */
 		Font font = workbook.createFont();
 		font.setFontName("맑은 고딕");					/* font type */
-		font.setFontHeight((short)(11*20));				/* font size */
+		row.setHeightInPoints(nTimes * row.getSheet().getDefaultRowHeightInPoints());			/* height */
 		font.setBoldweight(Font.BOLDWEIGHT_NORMAL);		/* font weight - normal */
 		style.setFont(font);
 		

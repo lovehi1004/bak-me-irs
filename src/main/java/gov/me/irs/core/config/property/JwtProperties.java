@@ -18,7 +18,6 @@ public class JwtProperties {
 	public final static class AccessToken {
 		public String secretKey;
 		public long validTime;
-		public int sessionTime;
 	}
 	
 	@Setter

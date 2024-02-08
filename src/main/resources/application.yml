@@ -23,6 +23,7 @@ spring:
   config:
     import:
       - classpath:config/core/common/core.yml
+      - classpath:config/core/common/holiday.yml
       - classpath:config/${spring.profiles.active}/web-ext.yml
       - classpath:config/${spring.profiles.active}/raon-k.yml
       - classpath:config/${spring.profiles.active}/jwt.yml
@@ -51,6 +52,7 @@ spring:
 spring:
   jpa:
     database: postgresql
+    open-in-view: false
     hibernate:
       ddl-auto: none  # 스키마 유효성 검사 옵션
       use-new-id-generator-mappings: true

@@ -14,6 +14,12 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface FirstMapper {
 	
+	/**
+	 * 테스트 목록조회
+	 * 
+	 * @param requestMap
+	 * @return
+	 */
 	List<Map<String, Object>> selectFirstList(Map<String, Object> requestMap);
 	
 }

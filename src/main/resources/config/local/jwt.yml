@@ -2,12 +2,15 @@
 # Access Token 유효시간 30분, Refresh Token 유효시간 30분
 # Access Token 만료 후 Refresh Token 남은 유효시간 30분이내 Token 재발급이 없다면 세션 만료 처리 - 총 1시간의 세션 설정
 jwt.access-token:
-  secret-key: JustinNumberOneTheBestOfTheBestTheOnlyBest
-  # 45분 - 45 * 60 * 1000L, valid-time/1000 시간과 session-time은 동일하게설정
+  # original secret key: [JustinNumberOneTheBestOfTheBestTheOnlyBest]
+  secret-key: SnVzdGluTnVtYmVyT25lVGhlQmVzdE9mVGhlQmVzdFRoZU9ubHlCZXN0
+  # 45분 - 45 * 60 * 1000L
   valid-time: 2700000
-  session-time: 2700
+  # valid-time: 10000    # 10초 - 테스트
 jwt.refresh-token:
-  secret-key: JustinNumberOneTheBestOfTheBestTheOnlyBestRefresh
+  # original secret key [JustinNumberOneTheBestOfTheBestTheOnlyBestRefresh]
+  secret-key: SnVzdGluTnVtYmVyT25lVGhlQmVzdE9mVGhlQmVzdFRoZU9ubHlCZXN0UmVmcmVzaA==
   # 60분 - 60 * 60 * 1000L
   valid-time: 3600000
+  # valid-time: 20000    # 20초 - 테스트
   

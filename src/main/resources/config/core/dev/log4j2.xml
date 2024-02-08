@@ -40,7 +40,7 @@
 	<Loggers>
 		<Logger name="org.springframework" level="ERROR" />
 		<Logger name="org.apache.commons.digester" level="OFF" />
-		<Logger name="com.zaxxer.hikari" level="ERROR" />
+		<Logger name="com.zaxxer.hikari" level="DEBUG" />
 		<Logger name="org.hibernate" level="OFF" />
 		<Logger name="jdbc" level="OFF" />
 		<Logger name="jdbc.sqlonly" level="INFO" />

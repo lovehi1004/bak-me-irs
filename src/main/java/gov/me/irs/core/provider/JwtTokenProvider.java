@@ -1,6 +1,5 @@
 package gov.me.irs.core.provider;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,12 +66,13 @@ public class JwtTokenProvider {
 	private final RefreshTokenRepository refreshTokenRepository;
 	
 	/**
-	 * Token Base64인코딩
+	 * Token Base64 디코딩 후 SecretKey 생성
+	 * -> [https://10015.io/tools/base64-encoder-decoder]
 	 */
 	@PostConstruct
 	protected void init() {
-		this.accessTokenKey = Keys.hmacShaKeyFor(jwtProperties.accessToken.secretKey.getBytes(StandardCharsets.UTF_8));
-		this.refreshTokenKey = Keys.hmacShaKeyFor(jwtProperties.refreshToken.secretKey.getBytes(StandardCharsets.UTF_8));
+		this.accessTokenKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.accessToken.secretKey));
+		this.refreshTokenKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.refreshToken.secretKey));
 	}
 	
 	/**

@@ -86,7 +86,7 @@ public final class JwtConst {
 		
 		public final static String AUTHENTICATION_ACCESS_UNKNOWN_ERROR = "인증정보가 존재하지 않습니다.";			/* Access Token */
 		public final static String AUTHENTICATION_REFRESH_UNKNOWN_ERROR = "인증정보가 존재하지 않습니다.";			/* Refresh Token */
-		public final static String AUTHENTICATION_EXPIRED_TOKEN = "만료된 인증정보 입니다.";
+		public final static String AUTHENTICATION_EXPIRED_TOKEN = "로그아웃 되었습니다.";						/* 만료된 인증정보 입니다. */
 		public final static String AUTHENTICATION_REFRESH_UNSUPPORTED_TOKEN = "변조된 인증정보 입니다.";
 		
 		public final static String AUTHENTICATION_EXTRA_ERROR_8011 = "만료 에러";

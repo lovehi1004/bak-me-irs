@@ -212,6 +212,22 @@ public final class UserSession {
 	}
 	
 	/**
+	 * 인증사용자 관장기관 사업수행자 또는 위탁기관 사업수행자 여부 - Y|N
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public final static String isOutsourcingBizOrDirectorBizYn() throws Exception {
+		RoleEnum roleEnum = UserSession.getRoleEnum();
+		
+		/* 관장기관여부 확인 */
+		if(roleEnum == RoleEnum.OUTSOURCING || roleEnum == RoleEnum.DIRECTORBIZ) {
+			return Const.CHARACTER.Y;
+		}
+		return Const.CHARACTER.N;
+	}
+	
+	/**
 	 * 인증사용자 사업수행자_계정관리인, 사업수행자_계정대표자 여부 - Y|N
 	 * 
 	 * @return

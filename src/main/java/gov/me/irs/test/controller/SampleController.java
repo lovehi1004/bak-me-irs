@@ -52,7 +52,9 @@ public class SampleController {
     	log.debug("프로퍼티 테스트1 : {}", commonProperties.getProperty("web.example.prop"));
     	log.debug("i18n 테스트 : {}", messageSource.getMessage("i18n.message.test1", null, LocaleContextHolder.getLocale()));
     	log.debug("i18n 파라미터 테스트 : {}", messageSource.getMessage("i18n.message.test2", Arrays.asList("테스트1", "테스트2").toArray(), LocaleContextHolder.getLocale()));
-
+    	
+    	LocaleContextHolder.resetLocaleContext();
+    	
 		return "<h1>sample -역할없이</h1>";
 	}
 }

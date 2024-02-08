@@ -1,13 +1,13 @@
 package gov.me.irs.core.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.util.ClientUtil;
 import gov.me.irs.core.config.property.CoreProperties;
-import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,8 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	
 	private final JwtTokenProvider jwtTokenProvider;
 	
-	private final JwtProperties jwtProperties;
-	
 	private final CoreProperties coreProperties;
 	
 	/**
@@ -60,18 +57,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		
 		boolean isShouldNotFilter = false;
 		
-		/* 1. *.irs 패턴이 아니라면 필터 Skip */
+		/* 1. *.irs 패턴이 아니라면 필터 - Skip */
 		if(!Const.SERVICE.EXT.equals(ext)) {
 			isShouldNotFilter = true;
-			
-		/* 2. 라온K 서블릿 이라면 Skip */
+		/* 2. 라온K 서블릿 이라면 - Skip */
 		} else if(coreProperties.raon.url.raonkhandler.equals(uri) || coreProperties.raon.url.raonkviewer.equals(uri)) {
 			isShouldNotFilter = true;
 		/* 3. /common/rsa.irs - RSA Skip */
 		} else if("/common/rsa.irs".equals(uri)) {
 			isShouldNotFilter = true;
-		/* 4. /common/board/selectBoardListLogin.irs - 비로그인 서비스 Skip */
-		} else if("/common/board/selectBoardListLogin.irs".equals(uri)) {
+		/* 유효인증 체크 서비스 - Skip */
+		} else if("/session/check.irs".equals(uri)) {
+			isShouldNotFilter = true;
+		/* F5 새로고침시 일괄 호출되는 미인증 서비스 - Skip */
+		} else if(Arrays.asList(
+				  "/common/board/selectMainAgrCnt.irs"
+				, "/common/board/selectMainMhdlgCnt.irs"
+				, "/common/board/selectMainBizCnt.irs"
+				, "/common/board/selectBoardListLogin.irs"
+				).contains(uri)) {
 			isShouldNotFilter = true;
 		}
 		return isShouldNotFilter;
@@ -128,13 +132,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
 							jwtTokenProvider.setAuthentication(accessToken, role, false);
 							
-							// Refresh Token으로 사용자인증 식별자 조회
-							String identifier = jwtTokenProvider.getLgnIdByRefreshToken(refreshToken);
-							
-							HttpSession session = request.getSession(true);
-							session.setAttribute(Const.SESSION.KEY, identifier);
-							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
-							
 						} else if (validateRefreshToken && !isRefreshToken) {
 							log.debug("▶▶▶▶ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실 ■■■■■■■■■■■■■■■■■■■■ */
@@ -177,9 +174,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 														
 							// 재발급 된 Token정보로 인증정보 생성
 							jwtTokenProvider.setAuthentication(newAccessToken, role, true);
-							
-							HttpSession session = request.getSession(false);
-							session.setMaxInactiveInterval(jwtProperties.accessToken.sessionTime);		/* Access Token만큼만 설정 */
 							
 						} else {
 							log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");

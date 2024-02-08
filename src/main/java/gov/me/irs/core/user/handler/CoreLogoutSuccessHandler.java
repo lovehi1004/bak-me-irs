@@ -87,9 +87,6 @@ public class CoreLogoutSuccessHandler implements LogoutSuccessHandler {
         	log.debug("[로그아웃 CASE][6][{}]", "파라미터 누락");
         	systemMessage = "logout type - 6";
         }
-        
-        /* 세션 삭제 */
-        request.getSession().invalidate();
 		
         CoreUtil.setResponse(response, JwtAuthEnum.LOGOUT, systemMessage);
         

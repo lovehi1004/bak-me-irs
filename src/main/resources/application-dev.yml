@@ -6,9 +6,9 @@ spring:
     # jdbc:log4jdbc:postgresql://127.0.0.1:15432/postgres
     url: ENC(mXC8GElHIxRrSxv/1vk9Nl61oXiRa/fWywB1WQdxGcLzSK4tZCfVKMAZWBLYFncfeIqhLunBXn7XXVZbi/typw==)
     # username : girirs
-    # username: ENC(5rXPK8Q2mzZXv8TFCm79VA==)
+    username: ENC(5rXPK8Q2mzZXv8TFCm79VA==)
     # username : devgirirs
-    username: ENC(XklR2sthimLQStiQ6EfQD69bBPvRFNnr)
+    # username: ENC(XklR2sthimLQStiQ6EfQD69bBPvRFNnr)
     password: ENC(oWBsc9H2AiE9ONt0bB3jHkBxaaFNX+AC)
     hikari:
       pool-name: irsHikari

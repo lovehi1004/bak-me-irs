@@ -1,5 +1,6 @@
 package gov.me.irs.common.user.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
+import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.user.service.MainUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,4 +93,46 @@ public class MainUserController {
 		return nexacroResult;
 	}
 	
+	/**
+	 * Top > 정보수정
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping("/common/main/user/selectMyUserInfo.irs")
+	public NexacroResult selectMyUserInfo() throws Exception {
+		NexacroResult nexacroResult = new NexacroResult();
+		
+		Map<String, Object> resultMap = mainUserService.selectMyUserInfo();
+		
+		/* map을 addDataSet 에 모두 넣기 */
+		resultMap.entrySet().stream().forEach(m -> {
+			nexacroResult.addDataSet(m.getKey(), m.getValue());
+		});
+		
+		return nexacroResult;
+	}
+	
+	/**
+	 * Top > 정보수정 - 사용자정보 정보수정하기
+	 * 
+	 * @param dsUserInfo
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping("/common/main/user/updateMyUserInfo.irs")
+	public NexacroResult updateUser(@ParamDataSet(name = "dsInstInfo") Map<String, Object> dsInstInfo
+			, @ParamDataSet(name = "dsSaveInfo") Map<String, Object> dsSaveInfo) throws Exception {
+		
+		NexacroResult nexacroResult = new NexacroResult();
+		
+		boolean result = mainUserService.updateMyUserInfo(dsInstInfo, dsSaveInfo);
+		log.debug("[result][{}]", String.valueOf(result));
+		
+		Map<String, Object> dsResult = new HashMap<String, Object>();
+		dsResult.put("result", result ? Const.CHARACTER.Y : Const.CHARACTER.N);
+		
+		nexacroResult.addDataSet("dsResult", dsResult);
+		return nexacroResult;
+	}
 }
