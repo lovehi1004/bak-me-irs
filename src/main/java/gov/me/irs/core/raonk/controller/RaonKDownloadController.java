@@ -134,22 +134,14 @@ public class RaonKDownloadController {
 		
 		log.debug("-------------------- 라온K - 전체 다운로드 체크 Controller 호출! ---------------------------");
 		
-		boolean result = false;
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파일정보 조회 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		log.debug("전체 다운로드 체크 실행! ---------------------------");
+		boolean result = raonKDownloadService.checkDownloadVo(dsSendFileDetail);
 		
-		try {
-			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파일정보 조회 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-			log.debug("전체 다운로드 체크 실행! ---------------------------");
-			result = raonKDownloadService.checkDownloadVo(dsSendFileDetail);
-			
-			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일다운로드 가능 여부 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-			if(!result) {
-				/* 파일다운로드 대상 파일이 존재하지 않습니다. */
-				CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_NOT_FOUND, "FILE NOT FOUND"));
-			}
-			
-		} catch (Exception e) {
-			/* 파일다운로드 처리중 오류가 발생하였습니다. */
-			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_UNKNOWN_ERROR, e));
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일다운로드 가능 여부 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		if(!result) {
+			/* 파일다운로드 대상 파일이 존재하지 않습니다. */
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_NOT_FOUND, "FILE NOT FOUND"));
 		}
 		
 		return nexacroResult;
@@ -168,22 +160,14 @@ public class RaonKDownloadController {
 		
 		log.debug("-------------------- 라온K - 지정파일 전체 다운로드 체크 Controller 호출! ---------------------------");
 		
-		boolean result = false;
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파일정보 조회 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		log.debug("지정파일 전체 다운로드 체크 실행! ---------------------------");
+		boolean result = raonKDownloadService.checkSelectedDownloadVo(dsSendFileDetail);
 		
-		try {
-			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 1. 파일정보 조회 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-			log.debug("지정파일 전체 다운로드 체크 실행! ---------------------------");
-			result = raonKDownloadService.checkSelectedDownloadVo(dsSendFileDetail);
-			
-			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일다운로드 가능 여부 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-			if(!result) {
-				/* 파일다운로드 대상 파일이 존재하지 않습니다. */
-				CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_NOT_FOUND, "FILE NOT FOUND"));
-			}
-			
-		} catch (Exception e) {
-			/* 파일다운로드 처리중 오류가 발생하였습니다. */
-			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_UNKNOWN_ERROR, e));
+		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 파일다운로드 가능 여부 결과 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
+		if(!result) {
+			/* 파일다운로드 대상 파일이 존재하지 않습니다. */
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.FILE_NOT_FOUND, "FILE NOT FOUND"));
 		}
 		
 		return nexacroResult;

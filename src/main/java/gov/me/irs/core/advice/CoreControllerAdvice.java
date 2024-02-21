@@ -54,7 +54,7 @@ public class CoreControllerAdvice {
 	@ExceptionHandler(Exception.class)
 	public void handleException(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
 		
-		HttpServletRequest forwardRequest = null;
+		HttpServletRequest forwardRequest = request;
 		
 		JwtAuthEnum jwtAuthEnum = JwtAuthEnum.UNKNOWN_ERROR;
 		
@@ -76,8 +76,6 @@ public class CoreControllerAdvice {
 			
 			if(multipartResolver.isMultipart(request)) {
 				forwardRequest = new ExcludeMultipartHttpServletRequestWrapper(request);
-			} else {
-				forwardRequest = request;
 			}
 		}
 		

@@ -1,6 +1,5 @@
 package gov.me.irs.common.file.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,21 +59,14 @@ public class ViewerController {
 				.build();
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 2. 사이냅소프트 파일 변환하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			resultMap = viewerService.convert(vo, request);
-			
-			if(Const.CHARACTER.RESULT.N .equals(resultMap.get("result"))) {
-				throw new Exception(JwtAuthEnum.VIEWER_ERROR.getMessage());
-			}
-			
+		Map<String, Object> resultMap = viewerService.convert(vo, request);
+		
+		if(Const.CHARACTER.RESULT.N .equals(resultMap.get("result"))) {
+			/* 사용자정의 데이터 공통 응답정보 설정 */
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.VIEWER_ERROR));
+		} else {
 			/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3. 결과 처리 하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 			nexacroResult.addDataSet("dsViewer", resultMap);
-		} catch(Exception e) {
-			log.error("[SynapConverter Error][{}]", e);
-			
-			/* 사용자정의 데이터 공통 응답정보 설정 */
-			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(HttpStatus.OK, JwtAuthEnum.VIEWER_ERROR, e));
 		}
 		
 		log.debug("["+this.getClass().getName()+"][conver] END");

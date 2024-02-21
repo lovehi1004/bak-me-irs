@@ -1,6 +1,8 @@
 package gov.me.irs.core.user.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -117,7 +122,9 @@ public class UserController {
 			/* 2. 비밀번호 RSA 복호화 */
 			try {
 				password = RsaUtil.decryptRsa(session, password);
-			} catch (Exception e) {
+			} catch (NoSuchAlgorithmException | NoSuchPaddingException
+					| InvalidKeyException | IllegalBlockSizeException
+					| BadPaddingException | UnsupportedEncodingException e) {
 				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
 			}
 			
@@ -244,7 +251,9 @@ public class UserController {
 			/* 2. 비밀번호 RSA 복호화 */
 			try {
 				password = RsaUtil.decryptRsa(session, password);
-			} catch (Exception e) {
+			} catch (NoSuchAlgorithmException | NoSuchPaddingException
+					| InvalidKeyException | IllegalBlockSizeException
+					| BadPaddingException | UnsupportedEncodingException e) {
 				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
 			}
 			
@@ -357,7 +366,7 @@ public class UserController {
 			log.info("getroleeeee = {}", user.getRoles());
 			
 			/* 6. JWT Token - 인증정보 저장처리 */
-			jwtService.login(jwtToken, userAgent);
+			jwtService.login(request, jwtToken, userAgent);
 			
 			/* 7. 사용자 접속정보 저장 */
 			clientService.saveClientDtl(request, Const.CHARACTER.RESULT.Y);

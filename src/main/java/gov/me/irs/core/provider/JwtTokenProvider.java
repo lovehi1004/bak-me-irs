@@ -21,16 +21,18 @@ import org.springframework.stereotype.Component;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.config.property.JwtProperties;
-import gov.me.irs.core.jwt.util.JwtUtil;
 import gov.me.irs.core.token.constants.JwtConst;
 import gov.me.irs.core.token.service.JwtService;
 import gov.me.irs.core.token.repository.RefreshTokenRepository;
 import gov.me.irs.core.user.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -203,10 +205,16 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String resolveAccessToken(HttpServletRequest request) {
-        if(request.getHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY) != null) {
-        	return request.getHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY).substring((JwtConst.HTTP_HEADER_AUTH_TYPE + JwtUtil.newBlankString(1)).length());
-        }
-        return null;
+		if(request.getHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY) == null) {
+			return null;
+		} else {
+			String value = request.getHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY);
+			if(value.length() > JwtConst.HTTP_HEADER_AUTH_TYPE.length()) {
+				return value.substring(JwtConst.HTTP_HEADER_AUTH_TYPE.length());
+			} else {
+				return null;
+			}
+		}
 	}
 	
 	/**
@@ -217,10 +225,16 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String resolveRefreshToken(HttpServletRequest request) {
-        if(request.getHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY) != null) {
-        	return request.getHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY).substring((JwtConst.HTTP_HEADER_AUTH_TYPE + JwtUtil.newBlankString(1)).length());
-        }
-        return null;
+		if(request.getHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY) == null) {
+			return null;
+		} else {
+			String value = request.getHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY);
+			if(value.length() > JwtConst.HTTP_HEADER_AUTH_TYPE.length()) {
+				return value.substring(JwtConst.HTTP_HEADER_AUTH_TYPE.length());
+			} else {
+				return null;
+			}
+		}
 	}
 	
 	/**
@@ -254,9 +268,19 @@ public class JwtTokenProvider {
 		try {
 			Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(tokenKey).build().parseClaimsJws(token);
 			return !claims.getBody().getExpiration().before(new Date());
-		} catch (Exception e) {
-			return false;
-		}
+    	} catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+    		log.info("Invalid JWT Access Token", e);
+    		return false;
+    	} catch (ExpiredJwtException e) {
+    		log.info("Expired JWT Access Token", e);
+    		return false;
+    	} catch (UnsupportedJwtException e) {
+    		log.info("Unsupported JWT Access Token", e);
+    		return false;
+    	} catch (IllegalArgumentException e) {
+    		log.info("JWT claims string is empty.", e);
+    		return false;
+    	}
 	}
 	
 	/**
@@ -288,7 +312,7 @@ public class JwtTokenProvider {
      * @param accessToken
      */
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
-    	response.setHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + JwtUtil.newBlankString(1) + accessToken);
+    	response.setHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + accessToken);
     }
     
     /**
@@ -298,7 +322,7 @@ public class JwtTokenProvider {
      * @param refreshToken
      */
     public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + JwtUtil.newBlankString(1) + refreshToken);
+        response.setHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + refreshToken);
     }
     
     /**

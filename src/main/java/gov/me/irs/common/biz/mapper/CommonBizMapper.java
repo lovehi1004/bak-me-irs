@@ -158,4 +158,12 @@ public interface CommonBizMapper {
 	 */
 	List<Map<String, Object>> selectPrvHstryList(Map<String, Object> requestMap);
 	
+	/**
+	 * 전송결과 업데이트 
+	 * 
+	 * @param requestMap
+	 * @return
+	 */	
+	int updateTrsmResult(Map<String, Object> requestMap);
+	
 }

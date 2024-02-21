@@ -187,7 +187,7 @@ public class RaonKFileUtil {
 				
 				return compressedFile;
 				
-			} catch(Exception e) {
+			} catch(IOException e) {
 				
 				log.error("[압축파일 생성하기 실패 - 개별 압축파일][{}]", e);
 				
@@ -213,7 +213,7 @@ public class RaonKFileUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public RaonKFileDownloadVo compressFileList(List<File> subArchiveFileList, String archiveFileName) throws Exception {
+	public RaonKFileDownloadVo compressFileList(List<File> subArchiveFileList, String archiveFileName) throws IOException {
 		
 		/* 압축처리 후 압축파일 */
 		File compressedFile = null;
@@ -258,7 +258,7 @@ public class RaonKFileUtil {
 				
 				return resultVo;
 				
-			} catch(Exception e) {
+			} catch(IOException e) {
 				
 				log.error("[압축파일 생성하기 실패 - 최종 압축파일][{}]", e);
 				

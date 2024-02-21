@@ -1,9 +1,8 @@
 package gov.me.irs.core.session.controller;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class SessionService {
 	private final JwtTokenProvider jwtTokenProvider;
 	
 	/**
-	 * 권한 목록 조회
+	 * 유효인증 체크
 	 * 
 	 * @param requestMap
 	 * @return
@@ -71,12 +70,23 @@ public class SessionService {
 					/* 유효한 RefreshToken정보로 부터 role 권한정보 취득 */
 					String role = jwtTokenProvider.getRoleByRefreshToken(refreshToken);
 					
+					String lgnId = jwtTokenProvider.getLgnIdByRefreshToken(refreshToken);
+					
 					log.debug("▶▶▶▶ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공");
 					/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
-					result = true;
-					log.debug("■■■■■■■■■■▶ [유효인증 체크 - 3]");
 					
-					jwtTokenProvider.setAuthentication(accessToken, role, false);
+					HttpSession session = request.getSession(false);
+					String sessionLgnId = (String) session.getAttribute("lgnId");
+					
+					if(lgnId.equals(sessionLgnId)) {
+						result = true;
+						log.debug("■■■■■■■■■■▶ [유효인증 체크 - 3]");
+						
+						jwtTokenProvider.setAuthentication(accessToken, role, false);
+						
+					} else {
+						return false;
+					}
 					
 				} else if (validateRefreshToken && !isRefreshToken) {
 					log.debug("▶▶▶▶ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
@@ -95,53 +105,7 @@ public class SessionService {
 			}
 			// Access Token 만료
 			else if (!validateAccessToken) {
-				
-				// Refresh Token 유효
-				if (validateRefreshToken && isRefreshToken) {
-					log.debug("▶▶▶▶ 3. invalid accessToken and valid refreshToken");
-					// Refresh Token으로 사용자인증 식별자 조회
-					String identifier = jwtTokenProvider.getLgnIdByRefreshToken(refreshToken);
-					// 사용자인증 식별자로 역할정보 조회
-					List<String> roles = jwtTokenProvider.getRoles(identifier);
-					
-					/* 유효한 RefreshToken정보로 부터 role 권한정보 취득 */
-					String role = jwtTokenProvider.getRoleByRefreshToken(refreshToken);
-					
-					// Token 재발급
-					String newAccessToken = jwtTokenProvider.createAccessToken(identifier, roles, role);
-					String newRefreshToken = jwtTokenProvider.createRefreshToken(identifier, roles, role);
-					
-					// 재발급 된 Refresh Token 저장소에 갱신
-					String userAgent = request.getHeader("User-Agent");
-					jwtTokenProvider.updateRefreshToken(identifier, userAgent, newRefreshToken);
-					
-					// 헤더에 재발급 된 Token정보 설정
-					jwtTokenProvider.setHeaderReissueToken(response);
-					jwtTokenProvider.setHeaderAccessToken(response, newAccessToken);
-					jwtTokenProvider.setHeaderRefreshToken(response, newRefreshToken);
-												
-					// 재발급 된 Token정보로 인증정보 생성
-					jwtTokenProvider.setAuthentication(newAccessToken, role, true);
-					
-					result = true;
-					log.debug("■■■■■■■■■■▶ [유효인증 체크 - 6]");
-					
-				} else {
-					log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");
-					if(!validateRefreshToken) {
-						log.debug("▶▶▶▶ 3-1. Access Token 만료 and Refresh Token 검증실패 - Refresh Token 변조 or 만료 상태");
-						/* ■■■■■■■■■■■■■■■■■■■■ 3-1. Access Token 만료 and Refresh Token 검증실패 - Refresh Token 변조 or 만료 상태 ■■■■■■■■■■■■■■■■■■■■ */
-						/* Refresh Token이 유효하지 않으므로 이후는 재인증(재로그인)을 유도하도록 한다. */
-						result = false;
-						log.debug("■■■■■■■■■■▶ [유효인증 체크 - 7]");
-					} else if(!isRefreshToken) {
-						log.debug("▶▶▶▶ 3-2. Access Token 만료 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
-						/* ■■■■■■■■■■■■■■■■■■■■ 3-2. Access Token 만료 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실 ■■■■■■■■■■■■■■■■■■■■ */
-						result = false;
-						log.debug("■■■■■■■■■■▶ [유효인증 체크 - 8]");
-					}
-					
-				}
+				result = false;
 			}
 		}
 		

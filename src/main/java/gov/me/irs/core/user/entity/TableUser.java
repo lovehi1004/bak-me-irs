@@ -71,6 +71,17 @@ public class TableUser implements UserDetails {
     @Builder.Default
     private List<String> roles = new ArrayList<>();
     
+	public List<String> getRoles() {
+		List<String> list = new ArrayList<>();
+		list.addAll(roles);
+		return list;
+	}
+	
+	public void setRoles(List<String> roles) {
+		this.roles = new ArrayList<>();
+		this.roles.addAll(roles);	
+	}
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
@@ -107,4 +118,5 @@ public class TableUser implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

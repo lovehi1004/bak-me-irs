@@ -22,7 +22,7 @@ public final class ExcelMatrix {
 	private ExcelCell matrix[][];
 	
 	public ExcelCell[][] getMatrix() {
-		return this.matrix;
+		return this.matrix.clone();
 	}
 	
 	/**
@@ -31,7 +31,9 @@ public final class ExcelMatrix {
 	 * @return
 	 */
 	public List<ColSpan> getColSpanList() {
-		return colSpanList;
+		List<ColSpan> list = new ArrayList<>();
+		list.addAll(colSpanList);
+		return list;
 	}
 	
 	/**
@@ -40,11 +42,11 @@ public final class ExcelMatrix {
 	 * @return
 	 */
 	public List<RowSpan> getRowSpanList() {
-		return rowSpanList;
+		List<RowSpan> list = new ArrayList<>();
+		list.addAll(rowSpanList);
+		return list;
 	}
-
-
-
+	
 	/**
 	 * 
 	 * @param rowSize - row 갯수

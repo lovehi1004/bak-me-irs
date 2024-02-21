@@ -1,5 +1,6 @@
 package gov.me.irs.core.user.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gov.me.irs.core.user.enumeration.UserClCdEnum;
@@ -51,6 +52,16 @@ public class CreateUserVo {
 	 * 권한정보 - JWT권한 목록
 	 */
 	private List<String> roles;
-	
+
+	public void setRoles(List<String> roles) {
+		this.roles = new ArrayList<>();
+		this.roles.addAll(roles);
+	}
+
+	public List<String> getRoles() {
+		List<String> list = new ArrayList<>();
+		list.addAll(roles);
+		return list;
+	}
 
 }

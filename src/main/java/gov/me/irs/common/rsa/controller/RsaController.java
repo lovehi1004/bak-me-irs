@@ -5,8 +5,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
@@ -30,7 +29,7 @@ public class RsaController {
 	 * @param requestMap
 	 * @return
 	 */
-	@RequestMapping(value = "/common/rsa.irs", method = {RequestMethod.GET, RequestMethod.POST})
+	@PostMapping(value = "/common/rsa.irs")
 	public NexacroResult selectRsa(HttpServletRequest request) throws Exception {
 		
 		NexacroResult nexacroResult = new NexacroResult();

@@ -8,6 +8,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.util.ClientUtil;
 import gov.me.irs.core.config.property.CoreProperties;
+import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -34,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+	
+	private final JwtProperties jwtProperties;
 	
 	private final JwtTokenProvider jwtTokenProvider;
 	
@@ -76,6 +80,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				, "/common/board/selectMainBizCnt.irs"
 				, "/common/board/selectBoardListLogin.irs"
 				).contains(uri)) {
+			isShouldNotFilter = true;
+		/* 코드조회 제외 */
+		} else if(uri.equals("/common/code/selectUserCommonCodeList.irs")
+				|| uri.equals("/common/initial/selectGroupCodeList.irs")
+				|| uri.equals("/common/initial/selectCodeList.irs")) {
 			isShouldNotFilter = true;
 		}
 		return isShouldNotFilter;
@@ -174,6 +183,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 														
 							// 재발급 된 Token정보로 인증정보 생성
 							jwtTokenProvider.setAuthentication(newAccessToken, role, true);
+							
+							HttpSession session = request.getSession(false);
+							session.setMaxInactiveInterval((int) (jwtProperties.accessToken.validTime/1000) - (5 * 60));		/* 5분 적게 설정 */
 							
 						} else {
 							log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");

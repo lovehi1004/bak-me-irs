@@ -3,6 +3,8 @@ package gov.me.irs.core.security.password;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.initech.safedb.sdk.exception.SafeDBSDKException;
+
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.safedb.Crypto;
 import lombok.RequiredArgsConstructor;
@@ -24,23 +26,23 @@ public class CorePasswordEncoder implements PasswordEncoder {
 	/**
 	 * encode
 	 * 
-	 * @param rawPassword - the original
+	 * @param rawPassword - RSA암호화비밀번호
 	 */
 	@Override
 	public String encode(CharSequence rawPassword) {
 		
 		try {
 			return crypto.encryptSHA((String) rawPassword);
-		} catch (Exception e) {
+		} catch (SafeDBSDKException e) {
 			log.error("비밀번호 암호화 처리 중 오류가 발생하였습니다", e);
+			return null;
 		}
-		return null;
 	}
 	
 	/**
 	 * matches
 	 * 
-	 * @param rawPassword - the original
+	 * @param rawPassword - RSA암호화비밀번호
 	 * @param encodedPassword - DB암호화비밀번호
 	 * @return
 	 */
@@ -54,7 +56,7 @@ public class CorePasswordEncoder implements PasswordEncoder {
 			log.debug("[rawPassword][{}]", rawPassword);
 			try {
 				log.debug("[암호화 솔루션 - rawPassword][{}]", crypto.encryptSHA((String) rawPassword));
-			} catch (Exception e) {
+			} catch (SafeDBSDKException e) {
 				log.error("[암호화 솔루션 에러][{}]", e);
 			}
 			log.debug("[encodedPassword][{}]", encodedPassword);
@@ -62,10 +64,10 @@ public class CorePasswordEncoder implements PasswordEncoder {
 		
 		try {
 			return crypto.encryptSHA((String) rawPassword).equals(encodedPassword) && !((String) rawPassword).equals(encodedPassword);
-		} catch (Exception e) {
+		} catch (SafeDBSDKException e) {
 			log.error("비밀번호 검증 중 오류가 발생하였습니다", e);
+			return false;
 		}
-		return false;
 	}
 
 }

@@ -2,8 +2,6 @@ package gov.me.irs.core.jwt.util;
 
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
-
 import gov.me.irs.core.user.enumeration.RoleEnum;
 import gov.me.irs.core.user.enumeration.UserClCdEnum;
 
@@ -14,23 +12,6 @@ import gov.me.irs.core.user.enumeration.UserClCdEnum;
  *
  */
 public final class JwtUtil {
-	
-	/**
-	 * generate a blank string by size
-	 * 
-	 * @param size
-	 * @return
-	 */
-	public final static String newBlankString(int size) {
-		StringBuffer sb = new StringBuffer();
-		
-		for (int i = 0; i < size; i++) {
-			sb.append(StringUtils.SPACE);
-		}
-		
-		return sb.toString();
-		
-	}
 	
 	/**
 	 * 사용자구분코드에 해당하는 권한정보 조회 - 사용자의 기본권한

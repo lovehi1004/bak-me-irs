@@ -1,8 +1,12 @@
 package gov.me.irs.core.token.service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.token.JwtToken;
 import gov.me.irs.core.token.entity.TableRefreshToken;
 import gov.me.irs.core.token.repository.RefreshTokenRepository;
@@ -21,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtService {
 	
+	private final JwtProperties jwtProperties;
+	
 	private final RefreshTokenRepository refreshTokenRepository;
 	
 	@Transactional(rollbackFor = Exception.class)
@@ -34,7 +40,7 @@ public class JwtService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
-	public void login(JwtToken jwtToken, String userAgent){
+	public void login(HttpServletRequest request, JwtToken jwtToken, String userAgent){
 		
 		TableRefreshToken tableRefreshToken = TableRefreshToken.builder()
 				.lgnId(jwtToken.getKey())
@@ -51,6 +57,11 @@ public class JwtService {
 			refreshTokenRepository.deleteByLgnId(lgnId);
 			log.debug("기존의 존재하는 refresh 토큰 삭제2");
 		}
+		
+		/* 세션생성 */
+		HttpSession session = request.getSession(true);
+		session.setAttribute("lgnId", lgnId);
+		session.setMaxInactiveInterval((int) (jwtProperties.accessToken.validTime/1000) - (5 * 60));		/* 5분 적게 설정 */
 		
 		refreshTokenRepository.save(tableRefreshToken);
 		

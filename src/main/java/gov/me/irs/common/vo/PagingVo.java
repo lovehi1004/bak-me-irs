@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 페이징처리 Vo
+ *  ▶ 업무별 공통 데이터셋 : dsPageInfo
+ * 	▶ 공통 컴포넌트 : comPaging.xfdl
  * 
  * @author Justin
  *
@@ -70,7 +72,7 @@ public final class PagingVo {
 					if(intValue > 0) {
 						this.pageNo = intValue;
 					}
-				} catch (Throwable e) {
+				} catch (NumberFormatException e) {
 					log.error("[invalid Map key - pageNo]", e);	
 				}
 			}
@@ -83,7 +85,7 @@ public final class PagingVo {
 					if(intValue > 0) {
 						this.listSize = intValue;
 					}
-				} catch (Throwable e) {
+				} catch (NumberFormatException e) {
 					log.error("[invalid Map key - listSize]", e);	
 				}
 			}

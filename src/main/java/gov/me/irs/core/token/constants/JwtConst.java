@@ -8,7 +8,7 @@ package gov.me.irs.core.token.constants;
  */
 public final class JwtConst {
 	
-	public final static String HTTP_HEADER_AUTH_TYPE = "Bearer";
+	public final static String HTTP_HEADER_AUTH_TYPE = "Bearer ";			/* [Bearer ] - Bearer 우측에 공백1칸 */
 	public final static String JWT_HTTP_HEADER_ACCESS_TOKEN_KEY = "Authorization";
 	public final static String JWT_HTTP_HEADER_REFRESH_TOKEN_KEY = "RefreshToken";
 	

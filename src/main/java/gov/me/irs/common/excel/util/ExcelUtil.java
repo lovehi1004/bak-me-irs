@@ -1,12 +1,14 @@
 package gov.me.irs.common.excel.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -510,5 +516,248 @@ public class ExcelUtil {
 	public final String getExcelFileName(String name) {
 		return raonKFileUtil.getExcelFilenameWithDate(name);
 	}
+
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 엑셀 파일 생성하기
+	 * 
+	 * @param headerMatrix
+	 * @param cellMatrix
+	 * @param dataList
+	 * @param sheetname
+	 * @param isAddDateFooter
+	 * @return
+	 * @throws Exception
+	 */
+	public ResponseEntity<byte[]> getXssf(ExcelMatrix headerMatrix, ExcelMatrix cellMatrix, List<Map<String, Object>> dataList, String filename, String sheetname, boolean exceptFooter) throws Exception {
+		ExcelCell matrixHeader[][] = headerMatrix.getMatrix();
+		ExcelCell matrixCell[][] = cellMatrix.getMatrix();
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 1. 워크북 생성 ■■■■■■■■■■■■■■■■■■■■ */
+		Workbook workbook = new XSSFWorkbook();
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 2. 시트 생성 ■■■■■■■■■■■■■■■■■■■■ */
+		Sheet sheet = workbook.createSheet(sheetname);
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 3. 초기값 설정 ■■■■■■■■■■■■■■■■■■■■ */
+		int rowCount = 0;
+		int totalCellCount = -1;
+		/* merge 대상 시작 row index를 저장할 list */
+		List<Integer> mergeTargetHeaderRowIndexList = new ArrayList<Integer>();
+		List<Integer> mergeTargetBodyRowIndexList = new ArrayList<Integer>();
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 4. 헤더영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
+		/* 헤더 출력정보가 존재하면 */
+		if(headerMatrix != null) {
+			mergeTargetHeaderRowIndexList.add(rowCount);
+			
+			for (int idx = 0; idx < matrixHeader.length; idx++) {
+				totalCellCount = 0;
+				
+				/* ■■■■■■■■■■■■■■■■■■■■ 5. row 생성 ■■■■■■■■■■■■■■■■■■■■ */
+				Row row = sheet.createRow(rowCount++);
+				int maxTimes = 1;
+				
+				for (int kdx = 0; kdx < matrixHeader[idx].length; kdx++) {
+					totalCellCount++;
+					
+					/* ■■■■■■■■■■■■■■■■■■■■ 6. cell 생성 ■■■■■■■■■■■■■■■■■■■■ */
+					Cell cell = row.createCell(kdx);
+					
+					String headerKey = matrixHeader[idx][kdx].getKey();
+					
+					int nTimes = headerKey.split("\\n").length;			/* 높이계산용 - 엔터값 갯수 */
+					if(nTimes >= maxTimes) {
+						maxTimes = nTimes;
+					}
+					
+					cell.setCellStyle(this.getDefaultHeaderCellStyle(workbook, row, maxTimes, matrixHeader[idx][kdx].getAlign()));
+					cell.setCellValue(headerKey);
+					
+				}
+			}
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 7. 바디영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
+		for (Map<String, Object> map : dataList) {
+			
+			mergeTargetBodyRowIndexList.add(rowCount);
+			
+			for (int idx = 0; idx < matrixCell.length; idx++) {
+				totalCellCount = 0;
+				
+				/* ■■■■■■■■■■■■■■■■■■■■ 8. row 생성 ■■■■■■■■■■■■■■■■■■■■ */
+				Row row = sheet.createRow(rowCount++);
+				int maxTimes = 1;
+				
+				for (int kdx = 0; kdx < matrixCell[idx].length; kdx++) {
+					totalCellCount++;
+					
+					/* ■■■■■■■■■■■■■■■■■■■■ 9. cell 생성 ■■■■■■■■■■■■■■■■■■■■ */
+					Cell cell = row.createCell(kdx);
+					
+					/* 9-1. key가 존재하지 않으면 default 값으로 설정 후 skip */
+					if(ObjectUtils.isEmpty(matrixCell[idx][kdx].getKey())) {
+						
+						Object defaultValue = matrixCell[idx][kdx].getDefaultValue();
+						
+						if(defaultValue instanceof Integer) {
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+							cell.setCellValue((Integer) defaultValue);
+						} else {
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+							cell.setCellValue((String) defaultValue);
+						}
+						
+					/* 9-2. key가 존재하면 해당 Cell위치에 값 설정 */
+					} else {
+						
+						Object dataValue = map.get(matrixCell[idx][kdx].getKey());
+						
+						if(ObjectUtils.isEmpty(dataValue)) {			// null값 공백으로 처리
+							cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+							cell.setCellValue(StringUtils.EMPTY);
+						} else {
+							if(matrixCell[idx][kdx].getType() == ExcelConst.INT) {
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, row, 1, matrixCell[idx][kdx].getAlign()));
+								cell.setCellValue((Integer) dataValue);
+							} else {
+								String dataString = String.valueOf(dataValue);
+								
+								int nTimes = dataString.split("\\n").length;			/* 높이계산용 - 엔터값 갯수 */
+								if(nTimes >= maxTimes) {
+									maxTimes = nTimes;
+								}
+								
+								cell.setCellStyle(this.getDefaultCellStyle(workbook, row, maxTimes, matrixCell[idx][kdx].getAlign()));
+								cell.setCellValue(dataString);
+							}
+						}
+						
+					}
+					
+				}
+			}
+			
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 10. 셀크기 조정 ■■■■■■■■■■■■■■■■■■■■ */
+		for (int idx = 0; idx < totalCellCount; idx++) {
+			sheet.autoSizeColumn(idx);
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 11. 엑셀 공통 푸터영역 처리 ■■■■■■■■■■■■■■■■■■■■ */
+		if(!exceptFooter) {
+			Row commonRow = sheet.createRow(rowCount);
+			Cell commonCell = commonRow.createCell(0);
+			commonCell.setCellStyle(this.getDefaultCommonFooterCellStyle(workbook));
+			final String dateInfo = DateUtil.getFullDate();
+			commonCell.setCellValue(dateInfo);
+			sheet.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, (matrixCell[0].length - 1)));
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 12-1. 헤더영역 Merge 하기 ■■■■■■■■■■■■■■■■■■■■ */
+		List<RowSpan> headerRowSpanList = headerMatrix.getRowSpanList();
+		List<ColSpan> headerColSpanList = headerMatrix.getColSpanList();
+		
+		for (int mergeTargetRowIndex : mergeTargetHeaderRowIndexList) {
+			for (RowSpan rowSpan : headerRowSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + rowSpan.getStartRow(),
+						mergeTargetRowIndex + rowSpan.getEndRow(),
+						rowSpan.getStartCol(),
+						rowSpan.getEndCol()));
+			}
+			for (ColSpan colSpan : headerColSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + colSpan.getStartRow(),
+						mergeTargetRowIndex + colSpan.getEndRow(),
+						colSpan.getStartCol(),
+						colSpan.getEndCol()));
+			}
+		}
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 12-2. 바디영역 Merge 하기 ■■■■■■■■■■■■■■■■■■■■ */
+		List<RowSpan> bodyRowSpanList = cellMatrix.getRowSpanList();
+		List<ColSpan> bodyColSpanList = cellMatrix.getColSpanList();
+		
+		for (int mergeTargetRowIndex : mergeTargetBodyRowIndexList) {
+			for (RowSpan rowSpan : bodyRowSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + rowSpan.getStartRow(),
+						mergeTargetRowIndex + rowSpan.getEndRow(),
+						rowSpan.getStartCol(),
+						rowSpan.getEndCol()));
+			}
+			for (ColSpan colSpan : bodyColSpanList) {
+				sheet.addMergedRegion(new CellRangeAddress(
+						mergeTargetRowIndex + colSpan.getStartRow(),
+						mergeTargetRowIndex + colSpan.getEndRow(),
+						colSpan.getStartCol(),
+						colSpan.getEndCol()));
+			}
+		}
+		
+		
+		/* ■■■■■■■■■■■■■■■■■■■■ 13. 엑셀 생성하기 ■■■■■■■■■■■■■■■■■■■■ */
+		
+		
+		
+		
+		ByteArrayOutputStream bos = null;
+		try {
+			
+			bos = new ByteArrayOutputStream();
+			workbook.write(bos);
+			
+			byte[] bytes = bos.toByteArray();
+			
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+			headers.setContentDispositionFormData("attachment", this.encode("aaaa.xlsx"));
+			headers.setContentLength(bytes.length);
+			
+			/* 예외처리 TEST START - 확인 20240221160300 */
+//			boolean xxx = false;
+//			xxx = true;
+//			
+//			if(xxx) {
+//				throw new IOException("aaaaa");
+//			}
+			/* 예외처리 TEST END - 확인 20240221160300 */
+			
+			return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+			
+		} catch(IOException e) {
+			log.error("[엑셀파일 생성 오류][{}]", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			if(bos != null) {
+				bos.close();
+			}
+		}
+	}
+	
+	public final String encode(String plainString) {
+		return Base64.getEncoder().encodeToString(plainString.getBytes());
+	}
+	
+	public final String decode(String encodedString) {
+		byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+		String decodedString = new String(decodedBytes);
+		return decodedString;
+	}
 }

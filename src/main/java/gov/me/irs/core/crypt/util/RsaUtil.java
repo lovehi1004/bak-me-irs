@@ -1,15 +1,22 @@
 package gov.me.irs.core.crypt.util;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -47,7 +54,7 @@ public final class RsaUtil {
     	KeyPairGenerator generator;
     	try {
     		generator = KeyPairGenerator.getInstance(RSA_INSTANCE);
-    		generator.initialize(1024);
+    		generator.initialize(2048);
     		
     		KeyPair keyPair = generator.genKeyPair();
     		KeyFactory keyFactory = KeyFactory.getInstance(RSA_INSTANCE);
@@ -67,6 +74,12 @@ public final class RsaUtil {
     		
     		return map;
     		
+    	} catch (NoSuchAlgorithmException e) {
+    		log.error("[initRsa][{}]", e);
+    		throw e;
+    	} catch (InvalidKeySpecException e) {
+    		log.error("[initRsa][{}]", e);
+    		throw e;
     	} catch (Exception e) {
     		log.error("[initRsa][{}]", e);
     		throw e;
@@ -79,9 +92,14 @@ public final class RsaUtil {
      * @param session
      * @param securedValue
      * @return
-     * @throws Exception
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws UnsupportedEncodingException
      */
-	public final static String decryptRsa(HttpSession session, String securedValue) throws Exception {
+	public final static String decryptRsa(HttpSession session, String securedValue) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 		
 		PrivateKey privateKey = (PrivateKey) session.getAttribute(RsaUtil.RSA_WEB_KEY);
 		
