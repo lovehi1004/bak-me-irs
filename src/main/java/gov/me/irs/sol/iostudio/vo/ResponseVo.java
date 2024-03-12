@@ -1,5 +1,6 @@
 package gov.me.irs.sol.iostudio.vo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,7 +28,19 @@ public class ResponseVo {
 	
 	private Hits hits;
 	
-	private Map<String, Object> resultMap;
+	public Map<String, Object> resultMap;
+
+	public void setResultMap(Map<String, Object> resultMap) {
+		this.resultMap = new HashMap<>();
+		this.resultMap.putAll(resultMap);	
+	}
+
+	public Map<String, Object> getResultMap() {
+		Map<String, Object> map = new HashMap<>();
+		map.putAll(resultMap);
+		return map;
+	}
+	
 	
 }
 

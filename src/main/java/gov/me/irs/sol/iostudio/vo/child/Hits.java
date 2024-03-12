@@ -1,5 +1,6 @@
 package gov.me.irs.sol.iostudio.vo.child;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -17,5 +18,18 @@ public class Hits {
 
 	private long total;
 	
-	private Map<String, Object> hits;
+	public Map<String, Object> hits;
+
+	public void setHits(Map<String, Object> hits) {
+		this.hits = new HashMap<>();
+		this.hits.putAll(hits);	
+	}
+
+	public Map<String, Object> getHits() {
+		Map<String, Object> map = new HashMap<>();
+		map.putAll(hits);
+		return map;
+	}
+	
+	
 }

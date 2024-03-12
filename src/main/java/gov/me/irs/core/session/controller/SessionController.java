@@ -1,5 +1,8 @@
 package gov.me.irs.core.session.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
+import gov.me.irs.common.constants.Const;
 import gov.me.irs.core.config.util.CoreUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import lombok.RequiredArgsConstructor;
@@ -38,10 +42,19 @@ public class SessionController {
 	@PostMapping("/session/check.irs")
 	public NexacroResult check(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		log.debug("[■■■■■■■■■■▶][invoked!][{}]", new Object() {}.getClass().getEnclosingMethod().getName());
-		
-		boolean result = sessionService.check(request, response);
+		Map<String, Object> dsCheck = new HashMap<String, Object>();
 		
 		NexacroResult nexacroResult = new NexacroResult();
+		
+		boolean result = sessionService.check(request, response);
+		dsCheck.put("sessionYn", result ? Const.CHARACTER.Y : Const.CHARACTER.N);
+		nexacroResult.addDataSet("dsCheck", dsCheck);
+		
+		/* 결과담기 */
+		/* 결과담기 */
+		/* 결과담기 */
+		/* 결과담기 */
+		/* 결과담기 */
 		
 		/* 로그인이 요구되는 상황 */
 		if(!result) {

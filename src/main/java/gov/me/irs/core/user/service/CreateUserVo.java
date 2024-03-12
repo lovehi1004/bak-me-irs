@@ -51,7 +51,7 @@ public class CreateUserVo {
 	/**
 	 * 권한정보 - JWT권한 목록
 	 */
-	private List<String> roles;
+	public List<String> roles;
 
 	public void setRoles(List<String> roles) {
 		this.roles = new ArrayList<>();

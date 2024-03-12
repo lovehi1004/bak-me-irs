@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmBizFldInfoMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야목록조회 총건수 조회 -->
+	<select id="selectBizFldInfoListCnt" resultType="int" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoListCnt */
+		SELECT COUNT(*)
+		FROM COM_BIZ_FLD_BSC
+		WHERE DEL_YN = 'N'
+		<if test="srhBizFldEngNm != null and !srhBizFldEngNm.equals('')">
+		   AND BIZ_FLD_ENG_NM LIKE CONCAT('%', #{srhBizFldEngNm}, '%')
+		</if>
+		<if test="srhBizFldKornNm != null and !srhBizFldKornNm.equals('')">
+		   AND BIZ_FLD_KORN_NM LIKE CONCAT('%', #{srhBizFldKornNm}, '%')
+		</if>
+		<if test="srhUseYn != null and !srhUseYn.equals('')">
+		   AND USE_YN = #{srhUseYn}
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야 목록조회 -->
+	<select id="selectBizFldInfoList" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.BIZ_FLD_CD_MGNO
+			 , U.BIZ_FLD_KORN_NM
+			 , U.BIZ_FLD_ENG_NM
+			 , U.BIZ_FLD_CN
+			 , U.SORT_SEQO
+			 , U.USE_YN
+			 , U.DEL_YN
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT BIZ_FLD_CD_MGNO							
+						 , BIZ_FLD_KORN_NM							
+						 , BIZ_FLD_ENG_NM							
+						 , BIZ_FLD_CN								
+						 , USE_YN
+						 , DEL_YN
+						 , SORT_SEQO									
+					  FROM COM_BIZ_FLD_BSC
+					 WHERE DEL_YN = 'N'
+					<if test="srhBizFldEngNm != null and !srhBizFldEngNm.equals('')">
+					   AND BIZ_FLD_ENG_NM LIKE CONCAT('%', #{srhBizFldEngNm}, '%')
+					</if>
+					<if test="srhBizFldKornNm != null and !srhBizFldKornNm.equals('')">
+					   AND BIZ_FLD_KORN_NM LIKE CONCAT('%', #{srhBizFldKornNm}, '%')
+					</if>
+					<if test="srhUseYn != null and !srhUseYn.equals('')">
+					   AND USE_YN = #{srhUseYn}
+					</if>
+					 ORDER BY SORT_SEQO ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 중복 조회 -->
+	<select id="selectBizSFldCnt" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizSubFldCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{bizFldCdMgno} as BIZ_FLD_CD_MGNO 
+		  FROM COM_BIZ_FLD_BSC 
+		 WHERE BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야등록 -->
+	<insert id="insertBizFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.insertBizFldInfo */
+		INSERT 
+		  INTO COM_BIZ_FLD_BSC
+		  	 ( BIZ_FLD_CD_MGNO
+			 , BIZ_FLD_ENG_NM
+			 , BIZ_FLD_KORN_NM
+			 , BIZ_FLD_CN
+			 , SORT_SEQO
+			 , USE_YN
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT
+			 )
+		 VALUES
+			( #{bizFldCdMgno}
+			, #{bizFldEngNm}
+			, #{bizFldKornNm}
+			, #{bizFldCn}
+			, CAST( #{bizFldCdMgno} AS NUMERIC)
+			, #{useYn}
+			, 'N'
+			, #{sUserId}
+			, CURRENT_TIMESTAMP
+			, #{sUserId}
+			, CURRENT_TIMESTAMP
+			)
+	</insert>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야수정 -->
+	<update id="updateBizFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.updateBizFldInfo */
+		UPDATE
+			COM_BIZ_FLD_BSC
+		SET
+			BIZ_FLD_ENG_NM = #{bizFldEngNm}
+		  , BIZ_FLD_KORN_NM = #{bizFldKornNm}
+		  , BIZ_FLD_CN = #{bizFldCn}
+		  , USE_YN = #{useYn}
+		  , MDFR_ID = #{sUserId}
+		  , MDFCN_DT =CURRENT_TIMESTAMP
+		WHERE
+			BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업분야 삭제 -->
+	<update id="deleteBizFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.deleteBizFldInfo */
+		UPDATE
+			COM_BIZ_FLD_BSC
+		SET
+		   DEL_YN = 'Y'
+		   ,USE_YN = 'N'
+		WHERE
+			BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 상세조회 -->
+	<select id="selectBizFldInfoDetail" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoDetail */
+		SELECT BIZ_FLD_CD_MGNO
+		    , BIZ_FLD_ENG_NM
+		    , BIZ_FLD_KORN_NM
+		    , BIZ_FLD_CN
+		    , SORT_SEQO
+		    , USE_YN
+		    , DEL_YN
+		    , RGTR_ID
+		    , REG_DT
+		FROM COM_BIZ_FLD_BSC
+		WHERE BIZ_FLD_CD_MGNO = #{srhBizFldCdMgno}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야 목록조회 -->
+	<select id="selectBizFldInfoDetailList" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizFldInfoDetailList */
+		SELECT B.BIZ_FLD_CD_MGNO
+			 , C.BIZ_FLD_DTL_CD_MGNO
+			 , C.BIZ_DTL_FLD_KORN_NM
+			 , C.BIZ_DTL_FLD_ENG_NM
+			 , C.BIZ_DTL_FLD_CN
+			 , C.SORT_SEQO
+			 , C.USE_YN
+		  FROM COM_BIZ_FLD_BSC B
+		 INNER JOIN COM_BIZ_FLD_DTL C
+		    ON C.BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD_MGNO
+		   AND B.BIZ_FLD_CD_MGNO = #{srhBizFldCdMgno}
+		 ORDER BY C.SORT_SEQO ASC
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야 상세조회 -->
+	<select id="selectBizSubFldInfoDetail" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizSubFldInfoDetail */
+		SELECT B.BIZ_FLD_CD_MGNO
+			 , B.BIZ_FLD_KORN_NM
+			 , C.BIZ_FLD_DTL_CD_MGNO
+			 , C.BIZ_DTL_FLD_KORN_NM
+			 , C.BIZ_DTL_FLD_ENG_NM
+			 , C.BIZ_DTL_FLD_CN
+			 , C.SORT_SEQO
+			 , C.USE_YN
+		  FROM COM_BIZ_FLD_BSC B
+		 INNER JOIN COM_BIZ_FLD_DTL C
+		    ON C.BIZ_FLD_CD_MGNO = B.BIZ_FLD_CD_MGNO
+		   AND B.BIZ_FLD_CD_MGNO = #{srhBizFldCdMgno}
+		  WHERE 1 = 1
+		   AND C.BIZ_FLD_DTL_CD_MGNO = #{srhBizFldDtlCdMgno}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업세부분야 중복 조회 -->
+	<select id="selectBizSubFldCnt" resultType="egovMap" parameterType="map">
+		/* AdmBizFldInfoMapper.selectBizSubFldCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{bizFldDtlCdMgno} AS BIZ_FLD_DTL_CD_MGNO 
+		  FROM COM_BIZ_FLD_DTL 
+		 WHERE BIZ_FLD_DTL_CD_MGNO = #{bizFldDtlCdMgno}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야등록 -->
+	<insert id="insertBizSubFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.insertBizSubFldInfo */
+		INSERT INTO
+			COM_BIZ_FLD_DTL
+			(	
+			  BIZ_FLD_DTL_CD_MGNO
+			, BIZ_FLD_CD_MGNO
+			, BIZ_DTL_FLD_ENG_NM
+			, BIZ_DTL_FLD_KORN_NM
+			, BIZ_DTL_FLD_CN
+			, SORT_SEQO
+			, USE_YN
+			, DEL_YN
+			, RGTR_ID
+			, REG_DT
+			, MDFR_ID
+			, MDFCN_DT
+			, CMPTNC_INST_NO
+			)
+		VALUES
+			 ( 
+			   #{bizFldDtlCdMgno}
+			 , #{bizFldCdMgno}
+			 , #{bizDtlFldEngNm}
+			 , #{bizDtlFldKornNm}
+			 , #{bizDtlFldCn}
+			 , CAST( #{sortSeqo} AS NUMERIC)
+			 , #{useYn}
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 , #{cmptncInstNo}
+			 )
+	</insert>
+	
+	
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야수정 -->
+	<update id="updateBizSubFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.updateBizSubFldInfo */
+		UPDATE
+			COM_BIZ_FLD_DTL
+		SET
+			 BIZ_DTL_FLD_KORN_NM = #{bizDtlFldKornNm}
+			, BIZ_DTL_FLD_ENG_NM = #{bizDtlFldEngNm}
+			, BIZ_DTL_FLD_CN = #{bizDtlFldCn}
+			, SORT_SEQO = CAST( #{sortSeqo} AS NUMERIC)
+			, USE_YN = #{useYn}
+			, MDFR_ID = #{sUserId}
+			, MDFCN_DT = CURRENT_TIMESTAMP
+			, CMPTNC_INST_NO = #{cmptncInstNo}
+		WHERE
+			BIZ_FLD_DTL_CD_MGNO = #{bizFldDtlCdMgno} AND BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	</update>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 사업세부분야 삭제-->
+	<update id="deleteBizSubFldInfo" parameterType="map">
+		/* AdmBizFldInfoMapper.deleteBizSubFldInfo */
+		UPDATE
+			COM_BIZ_FLD_DTL
+		SET
+			DEL_YN = 'Y'
+		    ,USE_YN = 'N'
+		WHERE
+			BIZ_FLD_DTL_CD_MGNO = #{bizFldDtlCdMgno} AND BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 사업분야 정보 관리 사업수행자관리 > 코드관리 > 사업분야 정보 관리 - 순서 정렬 -->
+	<update id="updateBizFldCdSortSeqo" parameterType="map">
+	/* AdmBizFldInfoMapper.updateBizFldCdSortSeqo */
+	UPDATE COM_BIZ_FLD_DTL AS TARGET
+	   SET SORT_SEQO = ORG.NEW_SORT_SEQO
+	  FROM (
+				SELECT BIZ_FLD_CD_MGNO
+					 , BIZ_FLD_DTL_CD_MGNO
+					 , SORT_SEQO
+				<if test='sortType.equals("INSERT")'><!-- 신규생성 기준으로 정렬처리 -->
+					 , ROW_NUMBER() OVER(ORDER BY SORT_SEQO, REG_DT DESC) AS NEW_SORT_SEQO
+				</if>
+				<if test='sortType.equals("UPDATE")'><!-- 수정 기준으로 정렬처리 -->
+					 , ROW_NUMBER() OVER(ORDER BY SORT_SEQO, COALESCE(MDFCN_DT, CURRENT_TIMESTAMP) DESC) AS NEW_SORT_SEQO
+				</if>
+				  FROM COM_BIZ_FLD_DTL
+				 WHERE BIZ_FLD_CD_MGNO = #{bizFldCdMgno}
+	  ) ORG
+	 WHERE TARGET.BIZ_FLD_CD_MGNO = ORG.BIZ_FLD_CD_MGNO
+	   AND TARGET.BIZ_FLD_DTL_CD_MGNO = ORG.BIZ_FLD_DTL_CD_MGNO
+	
+	</update>
+	
+</mapper>

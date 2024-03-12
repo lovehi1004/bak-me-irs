@@ -22,5 +22,14 @@ juso:
   addr-link-api: https://business.juso.go.kr/addrlink/addrLinkApi.do
   addr-link-api-domian: https://business.juso.go.kr
   
+# sms api address
+sms:
+  project-name: irs-dev-sms-api
+  service-url: https://sens.apigw.gov-ntruss.com
+  service-id: ncp-gov:sms:kr:1002933503:irs-dev-sms-api
+  access-key: D4FD5A7868874CC7D19A
+  secret-key: FDF8604996440380A3E44E092156D7D41BDFC684
+  from-tel: "0437147522"
+  
 # examples
 web.example.prop: prop-local

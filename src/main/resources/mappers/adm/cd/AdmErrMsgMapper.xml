@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmErrMsgMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 목록조회 -->
+	<select id="selectErrMsgList" resultType="egovMap" parameterType="map">
+		/* AdmErrMsgMapper.selectErrMsgList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.ERR_MSG_CD
+			 , U.ERR_MSG_CL_CD
+			 , U.ERR_MSG_CL_NM
+			 , U.ERR_MSG_NTN_CD
+			 , U.ERR_MSG_NM
+			 , U.INPT_CNT
+			 , CASE WHEN U.USE_YN = 'Y' THEN '사용'
+		            WHEN U.USE_YN = 'N' THEN '미사용'
+		            ELSE 'N/A'
+		       END as USE_YN
+			 , U.DEL_YN	
+		  FROM (
+				SELECT ROW_NUMBER() OVER(ORDER BY ERR_MSG_CD) AS RN
+					 , COUNT(*) OVER()     AS TOTAL_CNT
+					 , ERR_MSG_CD
+					 , ERR_MSG_CL_CD
+					 , FN_GET_CODENM('ERR_MSG_CL_CD', ERR_MSG_CL_CD) AS ERR_MSG_CL_NM
+					 , ERR_MSG_NTN_CD
+					 , ERR_MSG_NM
+					 , INPT_CNT
+					 , USE_YN
+					 , DEL_YN									
+				  FROM COM_ERR_MSG_BSC
+				 WHERE 1 = 1 AND DEL_YN ='N'
+				<if test="srhErrMsgCd != null and !srhErrMsgCd.equals('')">
+				   AND ERR_MSG_CD LIKE CONCAT('%', #{srhErrMsgCd}, '%')
+				</if>
+				<if test="srhErrMsgClCd != null and !srhErrMsgClCd.equals('')">
+				   AND ERR_MSG_CL_CD LIKE CONCAT('%', #{srhErrMsgClCd}, '%')
+				</if>
+				<if test="srhErrMsgNm != null and !srhErrMsgNm.equals('')">
+				   AND ERR_MSG_NM LIKE CONCAT('%', #{srhErrMsgNm}, '%')
+				</if>
+				<if test="srhUseYn != null and !srhUseYn.equals('')">
+				   AND USE_YN = #{srhUseYn}
+				</if>
+		  		) U
+		 ORDER BY U.ERR_MSG_CD ASC
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 상세조회 -->
+	<select id="selectErrMsgDetail" resultType="egovMap" parameterType="map">
+		/* AdmErrMsgMapper.selectErrMsgDetail */
+		SELECT ERR_MSG_CD
+			 , ERR_MSG_CL_CD
+			 , FN_GET_CODENM('ERR_MSG_CL_CD', ERR_MSG_CL_CD) AS ERR_MSG_CL_NM
+			 , ERR_MSG_NM
+			 , INPT_CNT			 
+			 , USE_YN									/* 사용여부 */
+		  FROM COM_ERR_MSG_BSC
+		 WHERE ERR_MSG_CD = #{srhErrMsgCd}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 등록 -->
+	<insert id="insertErrMsg" parameterType="map">
+		/* AdmErrMsgMapper.insertErrMsg */
+		INSERT
+		  INTO COM_ERR_MSG_BSC
+			 ( ERR_MSG_CD
+			 , ERR_MSG_CL_CD
+			 , ERR_MSG_NTN_CD
+			 , ERR_MSG_NM
+			 , INPT_CNT
+			 , USE_YN                     
+			 , DEL_YN  
+			 , RGTR_ID
+			 , REG_DT
+			 , MDFR_ID
+			 , MDFCN_DT                   
+			 )
+		VALUES
+			 ( #{errMsgCd}
+			 , #{errMsgClCd}
+			 , 'KR'
+			 , #{errMsgNm}
+			 , CAST( #{inptCnt} AS NUMERIC)
+			 , #{useYn}
+			 , 'N'
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 국가코드 중복 조회 -->
+	<select id="selectErrMsgCnt" resultType="egovMap" parameterType="map">
+		/* AdmErrMsgMapper.selectErrMsgCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{errMsgCd} as ERR_MSG_CD
+		  FROM COM_ERR_MSG_BSC
+		 WHERE ERR_MSG_CD = #{errMsgCd}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 수정 -->
+	<update id="updateErrMsg" parameterType="map">
+		/* AdmErrMsgMapper.updateErrMsg */
+		UPDATE COM_ERR_MSG_BSC
+		   SET ERR_MSG_NM = #{errMsgNm}
+		   	 , INPT_CNT = #{inptCnt}		   	 
+		   	 , USE_YN = #{useYn}
+		   	 , MDFR_ID = #{sUserId}
+			 , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE ERR_MSG_CD = #{errMsgCd}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 오류메시지 관리 - 삭제 -->
+	<update id="deleteErrMsg" parameterType="map">
+		/* AdmErrMsgMapper.deleteErrMsg */
+		UPDATE COM_ERR_MSG_BSC
+		   SET DEL_YN = 'Y'
+		   	 , MDFR_ID = #{sUserId}
+			 , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE ERR_MSG_CD = #{errMsgCd}
+	</update>
+	
+</mapper>

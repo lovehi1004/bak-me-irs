@@ -1,0 +1,175 @@
+<!-- DOCTYPE : DOCTYPE declaration -->
+<!DOCTYPE html>
+<html lang='ko'> <!-- LANGUAGE : locale setting (value of location property in Environment) -->
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="user-scalable=1, initial-scale=0.1, width=device-width, target-densitydpi=device-dpi">
+	<!-- META_CHECKVERSION : Add if value of checkversion property in Envrionment is true -->
+
+	
+	<!-- FAVICON : favion setting (value of icon property in Environment. add to value of icon property in Environment) -->
+    <link rel="shortcut icon" href="./_resource_/_theme_/IRS/images/titlebar_icon.ico">
+	
+	<!-- USERFONT_STYLE : userfont style setting (value of userfontid property in Environment. crate contents contained in xfont file specified userfontid property in Environment) -->
+    <style id="userfont">
+        @font-face {
+            font-family: 'NotoSansKR';
+            font-style: normal;
+            font-weight: 400;
+            src : local('Noto Sans KR');
+            src: url(./_resource_/_font_/NotoSansKR-Regular.woff2) format('woff2'),
+                 url(./_resource_/_font_/NotoSansKR-Regular.woff) format('woff'),
+                 url(./_resource_/_font_/NotoSansKR-Regular.otf) format('opentype');
+        }
+        @font-face {
+            font-family: 'NotoSansKR';
+            font-style: normal;
+            font-weight: 500;
+            src : local('Noto Sans KR');
+            src: url(./_resource_/_font_/NotoSansKR-Medium.woff2) format('woff2'),
+                 url(./_resource_/_font_/NotoSansKR-Medium.woff) format('woff'),
+                 url(./_resource_/_font_/NotoSansKR-Medium.otf) format('opentype');
+        }
+        @font-face {
+            font-family: 'NotoSansKR';
+            font-style: normal;
+            font-weight: 700;
+            src : local('Noto Sans KR');
+            src: url(./_resource_/_font_/NotoSansKR-Bold.woff2) format('woff2'),
+                 url(./_resource_/_font_/NotoSansKR-Bold.woff) format('woff'),
+                 url(./_resource_/_font_/NotoSansKR-Bold.otf) format('opentype');
+        }
+        @font-face {
+          font-family: 'NanumSquare';
+          font-weight: 300;
+          src : local('NanumSquare');
+          src: url(./_resource_/_font_/NanumSquareL.eot);
+          src: url(./_resource_/_font_/NanumSquareL.eot?#iefix) format('embedded-opentype'),
+               url(./_resource_/_font_/NanumSquareL.woff) format('woff'),
+        }
+        @font-face {
+          font-family: 'NanumSquare';
+          font-weight: 400;
+          src : local('NanumSquare');
+          src: url(./_resource_/_font_/NanumSquareR.eot);
+          src: url(./_resource_/_font_/NanumSquareR.eot?#iefix) format('embedded-opentype'),
+               url(./_resource_/_font_/NanumSquareR.woff) format('woff'),
+        }
+        @font-face {
+        font-family: 'NanumSquare';
+        font-weight: 700;
+        src : local('NanumSquare');
+        src: url(./_resource_/_font_/NanumSquareB.eot);
+        src: url(./_resource_/_font_/NanumSquareB.eot?#iefix) format('embedded-opentype'),
+             url(./_resource_/_font_/NanumSquareB.woff) format('woff'),
+        }
+        @font-face {
+        font-family: 'NanumSquare';
+        font-weight: 800;
+        src : local('NanumSquare');
+        src: url(./_resource_/_font_/NanumSquareEB.eot);
+        src: url(./_resource_/_font_/NanumSquareEB.eot?#iefix) format('embedded-opentype'),
+             url(./_resource_/_font_/NanumSquareEB.woff) format('woff'),
+        }
+        </style>
+	
+	<!-- FRAMEWORK_LIBRARY : framework lodaing path (list of scripts files in the Framework.json file) -->
+    <script src="./nexacrolib/framework/Framework.js"></script>
+	
+	<!-- COMPONENTS_LIBRARY : commonent lodaing path (list of script file in json file specified in the TypeDefinition module) -->
+    <script src="./nexacrolib/component/CompBase.js"></script>
+    <script src="./nexacrolib/component/ComComp.js"></script>
+    <script src="./nexacrolib/component/Grid.js"></script>
+    <script src="./nexacrolib/component/DeviceAPI.js"></script>
+    <script src="./nexacrolib/component/ListView.js"></script>
+    <script src="./nexacrolib/component/Graphics.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Frame.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Util.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Date.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/String.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Transaction.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Validation.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Popup.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Message.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Grid.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/Excel.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/File.js"></script>
+    <script src="./nexacrolib/component/ExtCrypt/rsa.js"></script>
+    <script src="./nexacrolib/component/ExtCrypt/jsbn.js"></script>
+    <script src="./nexacrolib/component/ExtCrypt/prng4.js"></script>
+    <script src="./nexacrolib/component/ExtCrypt/rng.js"></script>
+    <script src="./nexacrolib/component/raonkupload/js/raonkupload.js"></script>
+    <script src="./nexacrolib/component/raonkupload/plugin/nexacro/21/raonkupload.nexacro21.js"></script>
+    <script src="./nexacrolib/component/Accessibility.js"></script>
+    <script src="./nexacrolib/component/ExtPrototype/customXlsx.js"></script>
+  
+	<!-- ENVIRONMENT_LIBRARY : application environment path (path of Environment.xml.js) -->
+    <script src="./environment.xml.js"></script>
+	
+  <!-- SPLASH_DEFINE_STYLE : Defines the style of the splash screen that is visible while modules are loading -->
+
+  
+	<title></title>
+	<script>
+		// 히스토리 초기화
+		history.pushState(null, null, location.href); 
+		
+		// 뒤로라기 이벤트감지 -> 현재페이지로 이동
+		window.onpopstate = function() { 
+			history.go(1); 
+		}	
+	</script>		
+	<script>	
+		window.document.addEventListener("keydown" , handleKeyDown);
+		function handleKeyDown (oEvent)
+		{
+			if( (oEvent.ctrlKey == true && (oEvent.keyCode == 78 || oEvent.keyCode == 82)) //ctrl+N , ctrl+R
+			//F1(112) ~ F10(121)
+			|| ( oEvent.ctrlKey == false 
+			  && oEvent.altKey  == false
+			  && oEvent.keyCode > 111
+			  && oEvent.keyCode < 122 ) )
+			{
+				oEvent.keyCode      = 0;
+				oEvent.cancelBubble = true;
+				oEvent.returnValue  = false;
+			}
+		}
+	</script>
+	
+</head>
+<body style="margin:0;border:none;-ms-touch-action:none;" onload="oninitframework()">
+	<!-- SPLASH_SHOW_STYLE : Adds the splash screen that is visible while modules are loading -->
+
+  
+	<script>
+		function oninitframework()
+		{
+			/* SPLASH_HIDE_STYLE : Hides the splash screen when modules finish loading */
+
+      
+			/* SCREEN_INFORMATION : create screen information defined in Environment > ScreenDefinition */
+			var screeninfo = [
+            {"id":"Desktop_screen","type":"desktop","key":"IRS","themeid":"theme::IRS","xadl":"IRS.xadl.js"}
+			];
+			nexacro._initHTMLSysEvent(window, document);
+			nexacro._initEnvironment(screeninfo);
+			/* create internal iframe */
+			/* USERFONT_INFORMATION : userfontid property is specified in the Environment */
+			nexacro._prepareManagerFrame(onloadframework, [{family:'NotoSansKR', style:'normal', weight:400},{family:'NotoSansKR', style:'normal', weight:500},{family:'NotoSansKR', style:'normal', weight:700},{family:'NanumSquare', weight:300},{family:'NanumSquare', weight:400},{family:'NanumSquare', weight:700},{family:'NanumSquare', weight:800}]);
+		}
+		function onloadframework()
+		{
+			/* application loading */
+			nexacro._loadADL();
+		}
+		function onfinalframework()
+		{
+			/* application exit */
+		}
+	</script>
+</body>
+</html>
+  
+  

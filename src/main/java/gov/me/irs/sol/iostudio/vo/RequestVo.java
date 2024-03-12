@@ -1,5 +1,6 @@
 package gov.me.irs.sol.iostudio.vo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gov.me.irs.sol.iostudio.vo.child.CustomOptions;
@@ -20,7 +21,7 @@ import lombok.ToString;
  *
  */
 @Builder
-@Data
+//@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -44,6 +45,49 @@ public class RequestVo {
 	@Builder.Default
 	private CustomOptions customOptions = new CustomOptions();
 
+	public void setIndices(List<String> indices) {
+		this.indices = new ArrayList<>();
+		this.indices.addAll(indices);	
+	}
+
+	public void setFields(List<String> fields) {
+		this.fields = new ArrayList<>();
+		this.fields.addAll(fields);	
+	}
+
+	public void setSort(List<Sort> sort) {
+		this.sort = new ArrayList<>();
+		this.sort.addAll(sort);	
+	}
+
+	public void setFilter(List<Filter> filter) {
+		this.filter = new ArrayList<>();
+		this.filter.addAll(filter);	
+	}
+
+	public List<String> getIndices() {
+		List<String> list = new ArrayList<>();
+		list.addAll(indices);
+		return list;
+	}
+
+	public List<String> getFields() {
+		List<String> list = new ArrayList<>();
+		list.addAll(fields);
+		return list;
+	}
+
+	public List<Sort> getSort() {
+		List<Sort> list = new ArrayList<>();
+		list.addAll(sort);
+		return list;
+	}
+
+	public List<Filter> getFilter() {
+		List<Filter> list = new ArrayList<>();
+		list.addAll(filter);
+		return list;
+	}
 	
 }
 

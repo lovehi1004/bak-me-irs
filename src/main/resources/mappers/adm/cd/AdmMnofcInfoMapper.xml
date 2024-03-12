@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmMnofcInfoMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 부처 정보 관리 - 부처목록조회 총건수 조회 -->
+	<select id="selectMnofcInfoListCnt" resultType="int" parameterType="map">
+		/* AdmMnofcInfoMapper.selectMnofcInfoListCnt */
+		SELECT COUNT(*)
+		  FROM COM_MNOFC_BSC B
+		  LEFT OUTER JOIN INST_BSC IB
+		    ON IB.INST_MGNO = B.INST_MGNO
+		 WHERE 1 = 1
+		<if test='srhInstMgno != null and !srhInstMgno.equals("")'>
+		   AND B.INST_MGNO LIKE CONCAT('%', #{srhInstMgno}, '%')
+		</if>
+		<if test='srhBzentNm != null and !srhBzentNm.equals("")'>
+		   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 부처 정보 관리 - 부처목록조회 -->
+	<select id="selectMnofcInfoList" resultType="egovMap" parameterType="map">
+		/* AdmMnofcInfoMapper.selectMnofcInfoList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.INST_MGNO
+			 , U.BZENT_NM
+			 , U.DEL_YN
+			 , (SELECT COUNT(*) FROM COM_MNOFC_DTL D WHERE D.UP_INST_MGNO = U.INST_MGNO) AS CHILD_CNT	/* 하위기관건수 */
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT B.INST_MGNO
+						 , IB.BZENT_NM
+						 , B.DEL_YN
+					  FROM COM_MNOFC_BSC B
+					  LEFT OUTER JOIN INST_BSC IB
+					    ON IB.INST_MGNO = B.INST_MGNO
+					 WHERE 1 = 1
+					<if test='srhInstMgno != null and !srhInstMgno.equals("")'>
+					   AND B.INST_MGNO LIKE CONCAT('%', #{srhInstMgno}, '%')
+					</if>
+					<if test='srhBzentNm != null and !srhBzentNm.equals("")'>
+					   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+					</if>
+					 ORDER BY B.INST_MGNO ASC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 부처 정보 관리 - 부처 하위기관 목록조회 -->
+	<select id="selectSubMnofcInfoList" resultType="egovMap" parameterType="map">
+		/* AdmMnofcInfoMapper.selectSubMnofcInfoList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.UP_INST_MGNO
+			 , U.INST_MGNO
+			 , U.BZENT_NM
+			 , U.SORT_SEQO
+			 , U.DEL_YN
+		  FROM (
+				SELECT ROW_NUMBER() OVER(ORDER BY D.SORT_SEQO) AS RN
+					 , COUNT(*) OVER()     AS TOTAL_CNT
+					 , B.INST_MGNO         AS UP_INST_MGNO
+					 , D.INST_MGNO
+					 , IB.BZENT_NM
+					 , D.SORT_SEQO
+					 , D.DEL_YN
+				  FROM COM_MNOFC_BSC B
+				 INNER JOIN COM_MNOFC_DTL D
+				    ON B.INST_MGNO = #{srhUpInstMgno}
+				   AND D.UP_INST_MGNO = B.INST_MGNO
+				  LEFT OUTER JOIN INST_BSC IB
+				    ON IB.INST_MGNO = D.INST_MGNO
+				 WHERE 1 = 1
+		  		) U
+		 ORDER BY U.SORT_SEQO ASC
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 부처 정보 관리 - 부처수정 -->
+	<update id="updateMnofcInfo" parameterType="map">
+		/* AdmMnofcInfoMapper.updateMnofcInfo */
+		UPDATE COM_MNOFC_BSC
+		<choose>
+			<when test='delYn.equals("Y")'>
+		   SET DEL_YN = 'N'
+			</when>
+			<otherwise>
+		   SET DEL_YN = 'Y'
+			</otherwise>
+		</choose>
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE INST_MGNO = #{instMgno}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 부처 정보 관리 - 부처 하위기관 수정 -->
+	<update id="updateSubMnofcInfo" parameterType="map">
+		/* AdmMnofcInfoMapper.updateSubMnofcInfo */
+		UPDATE COM_MNOFC_DTL
+		<choose>
+			<when test='delYn.equals("Y")'>
+		   SET DEL_YN = 'N'
+			</when>
+			<otherwise>
+		   SET DEL_YN = 'Y'
+			</otherwise>
+		</choose>
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE UP_INST_MGNO = #{upInstMgno}
+		   AND INST_MGNO = #{instMgno}
+	</update>
+	
+</mapper>

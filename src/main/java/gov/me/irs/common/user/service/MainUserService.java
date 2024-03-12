@@ -17,9 +17,11 @@ import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.user.mapper.MainUserMapper;
 import gov.me.irs.core.config.util.UserSession;
 import gov.me.irs.core.crypt.util.RsaUtil;
+import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.jwt.util.JwtUtil;
 import gov.me.irs.core.raonk.service.RaonKService;
 import gov.me.irs.core.safedb.Crypto;
+import gov.me.irs.core.sign.exception.SignException;
 import gov.me.irs.core.user.entity.TableUser;
 import gov.me.irs.core.user.mapper.UserMapper;
 import gov.me.irs.core.user.repository.UserRepository;
@@ -55,6 +57,9 @@ public class MainUserService {
 	private final PasswordEncoder passwordEncoder;
 	
 	private final HttpSession session;
+	
+	/* 프로파일 */
+    String profiles = System.getProperty("spring.profiles.active");
 	
 	/**
 	 * 메인 > 사용자 > 회원가입 > 로그인 아이디 중복 검색 체크
@@ -139,7 +144,13 @@ public class MainUserService {
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 4. 미승인 상태 사용자정보 생성하기 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
 		String rsaPassword = (String) dsUserInfo.get(Const.CORE.KEY_USER_PASSWORD);
-		String encptPswd = crypto.encryptRsaToSHA(rsaPassword);
+		String encptPswd = StringUtils.EMPTY;
+		try {
+			encptPswd = crypto.encryptRsaToSHA(rsaPassword);
+		} catch (Exception e) {
+			throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+		}
+		
 		dsUserInfo.put("encptPswd", encptPswd);			//비밀번호 암호화
 		
 		dsUserInfo.put("userId", userId);
@@ -219,10 +230,21 @@ public class MainUserService {
 				/* 초기화된 비밀번호로 결과 설정 */
 				resultMap.put("result", initPswd);
 				
-			}
+				if(!ObjectUtils.isEmpty(profiles) && Const.PROFILES.PRD.equals(profiles)) {
+					// sms call
+				}
+			}			
+		}
+		else {
 			
+			if(!ObjectUtils.isEmpty(profiles) && Const.PROFILES.PRD.equals(profiles)) {
+				// sms call
+			}
 		}
 		
+		/* 화면으로 전송시 비밀번호 제거하고 전송 */
+		resultMap.remove("result");
+				
 		return resultMap;
 		
 	}
@@ -263,6 +285,7 @@ public class MainUserService {
 		dsSaveInfo.put("emlId"          , String.valueOf(dsUserInfo.get("emlId")));
 		dsSaveInfo.put("emlAddr"        , String.valueOf(dsUserInfo.get("emlAddr")));
 		dsSaveInfo.put("rsaCurrentPswd" , StringUtils.EMPTY);
+		dsSaveInfo.put("acntSttsClCd"   , String.valueOf(dsUserInfo.get("acntSttsClCd")));
 		
 		resultMap.put("dsInstInfo", dsInstInfo);			/* 사업체정보 */
 		resultMap.put("dsSaveInfo", dsSaveInfo);			/* 사용자정보 */
@@ -297,7 +320,13 @@ public class MainUserService {
 		String dbPswd = (String) userMap.get("pswd");
 		
 		String rsaCurrentPswd = (String) dsSaveInfo.get("rsaCurrentPswd");	/* 현재 비밀번호 */
-		String password = RsaUtil.decryptRsa(session, rsaCurrentPswd);
+		String password = StringUtils.EMPTY;
+		
+		try {
+			password = RsaUtil.decryptRsa(session, rsaCurrentPswd);
+		} catch (Exception e) {
+			throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+		}
 		
 		// 비번 불일치
 		if (!passwordEncoder.matches(password, dbPswd)) {
@@ -318,7 +347,12 @@ public class MainUserService {
 		if(!ObjectUtils.isEmpty(rsaPassword)) {
 			isChangedPassword = true;
 			beforePassword = dbPswd;
-			afterPassword = crypto.encryptRsaToSHA(rsaPassword);		//새 비밀번호 암호화
+			
+			try {
+				afterPassword = crypto.encryptRsaToSHA(rsaPassword);		//새 비밀번호 암호화
+			} catch (Exception e) {
+				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+			}
 		}
 		
 		/* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 3. 사용자정보 조회 ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gov.me.irs.common.PagingMapper">
+	
+	<!-- 페이징 목록 상단 선언부 -->
+	<sql id="pagingPreSql">
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+	</sql>
+	
+	<!-- 페이징 목록 하단 선언부 -->
+	<!--
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		■ 파라미터 정보
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		▶ PagingVo.java
+		@param pageNavigation.listSize - 리스트사이즈
+		@param pageNavigation.pageNo - 페이지번호
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	 -->
+	<sql id="pagingPostSql">
+				) V
+		) U
+		LIMIT #{pageNavigation.listSize}
+		OFFSET (#{pageNavigation.pageNo} - 1) * #{pageNavigation.listSize}
+	</sql>
+</mapper>

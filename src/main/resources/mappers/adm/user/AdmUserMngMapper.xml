@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmUserMngMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자관리 - 목록조회 총건수 조회 -->
+	<select id="selectUserMngListCnt" resultType="int" parameterType="map">
+		/* AdmUserMngMapper.selectUserMngListCnt */
+		SELECT COUNT(*)
+		  FROM USER_BSC U
+		 INNER JOIN INST_BSC IB
+		    ON IB.INST_MGNO = U.INST_MGNO
+		<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')">
+		   AND IB.INST_CLSF_CD = #{srhInstClsfCd}								/* 기관/사업체분류 검색 */
+		</if>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+		   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')					/* 사업체명으로 검색 */
+		</if>
+		<if test="srhBrno != null and !srhBrno.equals('')">
+		   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')					/* 사업자등록번호 검색 */
+		</if>
+		 INNER JOIN INST_BSC UIB
+		    ON UIB.INST_MGNO = U.UP_INST_MGNO
+		<if test="srhUpInstMgno != null and !srhUpInstMgno.equals('')">
+		   AND UIB.INST_MGNO = #{srhUpInstMgno}									/* 상위기관관리번호 검색 */
+		</if>
+		 WHERE U.DEL_YN = 'N'
+		<if test="srhLgnId != null and !srhLgnId.equals('')">
+		   AND U.LGN_ID LIKE CONCAT('%', #{srhLgnId}, '%')						/* 아이디로 검색 */
+		</if>
+		<if test="srhFlnm != null and !srhFlnm.equals('')">
+		   AND U.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')							/* 성명으로 검색 */
+		</if>
+		<if test="srhUserClCd != null and !srhUserClCd.equals('')">
+		   AND U.USER_CL_CD = #{srhUserClCd}									/* 계정구분 검색 */
+		</if>
+		<if test="srhAcntSttsClCd != null and !srhAcntSttsClCd.equals('')">
+		   AND U.ACNT_STTS_CL_CD = #{srhAcntSttsClCd}							/* 계정상태구분코드로 검색 */
+		</if>
+		<if test='srhSearchType != null and srhSearchType.equals("1")'><!-- 가입일자 -->
+			<if test="srhSearchStartYmd != null and !srhSearchStartYmd.equals('')">
+	   		   AND U.APRV_YMD <![CDATA[>=]]> #{srhSearchStartYmd}
+			</if>
+			<if test="srhSearchEndYmd != null and !srhSearchEndYmd.equals('')">
+	   		   AND U.APRV_YMD <![CDATA[<=]]> #{srhSearchEndYmd}
+			</if>
+		</if>
+		<if test='srhSearchType != null and srhSearchType.equals("2")'><!-- 접속기간 -->
+			<if test="srhSearchStartYmd != null or srhSearchEndYmd != null">
+			   AND (
+			   			U.LAST_CNTN_DT IS NOT NULL
+				<if test="srhSearchStartYmd != null and !srhSearchStartYmd.equals('')">
+		   		    AND U.LAST_CNTN_DT <![CDATA[>=]]> TO_TIMESTAMP(#{srhSearchStartYmd} , 'YYYYMMDD')
+				</if>
+				<if test="srhSearchEndYmd != null and !srhSearchEndYmd.equals('')">
+		   		    AND U.LAST_CNTN_DT <![CDATA[<]]> (TO_TIMESTAMP(#{srhSearchEndYmd}, 'YYYYMMDD') + INTERVAL '1 day')::TIMESTAMP
+				</if>
+			   )
+			</if>
+		</if>
+	</select>
+	
+	<!-- [관리자] 사업수행자관리 > 사용자관리 > 사용자관리 - 목록조회 -->
+	<select id="selectUserMngList" resultType="egovMap" parameterType="map">
+		/* AdmUserMngMapper.selectUserMngList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+			 , U.HDPON_DDD || '-' || U.HDPON_TLPNO || '-' || U.HDPON_PHINO       AS FULL_HDPON_NO             /* 전체핸드폰번호 */
+			 , COALESCE(TO_CHAR(U.LAST_CNTN_DT, 'yyyyMMdd'), '') AS LAST_CNTN_YMD                             /* 최종접속일자 */
+			 , CASE WHEN U.ACNT_STTS_CL_CD = 'ASC0001' THEN '조회'                                            /* 미승인      ▶ 조회 버튼 */
+			 		ELSE '변경'                                                                               /* 기타        ▶ 변경 버튼 */
+			   END AS ACNT_STTS_GBN_NM
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT IB.BZENT_CL_CD                                                                               /* 사업체구분코드 */
+						 , U.USER_ID                                                                                    /* 사용자ID */
+						 , U.INST_MGNO                                                                                  /* 기관관리번호 */
+						 , IB.INST_CLSF_CD                                                                              /* 기관분류코드 */
+						 , IB.BZENT_NM                                                                                  /* 기관명 */
+						 , IB.BRNO                                                                                      /* 사업자등록번호 */
+						 , IB.RPRSV_NM                                                                                  /* 대표자명 */
+						 , U.USER_CL_CD                                                                                 /* 사용자구분코드 */
+						 , U.LGN_ID                                                                                     /* 로그인ID */
+						 , U.FLNM                                                                                       /* 성명 */
+						 , U.HDPON_DDD                                                                                  /* 핸드폰지역번호 */
+						 , U.HDPON_TLPNO                                                                                /* 핸드폰국번호 */
+						 , U.HDPON_PHINO                                                                                /* 핸드폰개별번호 */
+						 , U.ACNT_STTS_CL_CD                                                                            /* 계정상태구분코드 */
+						 , U.INFO_PRVT_NTI_YN                                                                           /* 정보비공개알림여부 */
+						 , U.SMS_NTI_YN                                                                                 /* sms알림여부 */				
+						 , U.APRV_YMD                                                                                   /* 승인일자(가입일자) */
+						 , U.UP_INST_MGNO                                                                               /* 상위기관관리번호 */
+						 , U.LAST_CNTN_DT                                                                               /* 최종접속일자 */
+						 , UIB.INST_CLSF_CD AS UP_INST_CLSF_CD                                                          /* 상위기관분류코드 */
+						 , UIB.BZENT_NM AS UP_BZENT_NM                                                                  /* 상위기관명 */
+					  FROM USER_BSC U
+					 INNER JOIN INST_BSC IB
+					    ON IB.INST_MGNO = U.INST_MGNO
+					<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')">
+					   AND IB.INST_CLSF_CD = #{srhInstClsfCd}								/* 기관/사업체분류 검색 */
+					</if>
+					<if test="srhBzentNm != null and !srhBzentNm.equals('')">
+					   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')					/* 사업체명으로 검색 */
+					</if>
+					<if test="srhBrno != null and !srhBrno.equals('')">
+					   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')					/* 사업자등록번호 검색 */
+					</if>
+					 INNER JOIN INST_BSC UIB
+					    ON UIB.INST_MGNO = U.UP_INST_MGNO
+					<if test="srhUpInstMgno != null and !srhUpInstMgno.equals('')">
+					   AND UIB.INST_MGNO = #{srhUpInstMgno}									/* 상위기관관리번호 검색 */
+					</if>
+					 WHERE U.DEL_YN = 'N'
+					<if test="srhLgnId != null and !srhLgnId.equals('')">
+					   AND U.LGN_ID LIKE CONCAT('%', #{srhLgnId}, '%')						/* 아이디로 검색 */
+					</if>
+					<if test="srhFlnm != null and !srhFlnm.equals('')">
+					   AND U.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')							/* 성명으로 검색 */
+					</if>
+					<if test="srhUserClCd != null and !srhUserClCd.equals('')">
+					   AND U.USER_CL_CD = #{srhUserClCd}									/* 계정구분 검색 */
+					</if>
+					<if test="srhAcntSttsClCd != null and !srhAcntSttsClCd.equals('')">
+					   AND U.ACNT_STTS_CL_CD = #{srhAcntSttsClCd}							/* 계정상태구분코드로 검색 */
+					</if>
+					<if test='srhSearchType != null and srhSearchType.equals("1")'><!-- 가입일자 -->
+						<if test="srhSearchStartYmd != null and !srhSearchStartYmd.equals('')">
+				   		   AND U.APRV_YMD <![CDATA[>=]]> #{srhSearchStartYmd}
+						</if>
+						<if test="srhSearchEndYmd != null and !srhSearchEndYmd.equals('')">
+				   		   AND U.APRV_YMD <![CDATA[<=]]> #{srhSearchEndYmd}
+						</if>
+					</if>
+					<if test='srhSearchType != null and srhSearchType.equals("2")'><!-- 접속기간 -->
+						<if test="srhSearchStartYmd != null or srhSearchEndYmd != null">
+						   AND (
+						   			U.LAST_CNTN_DT IS NOT NULL
+							<if test="srhSearchStartYmd != null and !srhSearchStartYmd.equals('')">
+					   		    AND U.LAST_CNTN_DT <![CDATA[>=]]> TO_TIMESTAMP(#{srhSearchStartYmd} , 'YYYYMMDD')
+							</if>
+							<if test="srhSearchEndYmd != null and !srhSearchEndYmd.equals('')">
+					   		    AND U.LAST_CNTN_DT <![CDATA[<]]> (TO_TIMESTAMP(#{srhSearchEndYmd}, 'YYYYMMDD') + INTERVAL '1 day')::TIMESTAMP
+							</if>
+						   )
+						</if>
+					</if>
+					 ORDER BY IB.INST_CLSF_CD, IB.BZENT_CL_CD, IB.BZENT_NM, U.USER_CL_CD DESC, U.FLNM			<!-- 기관분류 + 사업체구분 + 사업체명 + 계정구분(계정대표자가 계정관리인보다 먼저 출력되도록) + 성명 순으로 -->
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+</mapper>

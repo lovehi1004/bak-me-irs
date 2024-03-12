@@ -124,7 +124,10 @@ public class UserController {
 				password = RsaUtil.decryptRsa(session, password);
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException
 					| InvalidKeyException | IllegalBlockSizeException
-					| BadPaddingException | UnsupportedEncodingException e) {
+					| BadPaddingException | UnsupportedEncodingException
+					| ArithmeticException e) {
+				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+			} catch (Exception e) {
 				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
 			}
 			
@@ -191,10 +194,14 @@ public class UserController {
 			} else if(cause instanceof BadCredentialsException) {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				jwtAuthEnum = JwtAuthEnum.MISMATCH_USER_INFO;
-			} else if(cause instanceof SignException) {
-				httpStatus = HttpStatus.BAD_REQUEST;
-				jwtAuthEnum = JwtAuthEnum.of(e.getCode());
-			} else if(cause instanceof InvalidKeyException) {			/* RSA 예외처리 */
+			} else if(cause instanceof NoSuchAlgorithmException
+					| cause instanceof NoSuchPaddingException
+					| cause instanceof InvalidKeyException
+					| cause instanceof IllegalBlockSizeException
+					| cause instanceof BadPaddingException
+					| cause instanceof UnsupportedEncodingException
+					| cause instanceof ArithmeticException
+					) {			/* RSA 예외처리 */
 				httpStatus = HttpStatus.BAD_REQUEST;
 				jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
 			}
@@ -253,7 +260,10 @@ public class UserController {
 				password = RsaUtil.decryptRsa(session, password);
 			} catch (NoSuchAlgorithmException | NoSuchPaddingException
 					| InvalidKeyException | IllegalBlockSizeException
-					| BadPaddingException | UnsupportedEncodingException e) {
+					| BadPaddingException | UnsupportedEncodingException
+					| ArithmeticException e) {
+				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
+			} catch (Exception e) {
 				throw new SignException(JwtAuthEnum.RSA_INVALID.getCode(), e);
 			}
 			
@@ -283,14 +293,7 @@ public class UserController {
 			/* 선택된 권한정보 설정 */
 			if(!ObjectUtils.isEmpty(requestMap.get(Const.CORE.KEY_USER_ROLE))) {
 				String role = (String) requestMap.get(Const.CORE.KEY_USER_ROLE);
-				
-				try {
-					jwtRoleNm = RoleEnum.ofCode(role).getValue();
-					log.debug("[선택된 role 있음, 권한지정 설정][jwtRoleNm][{}][role][{}]", jwtRoleNm, role);
-				} catch (Exception e) {
-					log.error("[클라이언트에서 권한정보 값 오류발생 예외처리]");
-					throw new SignException(JwtAuthEnum.AUTHENTICATION_PREAUTHORIZE_ACCESS_DENIED.getCode(), new SignException(identifier));
-				}
+				jwtRoleNm = RoleEnum.ofCode(role).getValue();
 				
 				/* DB 권한정보내에 지정된 권한이 존재하지 않으면 예외처리 */
 				if(!user.getRoles().contains(jwtRoleNm)) {
@@ -393,9 +396,16 @@ public class UserController {
 			} else if(cause instanceof BadCredentialsException) {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				jwtAuthEnum = JwtAuthEnum.MISMATCH_USER_INFO;
-			} else if(cause instanceof SignException) {
+			} else if(cause instanceof NoSuchAlgorithmException
+					| cause instanceof NoSuchPaddingException
+					| cause instanceof InvalidKeyException
+					| cause instanceof IllegalBlockSizeException
+					| cause instanceof BadPaddingException
+					| cause instanceof UnsupportedEncodingException
+					| cause instanceof ArithmeticException
+					) {			/* RSA 예외처리 */
 				httpStatus = HttpStatus.BAD_REQUEST;
-				jwtAuthEnum = JwtAuthEnum.of(e.getCode());
+				jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
 			}
 			
 			/* 사용자 접속정보 저장 */

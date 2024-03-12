@@ -34,7 +34,10 @@ public class CorePasswordEncoder implements PasswordEncoder {
 		try {
 			return crypto.encryptSHA((String) rawPassword);
 		} catch (SafeDBSDKException e) {
-			log.error("비밀번호 암호화 처리 중 오류가 발생하였습니다", e);
+			log.error("[비밀번호 암호화 처리 중 오류가 발생하였습니다][SafeDBSDKException]", e);
+			return null;
+		} catch (Exception e) {
+			log.error("[비밀번호 암호화 처리 중 오류가 발생하였습니다][Exception]", e);
 			return null;
 		}
 	}
@@ -57,7 +60,9 @@ public class CorePasswordEncoder implements PasswordEncoder {
 			try {
 				log.debug("[암호화 솔루션 - rawPassword][{}]", crypto.encryptSHA((String) rawPassword));
 			} catch (SafeDBSDKException e) {
-				log.error("[암호화 솔루션 에러][{}]", e);
+				log.error("[암호화 솔루션 에러][SafeDBSDKException][{}]", e);
+			} catch (Exception e) {
+				log.error("[암호화 솔루션 에러][Exception][{}]", e);
 			}
 			log.debug("[encodedPassword][{}]", encodedPassword);
 		}
@@ -65,7 +70,10 @@ public class CorePasswordEncoder implements PasswordEncoder {
 		try {
 			return crypto.encryptSHA((String) rawPassword).equals(encodedPassword) && !((String) rawPassword).equals(encodedPassword);
 		} catch (SafeDBSDKException e) {
-			log.error("비밀번호 검증 중 오류가 발생하였습니다", e);
+			log.error("[비밀번호 검증 중 오류가 발생하였습니다][SafeDBSDKException]", e);
+			return false;
+		} catch (Exception e) {
+			log.error("[비밀번호 검증 중 오류가 발생하였습니다][Exception]", e);
 			return false;
 		}
 	}

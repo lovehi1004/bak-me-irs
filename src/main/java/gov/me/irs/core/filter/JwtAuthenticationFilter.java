@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,9 +21,8 @@ import gov.me.irs.core.config.property.CoreProperties;
 import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
+import gov.me.irs.core.sign.exception.SignException;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,14 +108,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				String accessToken = jwtTokenProvider.resolveAccessToken(request);
 				String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
 				
-				if (accessToken == null) {
-					log.debug("▶▶▶▶▶▶▶▶▶▶ [1. Access Token 누락시]");
-					/* ■■■■■■■■■■■■■■■■■■■■ 1. Access Token 누락시 ■■■■■■■■■■■■■■■■■■■■ */
-					request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_ACCESS_UNKNOWN_ERROR.getCode());
-				} else if (refreshToken == null) {
-					log.debug("▶▶▶▶▶▶▶▶▶▶ [2. Refresh Token 누락시]");
-					/* ■■■■■■■■■■■■■■■■■■■■ 2. Refresh Token 누락시 ■■■■■■■■■■■■■■■■■■■■ */
-					request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_REFRESH_UNKNOWN_ERROR.getCode());
+				if (accessToken == null || refreshToken == null) {
+					log.debug("▶▶▶▶▶▶▶▶▶▶ [1. Access Token 누락시] or [2. Refresh Token 누락시]");
+					/* ■■■■■■■■■■■■■■■■■■■■ 1. Access Token or Refresh Token 누락시 ■■■■■■■■■■■■■■■■■■■■ */
 				}
 				// 토큰 유효성 검증
 				else {
@@ -126,6 +121,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					boolean validateRefreshToken = jwtTokenProvider.validateRefreshToken(refreshToken);
 					// Refresh Token 저장소 존재유무 확인
 					boolean isRefreshToken = jwtTokenProvider.existsRefreshToken(refreshToken);
+					
+					if(!isRefreshToken) {
+						/* 강제 로그아웃 처리시 */
+						throw new SignException(JwtAuthEnum.LOGOUT_UNKNOWN_STATE.getCode());
+					}
 					
 					/* Access Token 유효기간에는 Refresh Token도 유효하므로 Refresh Token 검증실패시엔 Refresh Token이 변조되었다고 판단한다 */
 					if (validateAccessToken) {
@@ -139,18 +139,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							
 							log.debug("▶▶▶▶ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공");
 							/* ■■■■■■■■■■■■■■■■■■■■ 2-1. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 있음 ▶ 인증성공 ■■■■■■■■■■■■■■■■■■■■ */
+							log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶ accessToken][{}]", accessToken);
 							jwtTokenProvider.setAuthentication(accessToken, role, false);
-							
-						} else if (validateRefreshToken && !isRefreshToken) {
-							log.debug("▶▶▶▶ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
-							/* ■■■■■■■■■■■■■■■■■■■■ 2-2. Access Token 유효 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실 ■■■■■■■■■■■■■■■■■■■■ */
-							request.setAttribute("exception", JwtAuthEnum.LOGOUT_UNKNOWN_STATE.getCode());
-							
-						} else if (!validateRefreshToken) {
-							log.debug("▶▶▶▶ 2-3. Access Token 유효 and Refresh Token 변조 - Refresh Token 변조 상태");
-							/* ■■■■■■■■■■■■■■■■■■■■ 2-3. Access Token 유효 and Refresh Token 변조 - Refresh Token 변조 상태 ■■■■■■■■■■■■■■■■■■■■ */
-							request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_REFRESH_UNSUPPORTED_TOKEN.getCode());
-
 						}
 						
 					}
@@ -182,25 +172,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							jwtTokenProvider.setHeaderRefreshToken(response, newRefreshToken);
 														
 							// 재발급 된 Token정보로 인증정보 생성
+							log.debug("[▶▶▶▶▶▶▶▶▶▶▶▶▶▶ newAccessToken][{}]", newAccessToken);
 							jwtTokenProvider.setAuthentication(newAccessToken, role, true);
 							
 							HttpSession session = request.getSession(false);
-							session.setMaxInactiveInterval((int) (jwtProperties.accessToken.validTime/1000) - (5 * 60));		/* 5분 적게 설정 */
+							session.setMaxInactiveInterval((int) (jwtProperties.refreshToken.validTime/1000));		/* Refresh Token 만료시간으로 설정 */
 							
-						} else {
-							log.debug("▶▶▶▶ 3. invalid accessToken and invalid refreshToken");
-							if(!validateRefreshToken) {
-								log.debug("▶▶▶▶ 3-1. Access Token 만료 and Refresh Token 검증실패 - Refresh Token 변조 or 만료 상태");
-								/* ■■■■■■■■■■■■■■■■■■■■ 3-1. Access Token 만료 and Refresh Token 검증실패 - Refresh Token 변조 or 만료 상태 ■■■■■■■■■■■■■■■■■■■■ */
-								/* Refresh Token이 유효하지 않으므로 이후는 재인증(재로그인)을 유도하도록 한다. */
-								request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_EXPIRED_TOKEN.getCode());
-							} else if(!isRefreshToken) {
-								log.debug("▶▶▶▶ 3-2. Access Token 만료 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실");
-								/* ■■■■■■■■■■■■■■■■■■■■ 3-2. Access Token 만료 and Refresh Token 유효 and Refresh Token DB 없음 - 강제 로그아웃 or 데이터 유실 ■■■■■■■■■■■■■■■■■■■■ */
-								request.setAttribute("exception", JwtAuthEnum.LOGOUT_UNKNOWN_STATE.getCode());
-							}
-							
-							log.debug("▶▶▶▶ 5. invalid refreshToken");
 						}
 					}
 				}
@@ -210,20 +187,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 			
 			filterChain.doFilter(request, response);
+
+		} catch (SignException | ExpiredJwtException e) {
+			log.error("[JwtAuthenticationFilter 예외처리]", e);
 			
-		} catch (ExpiredJwtException e) {
-			//만료 에러 - Jwt Libarary내부처리
-            request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_EXTRA_ERROR_8011.getCode());
-		} catch (MalformedJwtException e) {
-			//변조 에러 - Jwt Libarary내부처리
-            request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_EXTRA_ERROR_8012.getCode());
-		} catch (SignatureException e) {
-			//형식, 길이 에러 - Jwt Libarary내부처리
-            request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_EXTRA_ERROR_8013.getCode());
-		} catch (Exception e) {
-			//그밖의 에러
-			request.setAttribute("exception", JwtAuthEnum.AUTHENTICATION_UNKNOWN_ERROR.getCode());
+			int code = JwtAuthEnum.UNKNOWN_ERROR.getCode();
+			if(e instanceof SignException) {
+				code = ((SignException) e).getCode();
+			} else {
+				code = JwtAuthEnum.LOGOUT_UNKNOWN_STATE.getCode();
+			}
+			
+			String forwardUrl = "/exception/auth/" + code;
+			RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl);
+			request.setAttribute("exception", code);
+			dispatcher.forward(request, response);
 		}
+		
         
 	}
 	

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.common.user.mapper.UserDscntMapper">
+
+	<!-- 사용자활동내역 생성 -->
+	<insert id="insertUserActvDsctn" parameterType="map">
+		/* UserDscntMapper.insertUserActvDsctn */
+		INSERT 
+		  INTO USER_ACTV_DSCTN
+			 ( SN
+			 , SYS_CL_CD
+			 , USER_ID
+			 , MENU_MGNO
+			 , INQ_CL_CD
+			 , INQ_CN
+			 , USER_CL_CD
+			 , IP_ADDR
+			 , ACS_YMD
+			 , ACS_HR
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+			 ( SELECT NEXTVAL('USER_ACTV_DSCTN_SEQ')
+			 		, 'SCC0001'
+			 		, U.USER_ID
+			 		, #{menuMgno}
+			 		, #{inqClCd}
+			 		, #{inqCn}
+			 		, U.USER_CL_CD
+			 		, #{ipAddr}
+			 		, TO_CHAR(CURRENT_TIMESTAMP,'yyyyMMdd')
+			 		, TO_CHAR(CURRENT_TIMESTAMP,'HH24mmss')
+			 		, 'N'
+			 		, U.USER_ID
+			 		, CURRENT_TIMESTAMP
+			 	 FROM USER_BSC U
+			 	WHERE U.USER_ID = #{sUserId}
+			 )
+	</insert>
+	
+	<!-- 개인정보취급자내역 생성 -->
+	<insert id="insertUserPrvcDsctn" parameterType="map">
+		/* UserDscntMapper.insertUserPrvcDsctn */
+		INSERT 
+		  INTO USER_PRVC_DSCTN
+			 ( SN
+			 , SYS_CL_CD
+			 , USER_ID
+			 , MENU_MGNO
+			 , INQ_CL_CD
+			 , INQ_CN
+			 , USER_CL_CD
+			 , IP_ADDR
+			 , PRVC_INQ_ACS_YMD
+			 , PRVC_INQ_ACS_HR
+			 , DEL_YN
+			 , RGTR_ID
+			 , REG_DT
+			 )
+			 ( SELECT NEXTVAL('USER_PRVC_DSCTN_SEQ')
+			 		, 'SCC0001'
+			 		, U.USER_ID
+			 		, #{menuMgno}
+			 		, #{inqClCd}
+			 		, #{inqCn}
+			 		, U.USER_CL_CD
+			 		, #{ipAddr}
+			 		, TO_CHAR(CURRENT_TIMESTAMP,'yyyyMMdd')
+			 		, TO_CHAR(CURRENT_TIMESTAMP,'HH24mmss')
+			 		, 'N'
+			 		, U.USER_ID
+			 		, CURRENT_TIMESTAMP
+			 	 FROM USER_BSC U
+			 	WHERE U.USER_ID = #{sUserId}
+			 )
+	</insert>
+	
+</mapper>

@@ -25,6 +25,11 @@ public final class SignException extends Exception {
         super(JwtAuthEnum.of(code).getMessage(), cause);
         this.code = code;
     }
+	
+	public SignException(int code) {
+		super(JwtAuthEnum.of(code).getMessage());
+		this.code = code;
+	}
 
 
 

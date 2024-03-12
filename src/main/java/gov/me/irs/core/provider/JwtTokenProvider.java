@@ -243,8 +243,12 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	public boolean validateAccessToken(String token) {
-		return this.validateToken(accessTokenKey, token);
+	public boolean validateAccessToken(String token) throws ExpiredJwtException {
+		try {
+			return this.validateToken(accessTokenKey, token);
+		} catch (ExpiredJwtException e) {
+			return false;
+		}
 	}
 	
 	/**
@@ -253,7 +257,7 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	public boolean validateRefreshToken(String token) {
+	public boolean validateRefreshToken(String token) throws ExpiredJwtException {
 		return this.validateToken(refreshTokenKey, token);
 	}
 	
@@ -264,21 +268,27 @@ public class JwtTokenProvider {
 	 * @param token
 	 * @return
 	 */
-	private boolean validateToken(SecretKey tokenKey, String token) {
+	private boolean validateToken(SecretKey tokenKey, String token) throws ExpiredJwtException {
+		String tokenName = (tokenKey == this.accessTokenKey) ? "Access" : "Refresh";
+		
 		try {
 			Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(tokenKey).build().parseClaimsJws(token);
 			return !claims.getBody().getExpiration().before(new Date());
     	} catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-    		log.info("Invalid JWT Access Token", e);
+    		log.info("Invalid JWT {} Token", tokenName);
+    		log.error(e.getMessage(), e);
     		return false;
     	} catch (ExpiredJwtException e) {
-    		log.info("Expired JWT Access Token", e);
-    		return false;
+    		log.info("Expired JWT {} Token", tokenName);
+    		log.error(e.getMessage(), e);
+    		throw e;
     	} catch (UnsupportedJwtException e) {
-    		log.info("Unsupported JWT Access Token", e);
+    		log.info("Unsupported JWT {} Token", tokenName);
+    		log.error(e.getMessage(), e);
     		return false;
     	} catch (IllegalArgumentException e) {
-    		log.info("JWT claims string is empty.", e);
+    		log.info("{} Token - JWT claims string is empty.", tokenName);
+    		log.error(e.getMessage(), e);
     		return false;
     	}
 	}
@@ -312,6 +322,10 @@ public class JwtTokenProvider {
      * @param accessToken
      */
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
+    	/* [SP] HTTP 응답 분할 조치사항 적용 - 20240223104900 */
+    	// 외부로부터 받은 데이터에서 CRLF를 제거한다.
+    	accessToken = accessToken.replaceAll("\n", "");
+    	accessToken = accessToken.replaceAll("\r", "");
     	response.setHeader(JwtConst.JWT_HTTP_HEADER_ACCESS_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + accessToken);
     }
     
@@ -322,6 +336,10 @@ public class JwtTokenProvider {
      * @param refreshToken
      */
     public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
+    	/* [SP] HTTP 응답 분할 조치사항 적용 - 20240223104900 */
+    	// 외부로부터 받은 데이터에서 CRLF를 제거한다.
+    	refreshToken = refreshToken.replaceAll("\n", "");
+    	refreshToken = refreshToken.replaceAll("\r", "");
         response.setHeader(JwtConst.JWT_HTTP_HEADER_REFRESH_TOKEN_KEY, JwtConst.HTTP_HEADER_AUTH_TYPE + refreshToken);
     }
     

@@ -49,7 +49,15 @@ public final class RsaUtil {
 	 * @throws Exception
 	 */
     public final static Map<String, Object> generateRsaMap(HttpServletRequest request) throws Exception {
-    	HttpSession session = request.getSession();
+    	
+    	HttpSession session = null;
+    	if(request.getSession(false) != null) {
+    		log.debug("세션 불러오기 ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀");
+    		session = request.getSession(false);
+    	} else {
+    		log.debug("세션 생성하기 ◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀◀");
+    		session = request.getSession(true);
+    	}
     	
     	KeyPairGenerator generator;
     	try {
@@ -99,16 +107,21 @@ public final class RsaUtil {
      * @throws BadPaddingException
      * @throws UnsupportedEncodingException
      */
-	public final static String decryptRsa(HttpSession session, String securedValue) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	public final static String decryptRsa(HttpSession session, String securedValue) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, ArithmeticException, Exception {
 		
-		PrivateKey privateKey = (PrivateKey) session.getAttribute(RsaUtil.RSA_WEB_KEY);
-		
-		Cipher cipher = Cipher.getInstance(RSA_INSTANCE);
-		byte[] encryptedBytes = hexToByteArray(securedValue);
-		cipher.init(Cipher.DECRYPT_MODE, privateKey);
-		byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-		String decryptedValue = new String(decryptedBytes, "UTF-8"); // 문자 인코딩 주의.
-		return decryptedValue;
+		try {
+			PrivateKey privateKey = (PrivateKey) session.getAttribute(RsaUtil.RSA_WEB_KEY);
+			
+			Cipher cipher = Cipher.getInstance(RSA_INSTANCE);
+			byte[] encryptedBytes = hexToByteArray(securedValue);
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);
+			byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+			String decryptedValue = new String(decryptedBytes, "UTF-8"); // 문자 인코딩 주의.
+			return decryptedValue;
+		} catch (Exception e) {
+			log.error("[RSA 복호화 실패][{}]", e);
+			throw e;
+		}
 	}
 	
 	/**
@@ -117,15 +130,21 @@ public final class RsaUtil {
 	 * @param hex
 	 * @return
 	 */
-    private final static byte[] hexToByteArray(String hex) {
-        if (hex == null || hex.length() % 2 != 0) { return new byte[] {}; }
- 
-        byte[] bytes = new byte[hex.length() / 2];
-        for (int i = 0; i < hex.length(); i += 2) {
-            byte value = (byte) Integer.parseInt(hex.substring(i, i + 2), 16);
-            bytes[(int) Math.floor(i / 2)] = value;
-        }
-        return bytes;
+    private final static byte[] hexToByteArray(String hex) throws Exception {
+    	
+    	try {
+    		if (hex == null || hex.length() % 2 != 0) { return new byte[] {}; }
+    		
+    		byte[] bytes = new byte[hex.length() / 2];
+    		for (int i = 0; i < hex.length(); i += 2) {
+    			byte value = (byte) Integer.parseInt(hex.substring(i, i + 2), 16);
+    			bytes[(int) Math.floor(i / 2)] = value;
+    		}
+    		return bytes;
+		} catch (Exception e) {
+			log.error("[16진 문자열 byte 배열 변환][{}]", e);
+			throw e;
+		}
     }
     
 }

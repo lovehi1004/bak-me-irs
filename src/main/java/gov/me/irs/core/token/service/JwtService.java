@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import gov.me.irs.core.config.property.JwtProperties;
 import gov.me.irs.core.token.JwtToken;
-import gov.me.irs.core.token.constants.JwtConst;
 import gov.me.irs.core.token.entity.TableRefreshToken;
 import gov.me.irs.core.token.repository.RefreshTokenRepository;
 
@@ -42,17 +41,9 @@ public class JwtService {
 	
 	@Transactional(rollbackFor = Exception.class)
 	public void login(HttpServletRequest request, JwtToken jwtToken, String userAgent){
-		
-		String refreshToken = jwtToken.getRefreshToken();
-		
-		if(refreshToken.length() > JwtConst.HTTP_HEADER_AUTH_TYPE.length()) {
-			refreshToken = refreshToken.substring(JwtConst.HTTP_HEADER_AUTH_TYPE.length());
-		}
-		
-		
 		TableRefreshToken tableRefreshToken = TableRefreshToken.builder()
 				.lgnId(jwtToken.getKey())
-				.refreshTknCn(refreshToken)
+				.refreshTknCn(jwtToken.getRefreshToken())
 				.userClntCn(userAgent)
 				.build();
 		
@@ -69,7 +60,7 @@ public class JwtService {
 		/* 세션생성 */
 		HttpSession session = request.getSession(true);
 		session.setAttribute("lgnId", lgnId);
-		session.setMaxInactiveInterval((int) (jwtProperties.accessToken.validTime/1000) - (5 * 60));		/* 5분 적게 설정 */
+		session.setMaxInactiveInterval((int) (jwtProperties.refreshToken.validTime/1000));		/* Refresh Token 만료시간으로 설정 */
 		
 		refreshTokenRepository.save(tableRefreshToken);
 		

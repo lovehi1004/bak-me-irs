@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,8 +107,47 @@ public class RaonKFileUtil {
 	 * @throws Exception
 	 */
 	public String getRealFilePath() throws Exception {
+		
+		/* 프로파일 */
+		String profiles = System.getProperty("spring.profiles.active");
+		
 		String uploadRootPath = commonProperties.getProperty("upload.root.path");		//File Repository Root
+		
+		File file1 = new File(uploadRootPath);
+		if(!file1.exists()) {
+			file1.mkdirs();
+			
+			// 폴더 권한 추가
+			Path folderPath = Paths.get(uploadRootPath);
+			
+			/* 리눅스 전용 */
+			if(!ObjectUtils.isEmpty(profiles) && (Const.PROFILES.DEV.equals(profiles) || Const.PROFILES.PRD.equals(profiles))) {
+				// 대상 파일에 대한 "others"에 대한 읽기 권한 추가
+				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
+				permissions.add(PosixFilePermission.OTHERS_READ);
+				permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+				Files.setPosixFilePermissions(folderPath, permissions);
+			}
+		}
+		
 		String uploadRealPath = uploadRootPath + commonProperties.getProperty("upload.real.path");		//파일업로드 Real 경로
+		
+		File file2 = new File(uploadRealPath);
+		if(!file2.exists()) {
+			file2.mkdirs();
+			
+			// 폴더 권한 추가
+			Path folderPath = Paths.get(uploadRealPath);
+			
+			/* 리눅스 전용 */
+			if(!ObjectUtils.isEmpty(profiles) && (Const.PROFILES.DEV.equals(profiles) || Const.PROFILES.PRD.equals(profiles))) {
+				// 대상 파일에 대한 "others"에 대한 읽기 권한 추가
+				Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(folderPath);
+				permissions.add(PosixFilePermission.OTHERS_READ);
+				permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+				Files.setPosixFilePermissions(folderPath, permissions);
+			}
+		}
 		
 		return uploadRealPath;
 	}

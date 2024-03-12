@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -12,6 +13,9 @@ import com.nexacro.uiadapter.spring.core.data.NexacroResult;
 
 import gov.me.irs.common.constants.Const;
 import gov.me.irs.common.user.service.MainUserService;
+import gov.me.irs.core.config.util.CoreUtil;
+import gov.me.irs.core.enumeration.JwtAuthEnum;
+import gov.me.irs.core.sign.exception.SignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,10 +73,17 @@ public class MainUserController {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		mainUserService.insertAply(dsInstInfo, dsUserInfo, dsInstInfoFile, dsBrdocFlmnoFile);
-
+		try {
+			mainUserService.insertAply(dsInstInfo, dsUserInfo, dsInstInfoFile, dsBrdocFlmnoFile);
+			return nexacroResult;
+			
+		} catch (SignException e) {
+			HttpStatus httpStatus = HttpStatus.BAD_REQUEST;			/* default : 500 */
+			JwtAuthEnum jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, e.getCause()));
+			return nexacroResult;
+		}
 		
-		return nexacroResult;
 	}
 	
 	/**
@@ -126,13 +137,22 @@ public class MainUserController {
 		
 		NexacroResult nexacroResult = new NexacroResult();
 		
-		boolean result = mainUserService.updateMyUserInfo(dsInstInfo, dsSaveInfo);
-		log.debug("[result][{}]", String.valueOf(result));
+		try {
+			boolean result = mainUserService.updateMyUserInfo(dsInstInfo, dsSaveInfo);
+			log.debug("[result][{}]", String.valueOf(result));
+			
+			Map<String, Object> dsResult = new HashMap<String, Object>();
+			dsResult.put("result", result ? Const.CHARACTER.Y : Const.CHARACTER.N);
+			
+			nexacroResult.addDataSet("dsResult", dsResult);
+			return nexacroResult;
+			
+		} catch (SignException e) {
+			HttpStatus httpStatus = HttpStatus.BAD_REQUEST;			/* default : 500 */
+			JwtAuthEnum jwtAuthEnum = JwtAuthEnum.RSA_INVALID;
+			CoreUtil.setCommonResponse(nexacroResult, CoreUtil.getCoreResponse(httpStatus, jwtAuthEnum, e.getCause()));
+			return nexacroResult;
+		}
 		
-		Map<String, Object> dsResult = new HashMap<String, Object>();
-		dsResult.put("result", result ? Const.CHARACTER.Y : Const.CHARACTER.N);
-		
-		nexacroResult.addDataSet("dsResult", dsResult);
-		return nexacroResult;
 	}
 }

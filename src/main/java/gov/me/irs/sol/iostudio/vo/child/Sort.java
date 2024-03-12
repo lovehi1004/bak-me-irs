@@ -1,5 +1,6 @@
 package gov.me.irs.sol.iostudio.vo.child;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -25,7 +26,22 @@ public class Sort {
 	
 	private String order;
 	
-	private List<String> indices;
+	public List<String> indices;
+
+	public void setIndices(List<String> indices) {
+		this.indices = new ArrayList<>();
+		this.indices.addAll(indices);	
+	}
+
+	public List<String> getIndices() {
+		List<String> list = new ArrayList<>();
+		list.addAll(indices);
+		return list;
+	}
+	
+	
+	
+	
 	
 }
 

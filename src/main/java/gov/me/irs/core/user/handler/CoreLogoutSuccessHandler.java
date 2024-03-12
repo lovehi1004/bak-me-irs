@@ -15,7 +15,7 @@ import gov.me.irs.core.config.util.CoreUtil;
 import gov.me.irs.core.enumeration.JwtAuthEnum;
 import gov.me.irs.core.provider.JwtTokenProvider;
 import gov.me.irs.core.token.service.JwtService;
-
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +51,15 @@ public class CoreLogoutSuccessHandler implements LogoutSuccessHandler {
     		// 헤더에서 JWT 를 받아옵니다.
     		String accessToken = jwtTokenProvider.resolveAccessToken(request);
     		String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
+			// Refresh Token 검증
+			boolean validateRefreshToken = false;
+			
+			try {
+				validateRefreshToken = jwtTokenProvider.validateRefreshToken(refreshToken);
+			} catch (ExpiredJwtException e) {
+				/* Refresh Token이 만료되면 false로 반환처리 */
+				log.error("[Refresh Token 만료상태]");
+			}
     		
 			if (accessToken == null) {
 				/* ■■■■■■■■■■■■■■■■■■■■ 1. Access Token 누락시 ■■■■■■■■■■■■■■■■■■■■ */
@@ -62,7 +71,7 @@ public class CoreLogoutSuccessHandler implements LogoutSuccessHandler {
 				log.debug("[로그아웃 CASE][2][{}]", "Refresh Token 누락시");
 				systemMessage = "logout type - 2";
 				
-			} else if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+			} else if (!validateRefreshToken) {
 				/* ■■■■■■■■■■■■■■■■■■■■ 3. Refresh Token 검증 실패 ■■■■■■■■■■■■■■■■■■■■ */
 				log.debug("[로그아웃 CASE][3][{}]", "Refresh Token 검증 실패");
 				systemMessage = "logout type - 3";

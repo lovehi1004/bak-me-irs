@@ -17,6 +17,13 @@ import gov.me.irs.core.wrapper.ExcludeMultipartHttpServletRequestWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 인가 예외처리
+ * 	- hasRole 설정이 요구됨
+ * 
+ * @author Justin
+ *
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

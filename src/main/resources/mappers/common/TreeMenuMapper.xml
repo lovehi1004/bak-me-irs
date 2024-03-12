@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gov.me.irs.common.TreeMenuMapper">
+	
+	<!-- 메뉴 트리목록 -->
+	<!--
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		■ 파라미터 정보
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+		@param targetMenuMgno - 트리구조 시작 기준점의 메뉴ID 
+		@param sysClCd - 시스템구분코드 
+		■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	 -->
+	<sql id="treeMenuSql">
+		/* TreeMenuMapper.treeMenuSql */
+		WITH RECURSIVE WITH_MENU_LIST(MENU_MGNO
+									, UP_MENU_MGNO
+									, MENU_CL_CD
+									, MENU_NM
+									, MENU_EXPLN
+									, MENU_URL_ADDR
+									, EXPSR_YN
+									, POPUP_YN
+									, MENU_LVL
+									, SORT_SEQO
+									, SYS_CL_CD
+									, PTH
+									, MENU_PATH
+									, SORT_PATH
+									, CYC
+		) AS (
+			/* 기준점 */
+			SELECT M.MENU_MGNO
+				 , M.UP_MENU_MGNO
+				 , M.MENU_CL_CD
+				 , M.MENU_NM
+				 , M.MENU_EXPLN
+				 , M.MENU_URL_ADDR
+				 , M.EXPSR_YN
+				 , M.POPUP_YN
+				 , M.MENU_LVL
+				 , M.SORT_SEQO
+				 , M.SYS_CL_CD
+				 , ARRAY[M.MENU_MGNO::TEXT]  AS PTH
+				 , ARRAY[M.MENU_NM::TEXT]  AS MENU_PATH
+				 , ARRAY[LPAD(CAST(M.MENU_LVL AS TEXT), 2, '0') || LPAD(CAST(M.SORT_SEQO AS TEXT), 3, '0')] AS SORT_PATH
+				 , false
+			  FROM MENU_BSC M
+			 WHERE 1 = 1
+			<choose>
+				<when test="targetMenuMgno != null and !targetMenuMgno.equals('')"><!-- 기준점 지정 -->
+			   AND M.MENU_MGNO = #{targetMenuMgno}
+				</when>
+				<otherwise>
+				<if test='sysClCd == "SCC0001"'><!-- IRS시스템 최상위메뉴 - Default -->
+			   AND M.MENU_MGNO = #{scc0001MenuMgno}
+				</if>
+				<if test='sysClCd == "SCC0002"'><!-- 대고객시스템 최상위메뉴 - 새로운 시스템 추가시, 임시코드 추가 -->
+			   AND M.MENU_MGNO = #{scc0002MenuMgno}
+				</if>
+				</otherwise>
+			</choose>			
+			   AND M.SYS_CL_CD = #{sysClCd}
+			   AND M.DEL_YN = 'N'
+			 UNION ALL
+			SELECT M.MENU_MGNO
+				 , M.UP_MENU_MGNO
+				 , M.MENU_CL_CD
+				 , M.MENU_NM
+				 , M.MENU_EXPLN
+				 , M.MENU_URL_ADDR
+				 , M.EXPSR_YN
+				 , M.POPUP_YN
+				 , M.MENU_LVL
+				 , M.SORT_SEQO
+				 , M.SYS_CL_CD
+				 , ARRAY_APPEND( W.PTH, M.MENU_MGNO::TEXT) AS PTH
+				 , ARRAY_APPEND( W.MENU_PATH, M.MENU_NM::TEXT) AS MENU_PATH
+				 , ARRAY_APPEND( W.SORT_PATH, LPAD(CAST(M.MENU_LVL AS TEXT), 2, '0') || LPAD(CAST(M.SORT_SEQO AS TEXT), 3, '0')) AS SORT_PATH
+				 , M.MENU_MGNO = ANY(W.PTH)
+			  FROM MENU_BSC M
+			 INNER JOIN WITH_MENU_LIST W
+				ON M.UP_MENU_MGNO = W.MENU_MGNO
+			   AND M.SYS_CL_CD = #{sysClCd}
+			   AND M.DEL_YN = 'N'
+			 WHERE NOT CYC
+		)
+	</sql>
+</mapper>

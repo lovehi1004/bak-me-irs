@@ -69,7 +69,7 @@ public class TableUser implements UserDetails {
     @CollectionTable(name = "JWT_USER_ROLE_BSC", joinColumns = @JoinColumn(name = "LGN_ID"))
     @Column(name = "JWT_ROLE_NM")
     @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    public List<String> roles = new ArrayList<>();
     
 	public List<String> getRoles() {
 		List<String> list = new ArrayList<>();

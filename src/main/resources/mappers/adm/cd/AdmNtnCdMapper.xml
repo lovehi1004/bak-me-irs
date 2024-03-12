@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.cd.mapper.AdmNtnCdMapper">
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 목록조회 -->
+	<select id="selectNtnCdList" resultType="egovMap" parameterType="map">
+		/* AdmNtnCdMapper.selectNtnCdList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.IATA_NTN_CD
+			 , U.NTN_KORN_NM
+			 , U.NTN_ENG_NM
+			 , U.DEL_YN
+		  FROM (
+				SELECT ROW_NUMBER() OVER(ORDER BY IATA_NTN_CD) AS RN
+					 , COUNT(*) OVER()     AS TOTAL_CNT
+					 , IATA_NTN_CD
+					 , NTN_KORN_NM
+					 , NTN_ENG_NM
+					 , DEL_YN									/* 사용여부 */
+				  FROM COM_NTN_CD_BSC
+				 WHERE 1 = 1
+				<if test="srhIataNtnCd != null and !srhIataNtnCd.equals('')">
+				   AND IATA_NTN_CD LIKE CONCAT('%', #{srhIataNtnCd}, '%')
+				</if>
+				<if test="srhNtnKornNm != null and !srhNtnKornNm.equals('')">
+				   AND NTN_KORN_NM LIKE CONCAT('%', #{srhNtnKornNm}, '%')
+				</if>
+				<if test="srhNtnEngNm != null and !srhNtnEngNm.equals('')">
+				   AND NTN_ENG_NM LIKE CONCAT('%', #{srhNtnEngNm}, '%')
+				</if>
+				<if test="srhDelYn != null and !srhDelYn.equals('')">
+				   AND DEL_YN = #{srhDelYn}
+				</if>
+		  		) U
+		 ORDER BY U.IATA_NTN_CD ASC
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 상세조회 -->
+	<select id="selectNtnCdDetail" resultType="egovMap" parameterType="map">
+		/* AdmNtnCdMapper.selectNtnCdDetail */
+		SELECT IATA_NTN_CD
+			 , NTN_KORN_NM
+			 , NTN_ENG_NM
+			 , DEL_YN									/* 사용여부 */
+		  FROM COM_NTN_CD_BSC
+		 WHERE IATA_NTN_CD = #{srhIataNtnCd}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 등록 -->
+	<insert id="insertNtnCd" parameterType="map">
+		/* AdmNtnCdMapper.insertNtnCd */
+		INSERT
+		  INTO COM_NTN_CD_BSC
+			 ( IATA_NTN_CD
+			 , NTN_KORN_NM
+			 , NTN_ENG_NM
+			 , DEL_YN
+			 , RGTR_ID                     /* 등록자ID */
+			 , REG_DT                      /* 등록일시 */
+			 )
+		VALUES
+			 ( #{iataNtnCd}
+			 , #{ntnKornNm}
+			 , #{ntnEngNm}
+			 , #{delYn}
+			 , #{sUserId}
+			 , CURRENT_TIMESTAMP
+			 )
+	</insert>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 국가코드 중복 조회 -->
+	<select id="selectNtnCdCnt" resultType="egovMap" parameterType="map">
+		/* AdmNtnCdMapper.selectNtnCdCnt */
+		SELECT CASE WHEN COUNT(*) > 0 THEN 'N' ELSE 'Y' END AS CHECK_YN
+			 , #{iataNtnCd} as IATA_NTN_CD
+		  FROM COM_NTN_CD_BSC
+		 WHERE IATA_NTN_CD = #{iataNtnCd}
+	</select>
+
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 수정 -->
+	<update id="updateNtnCd" parameterType="map">
+		/* AdmNtnCdMapper.updateNtnCd */
+		UPDATE COM_NTN_CD_BSC
+		   SET DEL_YN = #{delYn}
+		     , NTN_KORN_NM = #{ntnKornNm}
+		     , NTN_ENG_NM = #{ntnEngNm}
+		     , MDFR_ID = #{sUserId}
+		     , MDFCN_DT = CURRENT_TIMESTAMP
+		 WHERE IATA_NTN_CD = #{iataNtnCd}
+	</update>
+	
+	<!-- [관리자] 사업수행자관리 > 코드관리 > 국가코드관리 - 삭제 -->
+	<update id="deleteNtnCd" parameterType="map">
+		/* AdmNtnCdMapper.deleteNtnCd */
+		DELETE FROM COM_NTN_CD_BSC WHERE IATA_NTN_CD = #{iataNtnCd}
+	</update>
+	
+</mapper>

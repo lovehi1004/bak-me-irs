@@ -157,6 +157,8 @@ public class SecurityConfig {
 //                .antMatchers("/**/*Excel.irs").permitAll()									/* URL고정 - [모두허용] - 엑셀다운로드 */
                 .antMatchers("/biz/**").authenticated()										/* URL고정 - [인증필수] - 사업수행자 서비스 */
                 .antMatchers("/adm/**").authenticated()										/* URL고정 - [인증필수] - 관리자, 관장(위탁)기관 서비스 */
+                .antMatchers("/common/main/user/selectMyUserInfo.irs").authenticated()			/* URL고정 - [인증필수] - Top > 정보수정 */
+                .antMatchers("/common/main/user/updateMyUserInfo.irs").authenticated()			/* URL고정 - [인증필수] - Top > 정보수정 - 사용자정보 정보수정하기 */
                 /* ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 기본 서비스 URL END ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ */
                 
                 .antMatchers("/**").permitAll()												/* 기타 서비스 */
@@ -177,7 +179,7 @@ public class SecurityConfig {
         
         http.headers().frameOptions().sameOrigin();												//X-Frame-Options - html기반 환경 iframe 허용
         
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);		//세션정책 설정
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);		//세션정책 설정
 		
 		return http.build();
 	}

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.common.user.mapper.MainUserMapper">
+
+	<!-- 메인 > 사용자 > 아이디/비밀번호 찾기 -->
+	<select id="selectFindUser" resultType="egovMap" parameterType="map">
+		/* MainUserMapper.selectFindUser */
+		SELECT #{srhType} AS RESULT_TYPE
+			 , COALESCE(
+						(
+							SELECT SUBSTRING(UB.LGN_ID, 1, 2) || LPAD('', LENGTH(UB.LGN_ID) - 2, '*')
+							  FROM USER_BSC UB
+							<if test='srhType.equals("1")'><!-- 아이디찾기 -->
+							 WHERE UB.FLNM = #{srhFlnm}
+							   AND UB.EML_ID || '@' || UB.EML_ADDR = #{srhEml}
+							</if>
+							<if test='srhType.equals("2")'><!-- 비밀번호찾기 -->
+							 WHERE UB.FLNM = #{srhFlnm}
+							   AND UB.LGN_ID = #{srhLgnId}
+							   AND UB.EML_ID || '@' || UB.EML_ADDR = #{srhEml}
+							</if>
+						)
+						, '사용자정보가 존재하지 않습니다.'
+				) AS RESULT
+			 , COALESCE(
+						(
+							SELECT UB.USER_ID
+							  FROM USER_BSC UB
+							<if test='srhType.equals("1")'><!-- 아이디찾기 -->
+							 WHERE UB.FLNM = #{srhFlnm}
+							   AND UB.EML_ID || '@' || UB.EML_ADDR = #{srhEml}
+							</if>
+							<if test='srhType.equals("2")'><!-- 비밀번호찾기 -->
+							 WHERE UB.FLNM = #{srhFlnm}
+							   AND UB.LGN_ID = #{srhLgnId}
+							   AND UB.EML_ID || '@' || UB.EML_ADDR = #{srhEml}
+							</if>
+						)
+						, ''
+				) AS USER_ID
+	</select>
+	
+</mapper>

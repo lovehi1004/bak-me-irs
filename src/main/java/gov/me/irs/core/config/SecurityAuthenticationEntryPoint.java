@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Security 인증 예외처리
+ * 	- 비로그인 사용자가 인증이 요구되는 URL 접근시
  * 
  * @author Justin
  *

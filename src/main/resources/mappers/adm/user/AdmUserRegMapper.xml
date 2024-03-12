@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="gov.me.irs.adm.user.mapper.AdmUserRegMapper">
+
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 목록조회 총건수 조회 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 목록조회 총건수 조회 -->
+	<select id="selectUserRegListCnt" resultType="int" parameterType="map">
+		/* AdmUserRegMapper.selectUserRegListCnt */
+		SELECT COUNT(*)
+		  FROM APLY_BSC AB
+		 INNER JOIN APLY_DTL AD
+		    ON AD.APLY_MGNO = AB.APLY_MGNO
+		   AND AB.APLY_REG_CL_CD IN ('ARC0001', 'ARC0002', 'ARC0003')						<!-- 회원가입, 업체정보 변경신청 전용 - [신규가입|신규사용자|업체정보변경] 조회 -->
+		   AND AB.APLY_PRCS_TYPE_CD IN ('APC0001', 'APC0002', 'APC0003')					<!-- 회원가입, 업체정보 변경신청 전용 - [신청|심의반려|심의승인] 조회 -->
+		 INNER JOIN USER_BSC UB
+		    ON UB.USER_ID = AD.USER_ID
+		 INNER JOIN INST_BSC IB
+		    ON IB.INST_MGNO = AD.INST_MGNO
+		 WHERE 1 = 1
+	<choose>
+		<when test='superUserYn.equals("N")'><!-- 전체관리자면 전체목록 조회가능 -->
+		   AND AD.USER_ID = #{sUserId}										/* 전체관리자가 아니라면 본인꺼만 열람가능 */
+		</when>
+	</choose>
+		<if test="srhBzentNm != null and !srhBzentNm.equals('')"><!-- 사업체/기관명 -->
+		   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+		</if>
+		<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')"><!-- 사업체/기관분류 -->
+		   AND IB.INST_CLSF_CD = #{srhInstClsfCd}
+		</if>
+		<if test="srhRprsvNm != null and !srhRprsvNm.equals('')"><!-- 대표자명 -->
+		   AND IB.RPRSV_NM LIKE CONCAT('%', #{srhRprsvNm}, '%')
+		</if>
+		<if test="srhBzentClCd != null and !srhBzentClCd.equals('')"><!-- 업체구분 -->
+		   AND IB.BZENT_CL_CD = #{srhBzentClCd}
+		</if>
+		<if test="srhCrno != null and !srhCrno.equals('')"><!-- 법인등록번호 -->
+		   AND IB.CRNO LIKE CONCAT('%', TRIM(#{srhCrno}), '%')
+		</if>
+		<if test="srhBrno != null and !srhBrno.equals('')"><!-- 사업자등록번호 -->
+		   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')
+		</if>
+		<if test="srhGovInstYn != null and !srhGovInstYn.equals('')"><!-- 정부기관여부 -->
+		   AND IB.GOV_INST_YN = #{srhGovInstYn}
+		</if>
+		<if test="srhAplyPrcsTypeCd != null and !srhAplyPrcsTypeCd.equals('')"><!-- 처리상태 -->
+		   AND AB.APLY_PRCS_TYPE_CD = #{srhAplyPrcsTypeCd}
+		</if>
+		<if test="srhLgnId != null and !srhLgnId.equals('')"><!-- 아이디 -->
+		   AND UB.LGN_ID LIKE CONCAT('%', #{srhLgnId}, '%')
+		</if>
+		<if test="srhFlnm != null and !srhFlnm.equals('')"><!-- 성명 -->
+		   AND UB.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')
+		</if>
+		<if test="srhUserClCd != null and !srhUserClCd.equals('')"><!-- 계정구분 -->
+		   AND UB.USER_CL_CD = #{srhUserClCd}
+		</if>
+		<if test="srhAplyRegClCd != null and !srhAplyRegClCd.equals('')"><!-- 신청등록구분 -->
+		   AND AB.APLY_REG_CL_CD = #{srhAplyRegClCd}
+		</if>
+	</select>
+	
+	<!-- [사용자] 사업수행자관리 > 등록관리 - 목록조회 -->
+	<!-- [관리자] 사업수행자관리 > 등록관리 - 목록조회 -->
+	<select id="selectUserRegList" resultType="egovMap" parameterType="map">
+		/* AdmUserRegMapper.selectUserRegList */
+		SELECT U.TOTAL_CNT - (U.RN-1) AS NO
+			 , U.*
+			 , CASE WHEN #{superUserYn} = 'Y' AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '심의'							/* 신청상태 AND 전체관리자    ▶ 심의 버튼 */
+					WHEN #{superUserYn} = 'N' AND U.APLY_PRCS_TYPE_CD = 'APC0001' THEN '관리자 승인대기'				/* 신청상태 AND 전체관리자 외 ▶ 관리자 승인대기 */
+			 		ELSE '조회'																							/* 기타                       ▶ 조회 버튼 */
+			   END AS BUTTON_NAME
+		FROM
+		(
+			SELECT
+				ROW_NUMBER() OVER() AS RN
+				, COUNT(*) OVER() AS TOTAL_CNT
+				, V.*
+			FROM
+				(
+					SELECT AB.APLY_MGNO                        /* 신청관리번호 */
+						 , AD.INST_MGNO                        /* 기관관리번호 */
+						 , IB.BZENT_NM                         /* 사업체명 */
+						 , IB.INST_CLSF_CD                     /* 기관분류코드 */
+						 , IB.RPRSV_NM                         /* 대표자명 */
+						 , IB.BRNO                             /* 사업자등록번호 */
+						 , UB.LGN_ID                           /* 아이디 */
+						 , UB.FLNM                             /* 성명 */
+						 , UB.USER_CL_CD                       /* 사용자구분코드 */
+						 , AB.APLY_REG_CL_CD                   /* 신청등록구분코드 */
+						 , AB.APLY_YMD                         /* 신청일자 */
+						 , AB.APLY_PRCS_YMD                    /* 신청처리일자 */
+						 , AB.APLY_PRCS_TYPE_CD                /* 신청처리유형코드 */
+						 , AB.APLY_PRCS_USER_ID                /* 신청처리사용자ID */
+						 , UB.USER_ID                          /* 신청자 사용자ID */
+					  FROM APLY_BSC AB
+					 INNER JOIN APLY_DTL AD
+					    ON AD.APLY_MGNO = AB.APLY_MGNO
+					   AND AB.APLY_REG_CL_CD IN ('ARC0001', 'ARC0002', 'ARC0003')						<!-- 회원가입, 업체정보 변경신청 전용 - [신규가입|신규사용자|업체정보변경] 조회 -->
+					   AND AB.APLY_PRCS_TYPE_CD IN ('APC0001', 'APC0002', 'APC0003')					<!-- 회원가입, 업체정보 변경신청 전용 - [신청|심의반려|심의승인] 조회 -->
+					 INNER JOIN USER_BSC UB
+					    ON UB.USER_ID = AD.USER_ID
+					 INNER JOIN INST_BSC IB
+					    ON IB.INST_MGNO = AD.INST_MGNO
+					 WHERE 1 = 1
+				<choose>
+					<when test='superUserYn.equals("N")'><!-- 전체관리자면 전체목록 조회가능 -->
+					   AND AD.USER_ID = #{sUserId}										/* 전체관리자가 아니라면 본인꺼만 열람가능 */
+					</when>
+				</choose>
+					<if test="srhBzentNm != null and !srhBzentNm.equals('')"><!-- 사업체/기관명 -->
+					   AND IB.BZENT_NM LIKE CONCAT('%', #{srhBzentNm}, '%')
+					</if>
+					<if test="srhInstClsfCd != null and !srhInstClsfCd.equals('')"><!-- 사업체/기관분류 -->
+		   			   AND IB.INST_CLSF_CD = #{srhInstClsfCd}
+					</if>
+					<if test="srhRprsvNm != null and !srhRprsvNm.equals('')"><!-- 대표자명 -->
+					   AND IB.RPRSV_NM LIKE CONCAT('%', #{srhRprsvNm}, '%')
+					</if>
+					<if test="srhBzentClCd != null and !srhBzentClCd.equals('')"><!-- 업체구분 -->
+					   AND IB.BZENT_CL_CD = #{srhBzentClCd}
+					</if>
+					<if test="srhCrno != null and !srhCrno.equals('')"><!-- 법인등록번호 -->
+					   AND IB.CRNO LIKE CONCAT('%', TRIM(#{srhCrno}), '%')
+					</if>
+					<if test="srhBrno != null and !srhBrno.equals('')"><!-- 사업자등록번호 -->
+					   AND IB.BRNO LIKE CONCAT('%', TRIM(#{srhBrno}), '%')
+					</if>
+					<if test="srhGovInstYn != null and !srhGovInstYn.equals('')"><!-- 정부기관여부 -->
+					   AND IB.GOV_INST_YN = #{srhGovInstYn}
+					</if>
+					<if test="srhAplyPrcsTypeCd != null and !srhAplyPrcsTypeCd.equals('')"><!-- 처리상태 -->
+					   AND AB.APLY_PRCS_TYPE_CD = #{srhAplyPrcsTypeCd}
+					</if>
+					<if test="srhLgnId != null and !srhLgnId.equals('')"><!-- 아이디 -->
+					   AND UB.LGN_ID LIKE CONCAT('%', #{srhLgnId}, '%')
+					</if>
+					<if test="srhFlnm != null and !srhFlnm.equals('')"><!-- 성명 -->
+					   AND UB.FLNM LIKE CONCAT('%', #{srhFlnm}, '%')
+					</if>
+					<if test="srhUserClCd != null and !srhUserClCd.equals('')"><!-- 계정구분 -->
+					   AND UB.USER_CL_CD = #{srhUserClCd}
+					</if>
+					<if test="srhAplyRegClCd != null and !srhAplyRegClCd.equals('')"><!-- 신청등록구분 -->
+					   AND AB.APLY_REG_CL_CD = #{srhAplyRegClCd}
+					</if>
+				   ORDER BY UB.REG_DT DESC
+		<include refid="gov.me.irs.common.PagingMapper.pagingPostSql" />
+	</select>
+	
+</mapper>

@@ -100,7 +100,7 @@ public final class JwtConst {
 		
 		public final static String LOGIN = "로그인 성공!";
 		public final static String LOGOUT = "로그아웃 성공!";
-		public final static String LOGOUT_UNKNOWN_STATE = "이미 로그아웃되었거나 만료된 Token입니다.";
+		public final static String LOGOUT_UNKNOWN_STATE = "이미 로그아웃되었거나 만료된 인증정보입니다.";				/* 이미 로그아웃되었거나 만료된 Token입니다. */
 		public final static String LOGOUT_MISSING_PARAMETERS = "로그아웃시 파라미터가 누락되었습니다. 다시 확인해 주세요.";
 		
 		public final static String NOT_FOUND_USER_ID = "계정이 존재하지 않습니다. 회원가입 진행 후 로그인 해주세요.";
@@ -111,7 +111,7 @@ public final class JwtConst {
 		
 		public final static String BAD_REQUEST = "잘못된 요청입니다.";
 		public final static String NOT_FOUND = "요청자원이 존재하지 않습니다.";
-		public final static String METHOD_NOT_ALLOWED = "허용되지 않는 HTTP Method입니다.";
+		public final static String METHOD_NOT_ALLOWED = "허용되지 않는 요청입니다.";				/* 허용되지 않는 HTTP Method입니다. */
 		public final static String NOT_ACCEPTABLE = "허용되지 않는 요청입니다.";
 		
 		public final static String SESSION_INVALID = "올바른 인증정보가 아닙니다.";
