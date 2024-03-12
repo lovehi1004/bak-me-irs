@@ -10,7 +10,7 @@ import gov.me.irs.core.user.entity.TableUser;
  * @author Justin
  *
  */
-public interface FirstRepository extends JpaRepository<TableUser, Long> {
+public interface FirstRepository extends JpaRepository<TableUser, String> {
 	
 	/**
 	 * 테스트 조회

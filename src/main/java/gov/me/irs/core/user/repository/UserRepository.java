@@ -10,7 +10,7 @@ import gov.me.irs.core.user.entity.TableUser;
  * @author Justin
  *
  */
-public interface UserRepository extends JpaRepository<TableUser, Long> {
+public interface UserRepository extends JpaRepository<TableUser, String> {
 	
 	/**
 	 * JWT사용자기본 조회

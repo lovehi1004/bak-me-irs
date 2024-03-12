@@ -10,7 +10,7 @@ import gov.me.irs.core.token.entity.TableRefreshToken;
  * @author Justin
  *
  */
-public interface RefreshTokenRepository extends JpaRepository<TableRefreshToken, Long> {
+public interface RefreshTokenRepository extends JpaRepository<TableRefreshToken, String> {
 	
 	/* log-on filter checking START */
 	TableRefreshToken findByRefreshTknCn(String refreshToken);
